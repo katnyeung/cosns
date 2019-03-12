@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Example - example-ng-submit</title>
+
+
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+
+
+</head>
+<body ng-app="myApp">
+
+	<script>
+		angular.module('myApp', []).controller('myCtrl',
+				[ '$scope', '$http', function($scope, $http) {
+					$scope.count = 0;
+					$scope.myFunc = function() {
+						$http({
+							url : "user/getUser",
+							method : "GET",
+							headers : {
+								'Content-Type' : 'application/json'
+							},
+						}).success(function(data, status, headers, config) {
+							$scope.status = status;
+							alert(data.email);
+							alert(data.status);
+						}).error(function(data, status, headers, config) {
+							alert($scope.status);
+						});
+					};
+				} ]);
+	</script>
+	Login Register
+
+	<div ng-controller="myCtrl">
+		<div> Search </div>
+		<div> Hot Tag</div>
+		<div> Main Section , list out the hot post</div>
+	</div>
+	>after login select chatroom (history) / region
+	<br/>
+</body>
+</html>
