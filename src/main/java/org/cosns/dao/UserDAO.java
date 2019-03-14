@@ -1,14 +1,15 @@
 package org.cosns.dao;
 
-import java.util.List;
+import java.util.Set;
 
 import org.cosns.repository.User;
+import org.cosns.util.ConstantsUtil;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UserDAO extends JpaRepository<User, Long> {
 
-	@Query("FROM User WHERE email = :email")
-	public List<User> findByEmail(@Param("email") String email);
+	@Query("FROM User WHERE email = :email and status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
+	public Set<User> findActiveUserByEmail(@Param("email") String email);
 }

@@ -4,41 +4,103 @@
 <meta charset="UTF-8">
 <title>Example - example-ng-submit</title>
 
-
 <script
 	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
 
-
 </head>
 <body ng-app="application">
-
 	<script>
-		angular.module('myApp', []).controller('myCtrl',
-				[ '$scope', '$http', function($scope, $http) {
-					$scope.count = 0;
-					$scope.myFunc = function() {
+		var main = angular.module('application', []);
+		main.controller('userController', [ '$scope', '$http', function($scope, $http) {
+			$scope.login = function() {
+				if ($scope.login.email) {
+					$http({
+						url : "user/login",
+						method : "POST",
+						headers : {
+							'Content-Type' : 'application/json'
+						},
+						data : {
+							'email' : $scope.login.email,
+							'password' : $scope.login.password,
+
+						}
+					}).success(function(data, status, headers, config) {
+						$scope.status = status;
+						alert(data.status + '\n' + data.remarks);
+
+					}).error(function(data, status, headers, config) {
+						alert(data.status + '\n' + data.remarks);
+					});
+				}
+			};
+			$scope.register = function() {
+				if ($scope.register.email) {
+					if ($scope.register.password == $scope.register.passwordAgain) {
 						$http({
-							url : "user/getUser",
-							method : "GET",
+							url : "user/register",
+							method : "POST",
 							headers : {
 								'Content-Type' : 'application/json'
 							},
+							data : {
+								'email' : $scope.register.email,
+								'password' : $scope.register.password,
+								'passwordAgain' : $scope.register.passwordAgain,
+
+							}
 						}).success(function(data, status, headers, config) {
 							$scope.status = status;
-							alert(data.email);
-							alert(data.status);
+							alert(data.status + '\n' + data.remarks);
+
 						}).error(function(data, status, headers, config) {
-							alert($scope.status);
+							alert(data.status + '\n' + data.remarks);
 						});
-					};
-				} ]);
+					} else {
+						alert("please verify your password")
+					}
+
+				}
+			};
+		} ]);
+		main.controller('mainController', [ '$scope', '$http', function($scope, $http) {
+			
+		} ]);
 	</script>
-	Login Register
+
+	<div ng-controller="userController">
+		<div>
+			Login
+			<form ng-submit="login()">
+				<input type="text" ng-model="login.email" name="email" /> <input
+					type="password" ng-model="login.password" name="password" /> <input
+					type="submit" id="login" value="Login" />
+			</form>
+		</div>
+
+		<br />
+		<div>
+			Register
+			<form ng-submit="register()" name="registerForm">
+				<ul>
+					<li>Email : <input type="text" ng-model="register.email"
+						name="email" /></li>
+					<li>Password <input type="password"
+						ng-model="register.password" name="password" /></li>
+					<li>Password Again <input type="password"
+						ng-model="register.passwordAgain" name="passwordAgain" /></li>
+				</ul>
+
+
+				<input type="submit" id="register" value="register" />
+			</form>
+		</div>
+	</div>
 
 	<div ng-controller="mainController">
-		<div> Search </div>
-		<div> Hot Tag</div>
-		<div> Main Section , list out the hot post</div>
+		<div>Search</div>
+		<div>Hot Tag</div>
+		<div>Main Section , list out the hot post</div>
 	</div>
 </body>
 </html>
