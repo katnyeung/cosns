@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 @RequestMapping("/")
-public class IndexController {
+public class RouteController {
 	Logger logger = Logger.getLogger(this.getClass().getName());
 
 	@RequestMapping(path = "/", method = RequestMethod.GET)

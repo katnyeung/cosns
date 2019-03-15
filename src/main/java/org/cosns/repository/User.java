@@ -5,7 +5,6 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,12 +13,10 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.cosns.util.Auditable;
 
 @Entity
-public class User {
+public class User extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -38,15 +35,6 @@ public class User {
 
 	@Null
 	private String displayname;
-
-	@NotNull
-	@CreatedDate
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date createdate;
-
-	@NotNull
-	@LastModifiedDate
-	private Date lastupdatedate;
 
 	@OneToMany(mappedBy = "postId", cascade = CascadeType.ALL)
 	private Set<Post> posts;
@@ -89,22 +77,6 @@ public class User {
 
 	public void setDisplayname(String displayname) {
 		this.displayname = displayname;
-	}
-
-	public Date getCreatedate() {
-		return createdate;
-	}
-
-	public void setCreatedate(Date createdate) {
-		this.createdate = createdate;
-	}
-
-	public Date getLastupdatedate() {
-		return lastupdatedate;
-	}
-
-	public void setLastupdatedate(Date lastupdatedate) {
-		this.lastupdatedate = lastupdatedate;
 	}
 
 	public Set<Post> getPosts() {
