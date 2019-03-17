@@ -4,70 +4,84 @@
 <meta charset="UTF-8">
 <title>Example - example-ng-submit</title>
 
-
+<!-- https://angular-file-upload.appspot.com/ -->
 <script
 	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-
-
+<script src="/js/ng-file-upload.min.js"></script>
 </head>
-<body ng-app="mainApplication">
+<body>
 	<script>
-		var upload = angular.module('mainApplication', []);
-		upload.directive('fileModel', [ '$parse', function($parse) {
-			return {
-				restrict : 'A',
-				link : function(scope, element, attrs) {
-					var model = $parse(attrs.fileModel);
-					var modelSetter = model.assign;
-					element.bind('change', function() {
-						var files = [];
-						angular.forEach(element[0].files, function(file) {
-							files.push(file);
-						});
-						scope.$apply(function() {
-							modelSetter(scope, files);
-						});
-					});
-				}
-			}
-		} ]);
+		//inject directives and services.
+		var app = angular.module('fileUpload', [ 'ngFileUpload' ]);
 
-		upload.controller('viewPostController', [ '$scope', '$http',
-				function($scope, $http) {
-					var vm = this;
-					vm.create = function() {
-						var fd = new FormData();
-						angular.forEach(vm.logos, function(val, key) {
-							fd.append('file' + key, val);
-						});
-						$http.post('http://localhost:8080/' + 'uploads', fd, {
-							transformRequest : angular.identity,
-							headers : {
-								'Content-Type' : undefined
-							}
-						}).success(function(serviceResponse) {
-							console.log(serviceResponse);
-						});
+		app.controller('MyCtrl', [ '$scope', 'Upload', function($scope, Upload) {
+			// upload later on form submit or something similar
+			$scope.submit = function() {
+				if ($scope.form.file.$valid && $scope.file) {
+					$scope.upload($scope.file);
+				}
+			};
+
+			// upload on file select or drop
+			$scope.upload = function(file) {
+				Upload.upload({
+					url : 'upload/url',
+					data : {
+						file : file,
+						'username' : $scope.username
 					}
-				} ]);
+				}).then(function(resp) {
+					console.log('Success ' + resp.config.data.file.name + 'uploaded. Response: ' + resp.data);
+				}, function(resp) {
+					console.log('Error status: ' + resp.status);
+				}, function(evt) {
+					var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+					console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
+				});
+			};
+
+		} ]);
 	</script>
-	<div ng-controller="viewPostController">
-		<form name="fileform">
-			<div class="form-group">
-				<label for="fileinput" class="col-sm-3 control-label">Files</label><br>
-				<div class="col-sm-12">
-					<input type="file" id="fileinput" name="logos"
-						file-model="vm.logos" multiple="multiple" class="form-control"
-						placeholder="Files" />
+	<div ng-app="fileUpload" ng-controller="MyCtrl">
+		<form name="myForm">
+			<fieldset>
+				<legend>Upload on form submit</legend>
+				Username: <input type="text" name="userName" ng-model="username"
+					size="39" required=""> <i
+					ng-show="myForm.userName.$error.required">*required</i><br>
+				Profile Picture: <input type="file" ngf-select=""
+					ng-model="multiple" name="file" ngf-accept="'image/*'" required="">
+				<i ng-show="myForm.file.$error.required">*required</i> <br>
+
+				<button ng-disabled="!myForm.$valid" ng-click="uploadPic(picFile)">Submit</button>
+				<img ngf-src="picFile" class="thumb"> <span class="progress"
+					ng-show="picFile.progress >= 0">
+					<div style="width: {{picFile.progress"
+						ng-bind="picFile.progress + '%'" class="ng-binding"></div>
+				</span> <span ng-show="picFile.result">Upload Successful</span>
+
+
+
+				<div ngf-select="" ngf-drop="" ng-model="files"
+					ngf-model-invalid="invalidFiles"
+					ngf-model-options="modelOptionsObj" ngf-multiple="multiple"
+					ngf-pattern="pattern" ngf-accept="acceptSelect"
+					ng-disabled="disabled" ngf-capture="capture"
+					ngf-drag-over-class="dragOverClassObj" ngf-validate="validateObj"
+					ngf-resize="resizeObj"
+					ngf-resize-if="resizeIfFn($file, $width, $height)"
+					ngf-dimensions="dimensionsFn($file, $width, $height)"
+					ngf-duration="durationFn($file, $duration)"
+					ngf-keep="keepDistinct ? 'distinct' : keep"
+					ngf-fix-orientation="orientation" ngf-max-files="maxFiles"
+					ngf-ignore-invalid="ignoreInvalid"
+					ngf-run-all-validations="runAllValidations"
+					ngf-allow-dir="allowDir" class="drop-box"
+					ngf-drop-available="dropAvailable">
+					Select File <span ng-show="dropAvailable"> or Drop File</span>
 				</div>
-			</div>
-			<div class="form-group">
-				<div class="col-sm-12">
-					<button type="submit" ng-click="vm.create()"
-						class="btn btn-default">Create</button>
-				</div>
-			</div>
-		</form>
+			</fieldset>
 	</div>
+	</form>
 </body>
 </html>
