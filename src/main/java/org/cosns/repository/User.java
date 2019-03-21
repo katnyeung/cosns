@@ -1,6 +1,5 @@
 package org.cosns.repository;
 
-import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -19,7 +18,7 @@ import org.cosns.util.Auditable;
 public class User extends Auditable<String> {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long userId;
 
 	@NotNull

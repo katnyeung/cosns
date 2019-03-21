@@ -1,7 +1,5 @@
 package org.cosns.repository;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,14 +10,13 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.cosns.util.Auditable;
 
 @Entity
-public class Post {
+public class Post extends Auditable<String> {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long postId;
 
 	@NotNull
@@ -36,12 +33,6 @@ public class Post {
 	@NotNull
 	@Size(max = 1)
 	private String status;
-
-	@CreatedDate
-	private Date createdate;
-
-	@LastModifiedDate
-	private Date lastupdatedate;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")
@@ -85,22 +76,6 @@ public class Post {
 
 	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	public Date getCreatedate() {
-		return createdate;
-	}
-
-	public void setCreatedate(Date createdate) {
-		this.createdate = createdate;
-	}
-
-	public Date getLastupdatedate() {
-		return lastupdatedate;
-	}
-
-	public void setLastupdatedate(Date lastupdatedate) {
-		this.lastupdatedate = lastupdatedate;
 	}
 
 	public User getUser() {

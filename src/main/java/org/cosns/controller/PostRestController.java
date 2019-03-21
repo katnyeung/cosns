@@ -1,19 +1,21 @@
 package org.cosns.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.cosns.dao.PostDAO;
 import org.cosns.repository.Post;
 import org.cosns.repository.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +28,7 @@ public class PostRestController {
 	@Autowired
 	PostDAO postDAO;
 
-	@RequestMapping(path = "/getPosts", method = RequestMethod.GET)
+	@GetMapping(path = "/getPosts")
 	public Set<Post> getPosts(HttpSession session) {
 
 		User user = (User) session.getAttribute("user");
@@ -38,7 +40,7 @@ public class PostRestController {
 		return postSet;
 	}
 
-	@RequestMapping(path = "/getPost/{postId}", method = RequestMethod.GET)
+	@GetMapping(path = "/getPost/{postId}")
 	public Post getPost(@PathVariable("postId") Long postId, HttpSession session) {
 		Optional<Post> post = postDAO.findById(postId);
 
@@ -49,15 +51,22 @@ public class PostRestController {
 		}
 	}
 
-	@RequestMapping(path = "/writePost/{postId}", method = RequestMethod.GET)
+	@PostMapping(value = "/uploadImage")
+	public String uploadImage(@RequestParam("files") MultipartFile[] files) throws IOException {
+		logger.info("inside upload image");
+		for (MultipartFile file : files) {
+			File uploadedFile = new File("d:/ChungYeung/" + file.getOriginalFilename());
+			file.transferTo(uploadedFile);
+			logger.info("file : " + file);
+		}
+
+		return "{status:\"success\"}";
+	}
+
+	@GetMapping(path = "/writePost/{postId}")
 	public String writePost(@PathVariable("postId") String postId) {
 
 		return "index";
 	}
 
-	@RequestMapping(value = "/new", method = RequestMethod.POST)
-	public void uploadImage(@RequestParam String dto, @RequestParam(required = false) MultipartFile file,
-			Authentication authentication) {
-
-	}
 }

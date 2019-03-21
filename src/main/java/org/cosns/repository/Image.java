@@ -1,7 +1,5 @@
 package org.cosns.repository;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,14 +8,13 @@ import javax.persistence.Lob;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.cosns.util.Auditable;
 
 @Entity
-public class Image {
+public class Image extends Auditable<String> {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long imageId;
 	private Long userId;
 
@@ -34,12 +31,6 @@ public class Image {
 	@NotNull
 	@Size(max = 1)
 	private String status;
-
-	@CreatedDate
-	private Date createdate;
-
-	@LastModifiedDate
-	private Date lastupdatedate;
 
 	public Long getImageId() {
 		return imageId;
@@ -95,22 +86,6 @@ public class Image {
 
 	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	public Date getCreatedate() {
-		return createdate;
-	}
-
-	public void setCreatedate(Date createdate) {
-		this.createdate = createdate;
-	}
-
-	public Date getLastupdatedate() {
-		return lastupdatedate;
-	}
-
-	public void setLastupdatedate(Date lastupdatedate) {
-		this.lastupdatedate = lastupdatedate;
 	}
 
 }

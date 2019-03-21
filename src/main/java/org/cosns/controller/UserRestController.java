@@ -10,9 +10,9 @@ import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.UserFormDTO;
 import org.cosns.web.result.DefaultResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -23,7 +23,7 @@ public class UserRestController {
 	@Autowired
 	UserService userService;
 
-	@RequestMapping(path = "/login", method = RequestMethod.POST)
+	@PostMapping(path = "/login")
 	public DefaultResult login(@RequestBody UserFormDTO userDTO, HttpSession session) {
 		DefaultResult defaultResult = new DefaultResult();
 
@@ -39,7 +39,7 @@ public class UserRestController {
 		return defaultResult;
 	}
 
-	@RequestMapping(path = "/register", method = RequestMethod.POST)
+	@PostMapping(path = "/register")
 	public DefaultResult register(@RequestBody UserFormDTO userDTO, HttpSession session) {
 		DefaultResult defaultResult = new DefaultResult();
 

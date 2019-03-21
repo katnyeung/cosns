@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Example - example-ng-submit</title>
+
+<!-- https://angular-file-upload.appspot.com/ -->
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+<script src="/js/ng-flow-standalone.min.js"></script>
+</head>
+<body ng-app="app">
+
+
+	<div ng-controller="controller">
+		<script>
+			var app = angular.module('app', [ 'flow' ]).config(
+					[ 'flowFactoryProvider', function(flowFactoryProvider) {
+						flowFactoryProvider.defaults = {
+							target : 'upload.php',
+							permanentErrors : [ 404, 500, 501 ],
+							maxChunkRetries : 1,
+							chunkRetryInterval : 5000,
+							simultaneousUploads : 4
+						};
+						flowFactoryProvider.on('catchAll', function(event) {
+							console.log('catchAll', arguments);
+						});
+						// Can be used with different implementations of Flow.js
+						// flowFactoryProvider.factory = fustyFlowFactory;
+					} ]);
+		</script>
+		<div flow-init="{target: '/upload'}"
+			flow-files-submitted="$flow.upload()"
+			flow-file-success="$file.msg = $message">
+
+			<div class="alert" flow-drop>Drag And Drop your file here</div>
+
+			<span class="btn" flow-btn>Upload File</span>
+
+			<table>
+				<tr ng-repeat="file in $flow.files">
+					<td>{{$index+1}}</td>
+					<td>{{file.name}}</td>
+					<td>{{file.msg}}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</body>
+</html>

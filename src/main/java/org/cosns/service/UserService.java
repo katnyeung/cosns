@@ -9,12 +9,14 @@ import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.UserFormDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
 	@Autowired
 	UserDAO userDAO;
 
+	@Transactional
 	public User registerUser(UserFormDTO userDTO) {
 		User registeredUser = null;
 
