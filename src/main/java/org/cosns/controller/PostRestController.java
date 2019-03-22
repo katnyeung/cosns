@@ -11,12 +11,12 @@ import javax.servlet.http.HttpSession;
 import org.cosns.dao.PostDAO;
 import org.cosns.repository.Post;
 import org.cosns.repository.User;
+import org.cosns.web.DTO.ImageUploadInfoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,14 +51,15 @@ public class PostRestController {
 		}
 	}
 
-	@PostMapping(value = "/uploadImage")
-	public String uploadImage(@RequestParam("files") MultipartFile[] files) throws IOException {
+	@PostMapping(value = "/uploadImage", consumes = { "multipart/form-data" })
+	public String uploadImageContent(ImageUploadInfoDTO imageInfo) throws IOException {
 		logger.info("inside upload image");
-		for (MultipartFile file : files) {
-			File uploadedFile = new File("d:/ChungYeung/" + file.getOriginalFilename());
-			file.transferTo(uploadedFile);
-			logger.info("file : " + file);
-		}
+
+		MultipartFile file = imageInfo.getFile();
+		
+		File uploadedFile = new File("d:/ChungYeung/" + file.getOriginalFilename());
+		file.transferTo(uploadedFile);
+		logger.info("file : " + imageInfo);
 
 		return "{status:\"success\"}";
 	}
