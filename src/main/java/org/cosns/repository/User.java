@@ -35,8 +35,11 @@ public class User extends Auditable<String> {
 	@Null
 	private String displayname;
 
-	@OneToMany(mappedBy = "postId", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private Set<Post> posts;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private Set<Image> images;
 
 	public Long getUserId() {
 		return userId;
@@ -84,6 +87,14 @@ public class User extends Auditable<String> {
 
 	public void setPosts(Set<Post> posts) {
 		this.posts = posts;
+	}
+
+	public Set<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(Set<Image> images) {
+		this.images = images;
 	}
 
 }

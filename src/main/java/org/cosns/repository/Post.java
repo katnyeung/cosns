@@ -21,11 +21,7 @@ public class Post extends Auditable<String> {
 
 	@NotNull
 	@Lob
-	private String title;
-
-	@NotNull
-	@Lob
-	private String contentHtml;
+	private String message;
 
 	@NotNull
 	private int likeCount;
@@ -35,7 +31,7 @@ public class Post extends Auditable<String> {
 	private String status;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", referencedColumnName = "userId")
 	private User user;
 
 	public Long getPostId() {
@@ -46,20 +42,12 @@ public class Post extends Auditable<String> {
 		this.postId = postId;
 	}
 
-	public String getTitle() {
-		return title;
+	public String getMessage() {
+		return message;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public String getContentHtml() {
-		return contentHtml;
-	}
-
-	public void setContentHtml(String contentHtml) {
-		this.contentHtml = contentHtml;
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	public int getLikeCount() {

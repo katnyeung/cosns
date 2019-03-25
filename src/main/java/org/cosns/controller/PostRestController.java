@@ -2,20 +2,28 @@ package org.cosns.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 
-import org.cosns.dao.PostDAO;
 import org.cosns.repository.Post;
 import org.cosns.repository.User;
-import org.cosns.web.DTO.ImageUploadInfoDTO;
+import org.cosns.service.PostService;
+import org.cosns.util.ConstantsUtil;
+import org.cosns.web.DTO.ImageUploadDTO;
+import org.cosns.web.DTO.PostFormDTO;
+import org.cosns.web.result.DefaultResult;
+import org.cosns.web.result.UploadImageResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +34,13 @@ public class PostRestController {
 	Logger logger = Logger.getLogger(this.getClass().getName());
 
 	@Autowired
-	PostDAO postDAO;
+	PostService postService;
+
+	@Value("${cosns.image.uploadFolder}")
+	String uploadFolder;
+
+	@Value("${cosns.image.uploadPattern}")
+	String uploadPattern;
 
 	@GetMapping(path = "/getPosts")
 	public Set<Post> getPosts(HttpSession session) {
@@ -42,7 +56,7 @@ public class PostRestController {
 
 	@GetMapping(path = "/getPost/{postId}")
 	public Post getPost(@PathVariable("postId") Long postId, HttpSession session) {
-		Optional<Post> post = postDAO.findById(postId);
+		Optional<Post> post = postService.findById(postId);
 
 		if (post.isPresent()) {
 			return post.get();
@@ -51,23 +65,58 @@ public class PostRestController {
 		}
 	}
 
-	@PostMapping(value = "/uploadImage", consumes = { "multipart/form-data" })
-	public String uploadImageContent(ImageUploadInfoDTO imageInfo) throws IOException {
-		logger.info("inside upload image");
+	@GetMapping(path = "/getRandomPost")
+	public Set<Post> getPost(HttpSession session) {
+		Set<Post> post = postService.findRandomPost();
 
-		MultipartFile file = imageInfo.getFile();
-		
-		File uploadedFile = new File("d:/ChungYeung/" + file.getOriginalFilename());
-		file.transferTo(uploadedFile);
-		logger.info("file : " + imageInfo);
-
-		return "{status:\"success\"}";
+		return post;
 	}
 
-	@GetMapping(path = "/writePost/{postId}")
-	public String writePost(@PathVariable("postId") String postId) {
+	@PostMapping(value = "/uploadImage", consumes = { "multipart/form-data" })
+	public DefaultResult uploadImageContent(ImageUploadDTO imageInfo, HttpSession session) throws IOException {
+		UploadImageResult result = new UploadImageResult();
+		User user = (User) session.getAttribute("user");
 
-		return "index";
+		if (user != null) {
+			SimpleDateFormat sdf = new SimpleDateFormat(uploadPattern);
+			String prefix = sdf.format(Calendar.getInstance().getTime()) + "_";
+
+			logger.info("inside upload image");
+
+			MultipartFile file = imageInfo.getFile();
+
+			File uploadedFile = new File(uploadFolder + prefix + file.getOriginalFilename());
+			file.transferTo(uploadedFile);
+
+			logger.info("file : " + uploadedFile);
+
+			postService.saveImage(prefix, file, user);
+
+			result.setFilePath(prefix + file.getOriginalFilename());
+			result.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+		} else {
+			result.setRemarks("Login Required");
+			result.setStatus(ConstantsUtil.RESULT_ERROR);
+		}
+
+		return result;
+	}
+
+	@PostMapping(path = "/writePost")
+	public DefaultResult writePost(@RequestBody PostFormDTO postDTO, HttpSession session) {
+		DefaultResult dr = new DefaultResult();
+		User user = (User) session.getAttribute("user");
+
+		if (user != null) {
+			postService.writePost(postDTO, user);
+			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		} else {
+			dr.setStatus(ConstantsUtil.RESULT_ERROR);
+			dr.setRemarks("Login Required");
+		}
+
+		return dr;
 	}
 
 }

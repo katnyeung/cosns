@@ -11,7 +11,7 @@
 <body ng-app="application">
 	<script>
 		var main = angular.module('application', []);
-		main.controller('userController', [ '$scope', '$http', function($scope, $http) {
+		main.controller('userController', function($scope, $http) {
 			$scope.login = function() {
 				if ($scope.login.email) {
 					$http({
@@ -62,10 +62,29 @@
 
 				}
 			};
-		} ]);
-		main.controller('mainController', [ '$scope', '$http', function($scope, $http) {
+		});
+		main.controller('mainController', function($scope, $http) {
+			$scope.loadRandomPost() = function(){
+				$http({
+					url : "post/getRandomPost",
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				}).success(function(data, status, headers, config) {
+					$scope.posts = data.posts;
+					$scope.status = status;
+					alert(data.status + '\n' + data.remarks);
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+				
+			}
+			loadRandomPost();
+			alert('here');
 			
-		} ]);
+		});
 	</script>
 
 	<div ng-controller="userController">
@@ -100,7 +119,7 @@
 	<div ng-controller="mainController">
 		<div>Search</div>
 		<div>Hot Tag</div>
-		<div>Main Section , list out the hot post</div>
+		<div><ul><li ng-repeat="post in posts">{{post}}</li></ul>Main Section , list out the hot post</div>
 	</div>
 </body>
 </html>

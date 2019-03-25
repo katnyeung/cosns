@@ -2,7 +2,7 @@ package org.cosns.web.DTO;
 
 import org.springframework.web.multipart.MultipartFile;
 
-public class ImageUploadInfoDTO {
+public class ImageUploadDTO {
 	Integer flowChunkNumber;
 	Long flowChunkSize;
 	Long flowCurrentChunkSize;
