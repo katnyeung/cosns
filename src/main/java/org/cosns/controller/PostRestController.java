@@ -17,6 +17,7 @@ import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.ImageUploadDTO;
 import org.cosns.web.DTO.PostFormDTO;
 import org.cosns.web.result.DefaultResult;
+import org.cosns.web.result.PostListResult;
 import org.cosns.web.result.UploadImageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,20 +44,25 @@ public class PostRestController {
 	String uploadPattern;
 
 	@GetMapping(path = "/getPosts")
-	public Set<Post> getPosts(HttpSession session) {
+	public DefaultResult getPosts(HttpSession session) {
 
 		User user = (User) session.getAttribute("user");
-		Set<Post> postSet = null;
+
+		PostListResult plr = new PostListResult();
 
 		if (user != null) {
-			postSet = user.getPosts();
+			plr.setPostList(user.getPosts());
+			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		} else {
+			plr.setStatus(ConstantsUtil.RESULT_ERROR);
+			plr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
 		}
-		return postSet;
+		return plr;
 	}
 
 	@GetMapping(path = "/getPost/{postId}")
 	public Post getPost(@PathVariable("postId") Long postId, HttpSession session) {
-		Optional<Post> post = postService.findById(postId);
+		Optional<Post> post = postService.getPost(postId);
 
 		if (post.isPresent()) {
 			return post.get();
@@ -65,11 +71,26 @@ public class PostRestController {
 		}
 	}
 
-	@GetMapping(path = "/getRandomPost")
-	public Set<Post> getPost(HttpSession session) {
-		Set<Post> post = postService.findRandomPost();
+	@GetMapping(path = "/getRandomPosts")
+	public DefaultResult getPost() {
+		PostListResult plr = new PostListResult();
 
-		return post;
+		Set<Post> postList = postService.findRandomPosts();
+
+		plr.setPostList(postList);
+
+		return plr;
+	}
+
+	@GetMapping(path = "/getUserPosts/{userId}")
+	public DefaultResult getUserPost(@PathVariable("userId") Long userId) {
+		PostListResult plr = new PostListResult();
+
+		Set<Post> postList = postService.getUserPosts(userId);
+
+		plr.setPostList(postList);
+
+		return plr;
 	}
 
 	@PostMapping(value = "/uploadImage", consumes = { "multipart/form-data" })
@@ -96,8 +117,8 @@ public class PostRestController {
 			result.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
 		} else {
-			result.setRemarks("Login Required");
 			result.setStatus(ConstantsUtil.RESULT_ERROR);
+			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
 		}
 
 		return result;
@@ -113,7 +134,7 @@ public class PostRestController {
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			dr.setStatus(ConstantsUtil.RESULT_ERROR);
-			dr.setRemarks("Login Required");
+			dr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
 		}
 
 		return dr;

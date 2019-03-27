@@ -35,10 +35,6 @@ public class PostService {
 		imageDAO.save(image);
 	}
 
-	public Optional<Post> findById(Long postId) {
-		return postDAO.findById(postId);
-	}
-
 	public void writePost(PostFormDTO postDTO, User user) {
 		logger.info("Writing Post By User : " + user.getUserId());
 
@@ -55,15 +51,26 @@ public class PostService {
 			Set<Image> imageSet = imageDAO.findPendImageByFilename(file);
 			for (Image image : imageSet) {
 				image.setStatus(ConstantsUtil.IMAGE_ACTIVE);
-				image.setPostId(post.getPostId());
+				image.setPost(post);
 				image.setSeq(count++);
 				imageDAO.save(image);
 			}
 		}
 	}
 
-	public Set<Post> findRandomPost() {
+	public Set<Post> findRandomPosts() {
 		return postDAO.findRandomPost();
 	}
 
+	public Set<Post> getUserPosts(String uniqueName) {
+		return postDAO.findPostByUniqueName(uniqueName);
+	}
+
+	public Set<Post> getUserPosts(Long userId) {
+		return postDAO.findPostByUserId(userId);
+	}
+
+	public Optional<Post> getPost(Long postId) {
+		return postDAO.findById(postId);
+	}
 }

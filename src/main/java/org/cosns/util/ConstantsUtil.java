@@ -17,4 +17,6 @@ public class ConstantsUtil {
 	public static final String POST_ACTIVE = "A";
 	public static final String POST_DELETED = "D";
 	
+	public static final String ERROR_MESSAGE_LOGIN = "Please Login";
+	
 }

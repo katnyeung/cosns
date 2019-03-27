@@ -1,6 +1,7 @@
 package org.cosns.repository;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,16 +12,24 @@ import javax.validation.constraints.Size;
 
 import org.cosns.util.Auditable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Image extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long imageId;
 
-	private Long postId;
+	@JsonIgnore
+	@ManyToOne(optional = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "post_id", referencedColumnName = "postId")
+	private Post post;
 
-	@ManyToOne
+	@JsonIgnore
+	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", referencedColumnName = "userId")
 	private User user;
 
@@ -31,7 +40,8 @@ public class Image extends Auditable<String> {
 	private String filename;
 
 	private double size;
-
+	
+	@JsonIgnore
 	@NotNull
 	@Size(max = 1)
 	private String status;
@@ -44,12 +54,12 @@ public class Image extends Auditable<String> {
 		this.imageId = imageId;
 	}
 
-	public Long getPostId() {
-		return postId;
+	public Post getPost() {
+		return post;
 	}
 
-	public void setPostId(Long postId) {
-		this.postId = postId;
+	public void setPost(Post post) {
+		this.post = post;
 	}
 
 	public int getSeq() {

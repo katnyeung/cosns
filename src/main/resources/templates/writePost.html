@@ -4,52 +4,94 @@
 <meta charset="UTF-8">
 <title>Example - example-ng-submit</title>
 
-<!-- https://angular-file-upload.appspot.com/ -->
 <script
 	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-<script src="/js/ng-file-upload.min.js"></script>
+<script src="/js/ng-flow-standalone.min.js"></script>
+<link
+	href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
+	rel="stylesheet" />
+<style>
+.thumbnail {
+	max-width: 200px;
+	max-height: 150px;
+	line-height: 20px;
+	margin-bottom: 5px;
+}
+</style>
 </head>
-<body>
+<body ng-app="app">
 	<script>
-		//inject directives and services.
-		var app = angular.module('fileUpload', [ 'ngFileUpload' ]);
+		var app = angular.module('app', [ 'flow' ])
 
-		app.controller('MyCtrl', [ '$scope', 'Upload', function($scope, Upload) {
-			// upload later on form submit or something similar
-			$scope.submit = function() {
-				if ($scope.form.file.$valid && $scope.file) {
-					$scope.upload($scope.file);
-				}
-			};
-			
-		    // for multiple files:
-		    $scope.uploadFiles = function (files) {
-		      if (files && files.length) {
-		          for (var i = 0; i < files.length; i++) {
-			        Upload.upload({url : 'post/uploadImage', data: {file: files[i]}})
-			        .then(function(resp) {
-						console.log('Success ' + resp.config.data.file.name + 'uploaded. Response: ' + resp.data);
-					}, function(resp) {
-						console.log('Error status: ');
-					}, function(evt) {
-						var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-						console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
+		app.controller('MyCtrl', function($scope, $http) {
+			$scope.submit = function(flow) {
+				if($scope.postMessage != ''){
+					console.log($scope.postMessage);
+					console.log(flow.files);
+					var fileList = [];
+					
+					angular.forEach(flow.files, function(value, key) {
+						var msg = JSON.parse(value.msg);
+						if(msg.status === 'success'){
+							fileList.push(msg.filePath);
+						}
+						console.log(key + ': ' + msg.filePath);
 					});
-		          }
-		      }
-		    }
-		} ]);
-	</script>
-	<div ng-app="fileUpload" ng-controller="MyCtrl">
-		<form name="myForm">
-			<fieldset>
-				<legend>Upload on form submit</legend>
+					
+					console.log(fileList);
+					$http({
+						url : "post/writePost",
+						method : "POST",
+						headers : {
+							'Content-Type' : 'application/json'
+						},
+						data : {
+							'postMessage' : $scope.postMessage,
+							'fileList' : fileList
+						}
+					}).success(function(data, status, headers, config) {
+						$scope.status = status;
+						alert(data.status + '\n' + data.remarks);
+
+					}).error(function(data, status, headers, config) {
+						alert(data.status + '\n' + data.remarks);
+					});
+				}
 				
-				<div ngf-drop="uploadFiles($files)" class="drop-box"
-  ngf-drag-over-class="'dragover'" ngf-multiple="true"
-  ngf-pattern="'image/*,application/pdf'">Drop Images or PDFs files here</div>
-			</fieldset>
+			}
+		});
+	</script>
+	<div ng-controller="MyCtrl">
+
+		<div class="text">
+			<textarea ng-model="postMessage"></textarea>
+		</div>
+		<form flow-init="{target: 'post/uploadImage', testChunks:false}" flow-files-submitted="$flow.upload()"
+			flow-file-success="$file.msg = $message" ng-submit="submit($flow)">
+
+			<div class="alert" flow-drop
+				flow-drag-enter="style={border:'4px solid green'}"
+				flow-drag-leave="style={}" ng-style="style">Drag And Drop your
+				file here
+			</div>
+
+			<span class="btn" flow-btn>Select File</span>
+
+			<table>
+				<tr ng-repeat="file in $flow.files">
+					<td>{{$index+1}}</td>
+					<td>{{file.name}}</td>
+					<td>{{file.msg}}</td>
+					<td><img flow-img="file" /></td>
+					<td><a href="#" class="btn btn-danger"
+						ng-click="file.cancel()"> Remove </a></td>
+				</tr>
+			</table>
+			<div>
+				<button type="submit" class="btn">Upload</button>
+			</div>
+
+		</form>
 	</div>
-	</form>
 </body>
 </html>

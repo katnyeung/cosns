@@ -7,13 +7,44 @@
 
 <script
 	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+<script>
+	var main = angular.module('application', []);
+	main.controller('viewPostController', function($scope, $http) {
+		$scope.loadPosts = function() {
+			$http({
+				url : "/post/getUserPosts/[[${user.userId}]]",
+				method : "GET",
+				headers : {
+					'Content-Type' : 'application/json'
+				}
+			}).success(function(data, status, headers, config) {
+				$scope.postList = data.postList;
+				$scope.status = status;
 
+			}).error(function(data, status, headers, config) {
+				alert(data.status + '\n' + data.remarks);
+			});
+
+		}
+		$scope.loadPosts();
+
+	});
+</script>
 
 </head>
-<body ng-app="mainApplication">
+<body ng-app="application">
 
 	<div ng-controller="viewPostController">
-		View Profile
+		<div>
+			<ul>
+				<li ng-repeat="post in postList">{{post.lastupdatedate}}
+					{{post.message}}
+					<ul>
+						<li ng-repeat="image in post">{{image}}</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
 	</div>
 </body>
 </html>

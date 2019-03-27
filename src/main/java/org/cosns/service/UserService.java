@@ -51,4 +51,34 @@ public class UserService {
 	public Set<Post> getPosts(User user) {
 		return user.getPosts();
 	}
+
+	public User getUserById(Long userId) {
+		Set<User> userSet = userDAO.findActiveUserById(userId);
+
+		if (userSet.iterator().hasNext()) {
+			return userSet.iterator().next();
+		} else {
+			return null;
+		}
+	}
+
+	public User getUserByEmail(String email) {
+		Set<User> userSet = userDAO.findActiveUserByEmail(email);
+
+		if (userSet.iterator().hasNext()) {
+			return userSet.iterator().next();
+		} else {
+			return null;
+		}
+	}
+
+	public User getUserByUniqueName(String uniqueName) {
+		Set<User> userSet = userDAO.findActiveUserByEmail(uniqueName);
+
+		if (userSet.iterator().hasNext()) {
+			return userSet.iterator().next();
+		} else {
+			return null;
+		}
+	}
 }
