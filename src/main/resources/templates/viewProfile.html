@@ -29,11 +29,47 @@
 		$scope.loadPosts();
 
 	});
+
+	main.controller('viewUserController', function($scope, $http) {
+		$scope.loadUser = function() {
+			$http({
+				url : "/user/getUser/[[${user.userId}]]",
+				method : "GET",
+				headers : {
+					'Content-Type' : 'application/json'
+				}
+			}).success(function(data, status, headers, config) {
+				$scope.user = data.user;
+				$scope.status = status;
+
+			}).error(function(data, status, headers, config) {
+				alert(data.status + '\n' + data.remarks);
+			});
+
+		}
+		$scope.loadUser();
+
+		$scope.addFriend = function(userId) {
+			$http({
+				url : "/user/addFriend/" + userId,
+				method : "GET",
+				headers : {
+					'Content-Type' : 'application/json'
+				}
+			}).success(function(data, status, headers, config) {
+				alert(data.status + '\n' + data.remarks);
+
+			}).error(function(data, status, headers, config) {
+				alert(data.status + '\n' + data.remarks);
+			});
+
+		}
+	});
 </script>
 
 </head>
 <body ng-app="application">
-
+	<div ng-controller="viewUserController">{{user}}<button type="button" th:attr="ng-click='addFriend(\''+${user.userId}+'\');'">Add Friend</button></div>
 	<div ng-controller="viewPostController">
 		<div>
 			<ul>

@@ -62,6 +62,10 @@ public class PostService {
 		return postDAO.findRandomPost();
 	}
 
+	public Set<Post> findTimelinePosts(User user) {
+		return postDAO.findTimelinePosts(user.getUserId());
+	}
+
 	public Set<Post> getUserPosts(String uniqueName) {
 		return postDAO.findPostByUniqueName(uniqueName);
 	}
@@ -73,4 +77,5 @@ public class PostService {
 	public Optional<Post> getPost(Long postId) {
 		return postDAO.findById(postId);
 	}
+
 }

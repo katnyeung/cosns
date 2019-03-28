@@ -1,5 +1,6 @@
 package org.cosns.repository;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -10,6 +11,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -24,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Table(name = "user", indexes = { @Index(name = "user_email", columnList = "email", unique = true),
 		@Index(name = "user_uniquename", columnList = "uniqueName", unique = true) })
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class User extends Auditable<String> {
 
 	@JsonIgnore
@@ -57,6 +61,17 @@ public class User extends Auditable<String> {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<Image> images;
 
+	@ManyToMany
+	@JoinTable(name = "friends", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "friendId"))
+	private List<User> friends;
+
+	@ManyToMany
+	@JoinTable(name = "friends", joinColumns = @JoinColumn(name = "friendId"), inverseJoinColumns = @JoinColumn(name = "userId"))
+	private List<User> friendOf;
+	
+	@OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL)
+	Set<FriendRequest> friendRequest;
+	
 	public Long getUserId() {
 		return userId;
 	}
@@ -111,6 +126,30 @@ public class User extends Auditable<String> {
 
 	public void setUniqueName(String uniqueName) {
 		this.uniqueName = uniqueName;
+	}
+
+	public List<User> getFriends() {
+		return friends;
+	}
+
+	public void setFriends(List<User> friends) {
+		this.friends = friends;
+	}
+
+	public List<User> getFriendOf() {
+		return friendOf;
+	}
+
+	public void setFriendOf(List<User> friendOf) {
+		this.friendOf = friendOf;
+	}
+
+	public Set<FriendRequest> getFriendRequest() {
+		return friendRequest;
+	}
+
+	public void setFriendRequest(Set<FriendRequest> friendRequest) {
+		this.friendRequest = friendRequest;
 	}
 
 }

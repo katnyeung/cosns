@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Post extends Auditable<String> {
 
 	@Id
@@ -35,7 +35,7 @@ public class Post extends Auditable<String> {
 
 	@NotNull
 	private int likeCount;
-	
+
 	@JsonIgnore
 	@NotNull
 	@Size(max = 1)
@@ -48,6 +48,9 @@ public class Post extends Auditable<String> {
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	@OrderBy("seq ASC")
 	private Set<Image> images;
+
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+	private Set<HashTag> hashtags;
 
 	public Long getPostId() {
 		return postId;
@@ -95,6 +98,14 @@ public class Post extends Auditable<String> {
 
 	public void setImages(Set<Image> images) {
 		this.images = images;
+	}
+
+	public Set<HashTag> getHashtags() {
+		return hashtags;
+	}
+
+	public void setHashtags(Set<HashTag> hashtags) {
+		this.hashtags = hashtags;
 	}
 
 }

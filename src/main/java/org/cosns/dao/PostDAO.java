@@ -9,7 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface PostDAO extends JpaRepository<Post, Long> {
-
+	
+	@Query("FROM Post WHERE status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY createdate DESC")
+	public Set<Post> findTimelinePosts(Long userId);
+	
 	@Query("FROM Post WHERE status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY createdate DESC")
 	public Set<Post> findRandomPost();
 

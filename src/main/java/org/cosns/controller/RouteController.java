@@ -1,9 +1,6 @@
 package org.cosns.controller;
 
-import java.io.IOException;
 import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.cosns.repository.User;
 import org.cosns.service.UserService;
@@ -28,13 +25,13 @@ public class RouteController {
 		return "index";
 	}
 
-	@GetMapping(path = "writePost")
+	@GetMapping(path = "w/")
 	public String writePost() {
 
 		return "writePost";
 	}
 
-	@GetMapping(path = "viewProfile/{username}")
+	@GetMapping(path = "u/{username}")
 	public String viewProfile(@PathVariable("username") String username, Model model) {
 		try {
 			User user = userService.getUserByUniqueName(username);

@@ -1,8 +1,11 @@
 package org.cosns.service;
 
 import java.util.Set;
+import java.util.logging.Logger;
 
+import org.cosns.dao.FriendRequestDAO;
 import org.cosns.dao.UserDAO;
+import org.cosns.repository.FriendRequest;
 import org.cosns.repository.Post;
 import org.cosns.repository.User;
 import org.cosns.util.ConstantsUtil;
@@ -13,8 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
+	Logger logger = Logger.getLogger(this.getClass().getName());
+
 	@Autowired
 	UserDAO userDAO;
+
+	@Autowired
+	FriendRequestDAO friendRequestDAO;
 
 	@Transactional
 	public User registerUser(UserFormDTO userDTO) {
@@ -80,5 +88,41 @@ public class UserService {
 		} else {
 			return null;
 		}
+	}
+
+	public FriendRequest findFriendRequest(User fromUser, Long targetUserId) {
+		Set<FriendRequest> frSet = friendRequestDAO.findRequest(fromUser.getUserId(), targetUserId);
+
+		if (frSet.iterator().hasNext()) {
+			return frSet.iterator().next();
+		} else {
+			return null;
+		}
+	}
+
+	public User addFriend(User fromUser, Long targetUserId) {
+		logger.info(" adding friend form " + fromUser.getUserId() + " to targetUser : " + targetUserId);
+		Set<User> targetUserSet = userDAO.findActiveUserById(targetUserId);
+
+		if (targetUserSet.iterator().hasNext()) {
+			User targetUser = targetUserSet.iterator().next();
+
+			logger.info("found target user: " + targetUser.getEmail());
+			if (targetUser.getUserId() != fromUser.getUserId()) {
+				FriendRequest fr = new FriendRequest();
+				fr.setFromUser(fromUser);
+				fr.setTargetUser(targetUser);
+
+				friendRequestDAO.save(fr);
+
+				return targetUser;
+			} else {
+				return null;
+			}
+
+		} else {
+			return null;
+		}
+
 	}
 }

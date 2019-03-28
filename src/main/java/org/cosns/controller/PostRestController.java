@@ -82,6 +82,25 @@ public class PostRestController {
 		return plr;
 	}
 
+	@GetMapping(path = "/getTimelinePosts")
+	public DefaultResult getTimelinePosts(HttpSession session) {
+		PostListResult plr = new PostListResult();
+
+		User user = (User) session.getAttribute("user");
+
+		if (user != null) {
+
+			Set<Post> postList = postService.findTimelinePosts(user);
+			plr.setPostList(postList);
+			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		} else {
+			plr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			plr.setStatus(ConstantsUtil.RESULT_ERROR);
+		}
+
+		return plr;
+	}
+
 	@GetMapping(path = "/getUserPosts/{userId}")
 	public DefaultResult getUserPost(@PathVariable("userId") Long userId) {
 		PostListResult plr = new PostListResult();
