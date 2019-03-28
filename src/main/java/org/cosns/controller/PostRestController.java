@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import org.cosns.repository.Post;
 import org.cosns.repository.User;
+import org.cosns.service.HashTagService;
 import org.cosns.service.PostService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.ImageUploadDTO;
@@ -21,6 +22,7 @@ import org.cosns.web.result.PostListResult;
 import org.cosns.web.result.UploadImageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +38,9 @@ public class PostRestController {
 
 	@Autowired
 	PostService postService;
+
+	@Autowired
+	HashTagService hashTagService;
 
 	@Value("${cosns.image.uploadFolder}")
 	String uploadFolder;
@@ -149,7 +154,16 @@ public class PostRestController {
 		User user = (User) session.getAttribute("user");
 
 		if (user != null) {
-			postService.writePost(postDTO, user);
+			Post post = postService.writePost(postDTO, user);
+
+			Set<String> hashTagSet = hashTagService.parseHash(post);
+			
+			logger.info("writing hash : " + hashTagSet);
+			
+			hashTagService.saveHash(post, hashTagSet);
+
+			hashTagService.saveHashToRedis(post, hashTagSet);
+
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			dr.setStatus(ConstantsUtil.RESULT_ERROR);

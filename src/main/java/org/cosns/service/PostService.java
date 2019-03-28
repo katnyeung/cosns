@@ -35,7 +35,7 @@ public class PostService {
 		imageDAO.save(image);
 	}
 
-	public void writePost(PostFormDTO postDTO, User user) {
+	public Post writePost(PostFormDTO postDTO, User user) {
 		logger.info("Writing Post By User : " + user.getUserId());
 
 		// create post
@@ -56,6 +56,8 @@ public class PostService {
 				imageDAO.save(image);
 			}
 		}
+		
+		return post;
 	}
 
 	public Set<Post> findRandomPosts() {

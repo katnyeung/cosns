@@ -40,7 +40,7 @@
 					
 					console.log(fileList);
 					$http({
-						url : "post/writePost",
+						url : "/post/writePost",
 						method : "POST",
 						headers : {
 							'Content-Type' : 'application/json'
@@ -66,7 +66,7 @@
 		<div class="text">
 			<textarea ng-model="postMessage"></textarea>
 		</div>
-		<form flow-init="{target: 'post/uploadImage', testChunks:false}" flow-files-submitted="$flow.upload()"
+		<form flow-init="{target: '/post/uploadImage', testChunks:false}" flow-files-submitted="$flow.upload()"
 			flow-file-success="$file.msg = $message" ng-submit="submit($flow)">
 
 			<div class="alert" flow-drop

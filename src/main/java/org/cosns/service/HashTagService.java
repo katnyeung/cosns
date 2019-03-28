@@ -10,7 +10,10 @@ import org.cosns.dao.HashTagDAO;
 import org.cosns.repository.HashTag;
 import org.cosns.repository.Post;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import redis.clients.jedis.Jedis;
 
 @Service
 public class HashTagService {
@@ -18,6 +21,9 @@ public class HashTagService {
 
 	@Autowired
 	HashTagDAO hashTagDAO;
+
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
 
 	public Set<String> parseHash(Post post) {
 		Pattern pattern = Pattern.compile("#(\\w+)");
@@ -47,7 +53,10 @@ public class HashTagService {
 		}
 	}
 
-	public void addHashToRedis(Post post, String key) {
+	public void saveHashToRedis(Post post, Set<String> hashTagSet) {
+		for (String hashTag : hashTagSet) {
+			stringRedisTemplate.opsForSet().add(hashTag, "" + post.getPostId());
+		}
 
 	}
 }
