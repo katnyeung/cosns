@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import redis.clients.jedis.Jedis;
-
 @Service
 public class HashTagService {
 	Logger logger = Logger.getLogger(this.getClass().getName());
@@ -54,6 +52,8 @@ public class HashTagService {
 	}
 
 	public void saveHashToRedis(Post post, Set<String> hashTagSet) {
+		logger.info("redis" + stringRedisTemplate.getConnectionFactory());
+
 		for (String hashTag : hashTagSet) {
 			stringRedisTemplate.opsForSet().add(hashTag, "" + post.getPostId());
 		}
