@@ -69,7 +69,7 @@
 
 </head>
 <body ng-app="application">
-	<div ng-controller="viewUserController">{{user}}<button type="button" th:attr="ng-click='addFriend(\''+${user.userId}+'\');'">Add Friend</button></div>
+	<div ng-controller="viewUserController">{{user}}<button type="button" th:attr="ng-click='addFriend(\''+${user.userId}+'\');',ng-show='' + ${user.userId != checkId} + ''" >Add Friend</button></div>
 	<div ng-controller="viewPostController">
 		<div>
 			<ul>
