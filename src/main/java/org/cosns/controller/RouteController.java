@@ -2,6 +2,8 @@ package org.cosns.controller;
 
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpSession;
+
 import org.cosns.repository.User;
 import org.cosns.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +34,13 @@ public class RouteController {
 	}
 
 	@GetMapping(path = "u/{username}")
-	public String viewProfile(@PathVariable("username") String username, Model model) {
+	public String viewProfile(@PathVariable("username") String username, HttpSession session, Model model) {
 		try {
+			User loggedUser = (User) session.getAttribute("user");
+			if (loggedUser != null) {
+				model.addAttribute("checkId", loggedUser.getUserId());
+			}
+
 			User user = userService.getUserByUniqueName(username);
 
 			if (user != null) {
@@ -48,7 +55,7 @@ public class RouteController {
 					} else {
 						model.addAttribute("user", user);
 					}
-				}else {
+				} else {
 
 					logger.info("either not found id " + username);
 					return "redirect:/";
@@ -58,7 +65,7 @@ public class RouteController {
 		} catch (NumberFormatException ne) {
 			ne.printStackTrace();
 		}
-		
+
 		return "viewProfile";
 	}
 

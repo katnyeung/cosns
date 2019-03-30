@@ -57,6 +57,13 @@ public class HashTagService {
 		for (String hashTag : hashTagSet) {
 			stringRedisTemplate.opsForSet().add(hashTag, "" + post.getPostId());
 		}
+	}
 
+	public Set<String> queryKeySet(String query) {
+		return stringRedisTemplate.keys("*" + query + "*");
+	}
+
+	public Set<String> getMembers(String key) {
+		return stringRedisTemplate.opsForSet().members(key);
 	}
 }

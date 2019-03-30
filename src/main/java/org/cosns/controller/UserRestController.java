@@ -60,12 +60,13 @@ public class UserRestController {
 	}
 
 	@GetMapping(path = "/getUser/{userId}")
-	public DefaultResult getUser(@PathVariable("userId") Long userId) {
+	public DefaultResult getUser(@PathVariable("userId") Long userId, HttpSession session) {
 		UserResult ur = new UserResult();
 
 		User user = userService.getUserById(userId);
 
 		if (user != null) {
+
 			ur.setUser(user);
 			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
@@ -87,7 +88,7 @@ public class UserRestController {
 
 			if (fr == null) {
 				user = userService.addFriend(user, userId);
-				
+
 				if (user != null) {
 					ur.setUser(user);
 					ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
@@ -95,7 +96,7 @@ public class UserRestController {
 					ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_ADD_FRIEND_FAIL);
 					ur.setStatus(ConstantsUtil.RESULT_ERROR);
 				}
-				
+
 			} else {
 				ur.setRemarks("Friend request exist");
 				ur.setStatus(ConstantsUtil.RESULT_ERROR);

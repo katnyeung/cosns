@@ -7,9 +7,12 @@
 <script
 	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
 <script src="/js/ng-flow-standalone.min.js"></script>
+<script src="/js/angular-sortable-view.min.js"></script>
 <link
 	href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
 	rel="stylesheet" />
+
+
 <style>
 .thumbnail {
 	max-width: 200px;
@@ -21,23 +24,23 @@
 </head>
 <body ng-app="app">
 	<script>
-		var app = angular.module('app', [ 'flow' ])
+		var app = angular.module('app', [ 'flow', 'angular-sortable-view' ])
 
 		app.controller('MyCtrl', function($scope, $http) {
 			$scope.submit = function(flow) {
-				if($scope.postMessage != ''){
+				if ($scope.postMessage != '') {
 					console.log($scope.postMessage);
 					console.log(flow.files);
 					var fileList = [];
-					
+
 					angular.forEach(flow.files, function(value, key) {
 						var msg = JSON.parse(value.msg);
-						if(msg.status === 'success'){
+						if (msg.status === 'success') {
 							fileList.push(msg.filePath);
 						}
 						console.log(key + ': ' + msg.filePath);
 					});
-					
+
 					console.log(fileList);
 					$http({
 						url : "/post/writePost",
@@ -57,7 +60,7 @@
 						alert(data.status + '\n' + data.remarks);
 					});
 				}
-				
+
 			}
 		});
 	</script>
@@ -66,29 +69,31 @@
 		<div class="text">
 			<textarea ng-model="postMessage"></textarea>
 		</div>
-		<form flow-init="{target: '/post/uploadImage', testChunks:false}" flow-files-submitted="$flow.upload()"
+		<form flow-init="{target: '/post/uploadImage', testChunks:false}"
+			flow-files-submitted="$flow.upload()"
 			flow-file-success="$file.msg = $message" ng-submit="submit($flow)">
 
 			<div class="alert" flow-drop
 				flow-drag-enter="style={border:'4px solid green'}"
 				flow-drag-leave="style={}" ng-style="style">Drag And Drop your
-				file here
-			</div>
+				file here</div>
 
 			<span class="btn" flow-btn>Select File</span>
 
-			<table>
-				<tr ng-repeat="file in $flow.files">
-					<td>{{$index+1}}</td>
+
+			<table sv-root sv-part="$flow.files">
+				<tr ng-repeat="file in $flow.files" sv-element="opts" class="well grid">
+					<td><div class="btn" sv-handle>{{$index+1}}</div></td>
 					<td>{{file.name}}</td>
 					<td>{{file.msg}}</td>
-					<td><img flow-img="file" /></td>
+					<td><img flow-img="file" style="width: 200px" /></td>
 					<td><a href="#" class="btn btn-danger"
 						ng-click="file.cancel()"> Remove </a></td>
+						
 				</tr>
 			</table>
 			<div>
-				<button type="submit" class="btn">Upload</button>
+				<button type="submit" class="btn">Post</button>
 			</div>
 
 		</form>

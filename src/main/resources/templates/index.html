@@ -80,6 +80,26 @@
 				});
 				
 			}
+			
+			$scope.search = function(){
+				$http({
+					url : "/post/searchPosts",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						keyword : $scope.keyword						
+					}
+				}).success(function(data, status, headers, config) {
+					$scope.postList = data.postList;
+					$scope.status = status;
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+				
+			}
 			$scope.loadRandomPosts();
 			
 		});
@@ -115,7 +135,7 @@
 	</div>
 
 	<div ng-controller="mainController">
-		<div>Search</div>
+		<div><input type="text" ng-mode="keyword"/><button type="button" ng-click="search()">Search</button></div>
 		<div>Hot Tag</div>
 		<div><ul><li ng-repeat="post in postList">{{post.lastupdatedate}} {{post.message}}  <ul><li ng-repeat="image in post">{{image}}</li></ul></li></ul>Main Section , list out the hot post</div>
 	</div>
