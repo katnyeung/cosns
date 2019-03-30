@@ -145,7 +145,6 @@ public class PostRestController {
 			try {
 				SimpleDateFormat sdf = new SimpleDateFormat(uploadPattern);
 				String prefix = sdf.format(Calendar.getInstance().getTime()) + "_";
-
 				logger.info("inside upload image");
 
 				MultipartFile file = imageInfo.getFile();
@@ -168,6 +167,7 @@ public class PostRestController {
 				ImageIO.write(scaledImage, file.getContentType(), baos);
 
 				postService.saveImage(prefix, file, user);
+
 
 				result.setFilePath(prefix + file.getOriginalFilename());
 				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
