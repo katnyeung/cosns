@@ -64,7 +64,7 @@
 			};
 		});
 		main.controller('mainController', function($scope, $http) {
-			$scope.loadRandomPosts = function(){
+			$scope.loadRandomPosts = function() {
 				$http({
 					url : "post/getRandomPosts",
 					method : "GET",
@@ -78,10 +78,10 @@
 				}).error(function(data, status, headers, config) {
 					alert(data.status + '\n' + data.remarks);
 				});
-				
+
 			}
-			
-			$scope.search = function(){
+
+			$scope.search = function() {
 				$http({
 					url : "/post/searchPosts",
 					method : "POST",
@@ -89,7 +89,7 @@
 						'Content-Type' : 'application/json'
 					},
 					data : {
-						keyword : $scope.keyword						
+						keyword : $scope.keyword
 					}
 				}).success(function(data, status, headers, config) {
 					$scope.postList = data.postList;
@@ -98,10 +98,29 @@
 				}).error(function(data, status, headers, config) {
 					alert(data.status + '\n' + data.remarks);
 				});
-				
+
 			}
-			$scope.loadRandomPosts();
+			$scope.like = function(postId) {
+				$http({
+					url : "/post/likePost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				}).success(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+					
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
 			
+			$scope.loadRandomPosts();
+
 		});
 	</script>
 
@@ -135,9 +154,23 @@
 	</div>
 
 	<div ng-controller="mainController">
-		<div><input type="text" ng-mode="keyword"/><button type="button" ng-click="search()">Search</button></div>
+		<div>
+			<input type="text" ng-model="keyword" />
+			<button type="button" ng-click="search()">Search</button>
+		</div>
 		<div>Hot Tag</div>
-		<div><ul><li ng-repeat="post in postList">{{post.lastupdatedate}} {{post.message}}  <ul><li ng-repeat="image in post">{{image}}</li></ul></li></ul>Main Section , list out the hot post</div>
+		<div>
+			<ul>
+				<li ng-repeat="post in postList">{{post.lastupdatedate}}
+					{{post.message}}
+					<ul>
+						<li ng-repeat="image in post">{{image}}</li>
+					</ul>
+					<button type="button" ng-click="like(post.postId)">Like</button>
+				</li>
+			</ul>
+			Main Section , list out the hot post
+		</div>
 	</div>
 </body>
 </html>

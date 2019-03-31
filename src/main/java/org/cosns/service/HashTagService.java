@@ -51,9 +51,7 @@ public class HashTagService {
 		}
 	}
 
-	public void saveHashToRedis(Post post, Set<String> hashTagSet) {
-		logger.info("redis" + stringRedisTemplate.getConnectionFactory());
-
+	public void saveHashToRedis(Post post, Set<String> hashTagSet, String prefix) {
 		for (String hashTag : hashTagSet) {
 			stringRedisTemplate.opsForSet().add(hashTag, "" + post.getPostId());
 		}
