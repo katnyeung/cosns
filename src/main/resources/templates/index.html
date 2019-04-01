@@ -6,67 +6,19 @@
 
 <script
 	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-
+<link
+	href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
+	rel="stylesheet" />
+	
 </head>
 <body ng-app="application">
 	<script>
 		var main = angular.module('application', []);
-		main.controller('userController', function($scope, $http) {
-			$scope.login = function() {
-				if ($scope.login.email) {
-					$http({
-						url : "user/login",
-						method : "POST",
-						headers : {
-							'Content-Type' : 'application/json'
-						},
-						data : {
-							'email' : $scope.login.email,
-							'password' : $scope.login.password,
 
-						}
-					}).success(function(data, status, headers, config) {
-						$scope.status = status;
-						alert(data.status + '\n' + data.remarks);
-
-					}).error(function(data, status, headers, config) {
-						alert(data.status + '\n' + data.remarks);
-					});
-				}
-			};
-			$scope.register = function() {
-				if ($scope.register.email) {
-					if ($scope.register.password == $scope.register.passwordAgain) {
-						$http({
-							url : "user/register",
-							method : "POST",
-							headers : {
-								'Content-Type' : 'application/json'
-							},
-							data : {
-								'email' : $scope.register.email,
-								'password' : $scope.register.password,
-								'passwordAgain' : $scope.register.passwordAgain,
-
-							}
-						}).success(function(data, status, headers, config) {
-							$scope.status = status;
-							alert(data.status + '\n' + data.remarks);
-
-						}).error(function(data, status, headers, config) {
-							alert(data.status + '\n' + data.remarks);
-						});
-					} else {
-						alert("please verify your password")
-					}
-
-				}
-			};
-		});
 		main.controller('mainController', function($scope, $http) {
 			$scope.loadRandomPosts = function() {
 				$http({
-					url : "post/getRandomPosts",
+					url : "/post/getRandomPosts",
 					method : "GET",
 					headers : {
 						'Content-Type' : 'application/json'
@@ -98,8 +50,8 @@
 				}).error(function(data, status, headers, config) {
 					alert(data.status + '\n' + data.remarks);
 				});
-
 			}
+      
 			$scope.like = function(postId) {
 				$http({
 					url : "/post/likePost",
@@ -118,59 +70,46 @@
 				});
 
 			}
-			
+      
 			$scope.loadRandomPosts();
 
 		});
 	</script>
+	
+	<div th:include="components/header :: header"></div>
 
-	<div ng-controller="userController">
-		<div>
-			Login
-			<form ng-submit="login()">
-				<input type="text" ng-model="login.email" name="email" /> <input
-					type="password" ng-model="login.password" name="password" /> <input
-					type="submit" id="login" value="Login" />
-			</form>
-		</div>
+	<div class="container" ng-controller="mainController">
 
-		<br />
-		<div>
-			Register
-			<form ng-submit="register()" name="registerForm">
-				<ul>
-					<li>Email : <input type="text" ng-model="register.email"
-						name="email" /></li>
-					<li>Password <input type="password"
-						ng-model="register.password" name="password" /></li>
-					<li>Password Again <input type="password"
-						ng-model="register.passwordAgain" name="passwordAgain" /></li>
-				</ul>
-
-
-				<input type="submit" id="register" value="register" />
-			</form>
-		</div>
-	</div>
-
-	<div ng-controller="mainController">
-		<div>
-			<input type="text" ng-model="keyword" />
+		<!-- Main hero unit for a primary marketing message or call to action -->
+		<div class="hero-unit">
+			Search <input type="text" ng-mode="keyword" />
 			<button type="button" ng-click="search()">Search</button>
 		</div>
-		<div>Hot Tag</div>
-		<div>
-			<ul>
-				<li ng-repeat="post in postList">{{post.lastupdatedate}}
-					{{post.message}}
-					<ul>
-						<li ng-repeat="image in post">{{image}}</li>
-					</ul>
-					<button type="button" ng-click="like(post.postId)">Like</button>
-				</li>
-			</ul>
-			Main Section , list out the hot post
+
+		<!-- Example row of columns -->
+		<div class="row">
+			<div class="span4">
+				<ul>
+					<li ng-repeat="post in postList">{{post.lastupdatedate}}
+						{{post.message}}
+						<ul>
+							<li ng-repeat="image in post">{{image}}</li>
+						</ul>
+					</li>
+				</ul>
+				Main Section , list out the hot post
+			</div>
 		</div>
+
+		<hr>
+
+		<footer>
+			<p>&copy; Company 2013</p>
+		</footer>
+
 	</div>
+	<!-- /container -->
+
+
 </body>
 </html>
