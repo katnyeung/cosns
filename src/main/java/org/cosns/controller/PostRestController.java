@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -82,7 +83,6 @@ public class PostRestController {
 			return null;
 		}
 	}
-	
 
 	@PostMapping(path = "/searchPosts")
 	public DefaultResult getPost(@RequestBody SearchPostDTO searchPost, HttpSession session) {
@@ -145,7 +145,6 @@ public class PostRestController {
 			try {
 				SimpleDateFormat sdf = new SimpleDateFormat(uploadPattern);
 				String prefix = sdf.format(Calendar.getInstance().getTime()) + "_";
-
 				logger.info("inside upload image");
 
 				MultipartFile file = imageInfo.getFile();
@@ -202,7 +201,7 @@ public class PostRestController {
 
 			hashTagService.saveHash(post, hashTagSet);
 
-			hashTagService.saveHashToRedis(post, hashTagSet);
+			hashTagService.saveHashToRedis(post, hashTagSet, ConstantsUtil.PHOTO_POST_PREFIX);
 
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
@@ -213,4 +212,20 @@ public class PostRestController {
 		return dr;
 	}
 
+	@PostMapping(path = "/likePost")
+	public DefaultResult likePost(@RequestParam("postId") Long postId, HttpSession session) {
+		DefaultResult dr = new DefaultResult();
+		User user = (User) session.getAttribute("user");
+
+		if (user != null) {
+			Post post = postService.likePost(postId);
+
+			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		} else {
+			dr.setStatus(ConstantsUtil.RESULT_ERROR);
+			dr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+		}
+
+		return dr;
+	}
 }

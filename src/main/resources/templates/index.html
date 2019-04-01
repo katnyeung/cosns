@@ -50,8 +50,27 @@
 				}).error(function(data, status, headers, config) {
 					alert(data.status + '\n' + data.remarks);
 				});
+			}
+      
+			$scope.like = function(postId) {
+				$http({
+					url : "/post/likePost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				}).success(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+					
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
 
 			}
+      
 			$scope.loadRandomPosts();
 
 		});

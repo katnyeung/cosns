@@ -26,8 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name = "user", indexes = { @Index(name = "user_email", columnList = "email", unique = true),
-		@Index(name = "user_uniquename", columnList = "uniqueName", unique = true) })
+@Table(name = "user", indexes = { @Index(name = "user_email", columnList = "email", unique = true), @Index(name = "user_uniquename", columnList = "uniqueName", unique = true) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class User extends Auditable<String> {
 
@@ -62,16 +61,20 @@ public class User extends Auditable<String> {
 	private Set<Image> images;
 
 	@ManyToMany
-	@JoinTable(name = "friends", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "friendId"))
-	private List<User> friends;
+	@JoinTable(name = "followers", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "followerId"))
+	private List<User> followers;
 
 	@ManyToMany
-	@JoinTable(name = "friends", joinColumns = @JoinColumn(name = "friendId"), inverseJoinColumns = @JoinColumn(name = "userId"))
-	private List<User> friendOf;
-	
+	@JoinTable(name = "followedBy", joinColumns = @JoinColumn(name = "followerId"), inverseJoinColumns = @JoinColumn(name = "userId"))
+	private List<User> followedBy;
+
 	@OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL)
 	Set<FriendRequest> friendRequest;
-	
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private Set<PostReaction> postReaction;
+
 	public Long getUserId() {
 		return userId;
 	}
@@ -128,20 +131,28 @@ public class User extends Auditable<String> {
 		this.uniqueName = uniqueName;
 	}
 
-	public List<User> getFriends() {
-		return friends;
+	public List<User> getFollowers() {
+		return followers;
 	}
 
-	public void setFriends(List<User> friends) {
-		this.friends = friends;
+	public void setFollowers(List<User> followers) {
+		this.followers = followers;
 	}
 
-	public List<User> getFriendOf() {
-		return friendOf;
+	public List<User> getFollowedBy() {
+		return followedBy;
 	}
 
-	public void setFriendOf(List<User> friendOf) {
-		this.friendOf = friendOf;
+	public void setFollowedBy(List<User> followedBy) {
+		this.followedBy = followedBy;
+	}
+
+	public Set<PostReaction> getPostReaction() {
+		return postReaction;
+	}
+
+	public void setPostReaction(Set<PostReaction> postReaction) {
+		this.postReaction = postReaction;
 	}
 
 	public Set<FriendRequest> getFriendRequest() {

@@ -3,16 +3,20 @@ package org.cosns.repository;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -22,8 +26,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
+@Table(name = "post")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "post_type")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class Post extends Auditable<String> {
+public abstract class Post extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,9 +39,6 @@ public class Post extends Auditable<String> {
 	@NotNull
 	@Lob
 	private String message;
-
-	@NotNull
-	private int likeCount;
 
 	@JsonIgnore
 	@NotNull
@@ -52,6 +56,9 @@ public class Post extends Auditable<String> {
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private Set<HashTag> hashtags;
 
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+	private Set<PostReaction> postReaction;
+
 	public Long getPostId() {
 		return postId;
 	}
@@ -66,14 +73,6 @@ public class Post extends Auditable<String> {
 
 	public void setMessage(String message) {
 		this.message = message;
-	}
-
-	public int getLikeCount() {
-		return likeCount;
-	}
-
-	public void setLikeCount(int likeCount) {
-		this.likeCount = likeCount;
 	}
 
 	public String getStatus() {
@@ -106,6 +105,14 @@ public class Post extends Auditable<String> {
 
 	public void setHashtags(Set<HashTag> hashtags) {
 		this.hashtags = hashtags;
+	}
+
+	public Set<PostReaction> getPostReaction() {
+		return postReaction;
+	}
+
+	public void setPostReaction(Set<PostReaction> postReaction) {
+		this.postReaction = postReaction;
 	}
 
 }

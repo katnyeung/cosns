@@ -8,16 +8,19 @@ public class ConstantsUtil {
 
 	public final static String RESULT_SUCCESS = "success";
 	public final static String RESULT_ERROR = "error";
-	
+
 	public static final String IMAGE_PEND = "P";
 	public static final String IMAGE_ACTIVE = "A";
 	public static final String IMAGE_DELETED = "D";
-	
+
 	public static final String POST_PEND = "P";
 	public static final String POST_ACTIVE = "A";
 	public static final String POST_DELETED = "D";
-	
+
 	public static final String ERROR_MESSAGE_LOGIN = "Please Login";
 	public static final String ERROR_MESSAGE_ADD_FRIEND_FAIL = "NO SUCH FRIEND";
-	
+
+	public static final String PHOTO_POST_PREFIX = "photo";
+	public static final String SELLING_POST_PREFIX = "sell";
+
 }

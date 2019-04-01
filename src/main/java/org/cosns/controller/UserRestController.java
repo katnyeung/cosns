@@ -8,6 +8,7 @@ import org.cosns.repository.FriendRequest;
 import org.cosns.repository.User;
 import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
+import org.cosns.util.DefaultException;
 import org.cosns.web.DTO.UserFormDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.UserResult;
@@ -28,7 +29,7 @@ public class UserRestController {
 	UserService userService;
 
 	@PostMapping(path = "/login")
-	public DefaultResult login(@RequestBody UserFormDTO userDTO, HttpSession session) {
+	public DefaultResult login(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
 		DefaultResult defaultResult = new DefaultResult();
 
 		User user = userService.verifyUser(userDTO);
@@ -37,14 +38,14 @@ public class UserRestController {
 			session.setAttribute("user", user);
 			defaultResult.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
-			defaultResult.setStatus(ConstantsUtil.RESULT_ERROR);
+			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
 		}
 
 		return defaultResult;
 	}
 
 	@PostMapping(path = "/register")
-	public DefaultResult register(@RequestBody UserFormDTO userDTO, HttpSession session) {
+	public DefaultResult register(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
 		DefaultResult defaultResult = new DefaultResult();
 
 		User user = userService.registerUser(userDTO);
@@ -53,7 +54,7 @@ public class UserRestController {
 			session.setAttribute("user", user);
 			defaultResult.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
-			defaultResult.setStatus(ConstantsUtil.RESULT_ERROR);
+			throw new DefaultException("Register Error");
 		}
 
 		return defaultResult;
