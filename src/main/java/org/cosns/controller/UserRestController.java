@@ -30,34 +30,36 @@ public class UserRestController {
 
 	@PostMapping(path = "/login")
 	public DefaultResult login(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
-		DefaultResult defaultResult = new DefaultResult();
+		UserResult ur = new UserResult();
 
 		User user = userService.verifyUser(userDTO);
 
 		if (user != null) {
 			session.setAttribute("user", user);
-			defaultResult.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			ur.setUser(user);
+			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
 		}
 
-		return defaultResult;
+		return ur;
 	}
 
 	@PostMapping(path = "/register")
 	public DefaultResult register(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
-		DefaultResult defaultResult = new DefaultResult();
+		UserResult ur = new UserResult();
 
 		User user = userService.registerUser(userDTO);
 
 		if (user != null) {
 			session.setAttribute("user", user);
-			defaultResult.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			ur.setUser(user);
+			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
-			throw new DefaultException("Register Error");
+			throw new DefaultException("Register Error : user already exist");
 		}
 
-		return defaultResult;
+		return ur;
 	}
 
 	@GetMapping(path = "/getUser/{userId}")

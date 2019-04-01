@@ -1,86 +1,78 @@
 <!-- components/header.html -->
-<header th:fragment="loginRegister">
-	<script>
-		main
-				.controller(
-						'userController',
-						function($scope, $http) {
-							$scope.login = function() {
-								if ($scope.login.email) {
-									$http({
-										url : "/user/login",
-										method : "POST",
-										headers : {
-											'Content-Type' : 'application/json'
-										},
-										data : {
-											'email' : $scope.login.email,
-											'password' : $scope.login.password,
+<header th:fragment="loginRegisterScript">
+	<script th:inline="javascript">
+		main.controller('userController', function($scope, $http) {
+			$scope.login = function() {
+				if ($scope.login.email) {
+					$http({
+						url : "/user/login",
+						method : "POST",
+						headers : {
+							'Content-Type' : 'application/json'
+						},
+						data : {
+							'email' : $scope.login.email,
+							'password' : $scope.login.password,
 
-										}
-									}).success(
-											function(data, status, headers,
-													config) {
-												$scope.status = status;
-												alert(data.status + '\n'
-														+ data.remarks);
+						}
+					}).success(function(data, status, headers, config) {
+						$scope.status = status;
+						$scope.user = data.user;
+						alert(data.status + '\n' + data.remarks);
 
-											}).error(
-											function(data, status, headers,
-													config) {
-												alert(data.status + '\n'
-														+ data.remarks);
-											});
-								}
-							};
-							$scope.register = function() {
-								if ($scope.register.email) {
-									if ($scope.register.password == $scope.register.passwordAgain) {
-										$http(
-												{
-													url : "/user/register",
-													method : "POST",
-													headers : {
-														'Content-Type' : 'application/json'
-													},
-													data : {
-														'email' : $scope.register.email,
-														'password' : $scope.register.password,
-														'passwordAgain' : $scope.register.passwordAgain,
+					}).error(function(data, status, headers, config) {
+						alert(data.status + '\n' + data.remarks);
+					});
+				}
+			};
+			$scope.register = function() {
+				if ($scope.register.email) {
+					if ($scope.register.password == $scope.register.passwordAgain) {
+						$http({
+							url : "/user/register",
+							method : "POST",
+							headers : {
+								'Content-Type' : 'application/json'
+							},
+							data : {
+								'email' : $scope.register.email,
+								'password' : $scope.register.password,
+								'passwordAgain' : $scope.register.passwordAgain,
 
-													}
-												}).success(
-												function(data, status, headers,
-														config) {
-													$scope.status = status;
-													alert(data.status + '\n'
-															+ data.remarks);
+							}
+						}).success(function(data, status, headers, config) {
+							$scope.status = status;
+							alert(data.status + '\n' + data.remarks);
 
-												}).error(
-												function(data, status, headers,
-														config) {
-													alert(data.status + '\n'
-															+ data.remarks);
-												});
-									} else {
-										alert("please verify your password")
-									}
-
-								}
-							};
-							
-							showRegister = false;
+						}).error(function(data, status, headers, config) {
+							alert(data.status + '\n' + data.remarks);
 						});
+					} else {
+						alert("please verify your password")
+					}
+
+				}
+			};
+
+			$scope.user = /*[[${user}]]*/{};
+		});
 	</script>
+</header>
+<header th:fragment="loginRegisterBody">
+
 	<div ng-controller="userController">
-		<form class="navbar-form pull-right" ng-submit="login()">
-			<input class="span2" type="text" ng-model="login.email" name="email"
-				placeholder="Email"> <input class="span2" type="password"
-				ng-model="login.password" name="password" placeholder="Password">
-			<button type="submit" class="btn">Sign in</button>
-			<a href="#myModal" role="button" class="btn"
-				ng-click="showRegister=true">Register</a>
-		</form>
+		<div ng-hide="user">
+			<form class="navbar-form pull-right" ng-submit="login()">
+				<input class="span2" type="text" ng-model="login.email" name="email"
+					placeholder="Email"> <input class="span2" type="password"
+					ng-model="login.password" name="password" placeholder="Password">
+				<button type="submit" class="btn">Sign in</button>
+				<a href="#myModal" role="button" class="btn"
+					ng-click="showRegister=true">Register</a>
+			</form>
+		</div>
+		<div ng-show="user" class="text-white pull-right">
+			{{user.email}}</div>
 
 		<div id="myModal" ng-show="showRegister" class="modal">
 			<div class="modal-header">

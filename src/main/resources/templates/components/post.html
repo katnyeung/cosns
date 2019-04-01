@@ -1,0 +1,14 @@
+<body th:fragment="viewPosts">
+		<!-- Example row of columns -->
+		<div class="row">
+			<div class="span4">
+				<ul>
+					<li ng-repeat="post in postList"><a
+						href="/u/{{post.user.userId}}">{{post.user.email}}</a><br />
+					<pre>{{post.message}}
+							<div ng-repeat="image in post.images">{{image.filename}}</div>
+						</pre></li>
+				</ul>
+			</div>
+		</div>
+</body>

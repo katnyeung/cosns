@@ -22,14 +22,24 @@ public class RouteController {
 	UserService userService;
 
 	@GetMapping(path = "/")
-	public String index() {
+	public String index(HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
 
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		}
+		
 		return "index";
 	}
 
 	@GetMapping(path = "w/")
-	public String writePost() {
+	public String writePost(HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
 
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		}
+		
 		return "writePost";
 	}
 

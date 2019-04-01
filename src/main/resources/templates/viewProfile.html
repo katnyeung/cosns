@@ -5,82 +5,82 @@
 <title>Example - example-ng-submit</title>
 
 
-<script
-	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-<script>
-	var main = angular.module('application', []);
-	main.controller('viewPostController', function($scope, $http) {
-		$scope.loadPosts = function() {
-			$http({
-				url : "/post/getUserPosts/[[${user.userId}]]",
-				method : "GET",
-				headers : {
-					'Content-Type' : 'application/json'
-				}
-			}).success(function(data, status, headers, config) {
-				$scope.postList = data.postList;
-				$scope.status = status;
+<script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
-			}).error(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
-			});
-
-		}
-		$scope.loadPosts();
-
-	});
-
-	main.controller('viewUserController', function($scope, $http) {
-		$scope.loadUser = function() {
-			$http({
-				url : "/user/getUser/[[${user.userId}]]",
-				method : "GET",
-				headers : {
-					'Content-Type' : 'application/json'
-				}
-			}).success(function(data, status, headers, config) {
-				$scope.user = data.user;
-				$scope.status = status;
-
-			}).error(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
-			});
-
-		}
-		$scope.loadUser();
-
-		$scope.addFriend = function(userId) {
-			$http({
-				url : "/user/addFriend/" + userId,
-				method : "GET",
-				headers : {
-					'Content-Type' : 'application/json'
-				}
-			}).success(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
-
-			}).error(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
-			});
-
-		}
-	});
-</script>
 
 </head>
 <body ng-app="application">
-	<div ng-controller="viewUserController">{{user}}<button type="button" th:attr="ng-click='addFriend(\''+${user.userId}+'\');',ng-show='' + ${user.userId != checkId} + ''" >Add Friend</button></div>
+	<script>
+		var main = angular.module('application', []);
+		main.controller('viewPostController', function($scope, $http) {
+			$scope.loadPosts = function() {
+				$http({
+					url : "/post/getUserPosts/[[${user.userId}]]",
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				}).success(function(data, status, headers, config) {
+					$scope.postList = data.postList;
+					$scope.status = status;
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+			$scope.loadPosts();
+
+		});
+
+		main.controller('viewUserController', function($scope, $http) {
+			$scope.loadUser = function() {
+				$http({
+					url : "/user/getUser/[[${user.userId}]]",
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				}).success(function(data, status, headers, config) {
+					$scope.user = data.user;
+					$scope.status = status;
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+			$scope.loadUser();
+
+			$scope.addFriend = function(userId) {
+				$http({
+					url : "/user/addFriend/" + userId,
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				}).success(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+		});
+	</script>
+	<div th:include="components/header :: headerScript" th:remove="tag"></div>
+	<div th:include="components/header :: headerBody" th:remove="tag"></div>
+
+	<div ng-controller="viewUserController">
+		{{user}}
+		<button type="button"
+			th:attr="ng-click='addFriend('+${user.userId}+');',ng-show='' + ${user.userId != checkId} + ''">Add
+			Friend</button>
+	</div>
 	<div ng-controller="viewPostController">
-		<div>
-			<ul>
-				<li ng-repeat="post in postList">{{post.lastupdatedate}}
-					{{post.message}}
-					<ul>
-						<li ng-repeat="image in post">{{image}}</li>
-					</ul>
-				</li>
-			</ul>
-		</div>
+		<div th:include="components/post :: viewPosts" th:remove="tag"></div>
+
 	</div>
 </body>
 </html>
