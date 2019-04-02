@@ -4,37 +4,84 @@
 <meta charset="UTF-8">
 <title>Example - example-ng-submit</title>
 
+<script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
-<script
-	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
 <script>
-	var main = angular.module('application', []);
-	main.controller('viewPostController', function($scope, $http) {
-		$scope.loadPosts = function() {
-			$http({
-				url : "/post/getTimelinePosts",
-				method : "GET",
-				headers : {
-					'Content-Type' : 'application/json'
-				}
-			}).success(function(data, status, headers, config) {
-				$scope.postList = data.postList;
-				$scope.status = status;
+	var main = angular.module('application', ['ui.calendar']);
+	main.controller('calendarController', function($scope, $http) {
 
-			}).error(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
-			});
+	    $calendar = $('[ui-calendar]');
+	    
+	    var date = new Date(),
+	      d = date.getDate(),
+	      m = date.getMonth(),
+	      y = date.getFullYear();
 
-		}
-		$scope.loadPosts();
+	    $scope.changeView = function(view){      
+	       $calendar.fullCalendar('changeView',view);
+	    };
+	    
+	    /* config object */
+	    $scope.uiConfig = {
+	      calendar: {
+	        lang: 'da',
+	        height: '100%',
+	        editable: true,
+	        header: {
+	          //left: 'month basicWeek basicDay',
+	          //center: 'title',
+	          right: 'today prev,next'
+	        },
+	        eventClick: function(date, jsEvent, view) {
+	          $scope.alertMessage = (date.title + ' was clicked ');
+	        },
+	        dayClick: $scope.alertEventOnClick,
+	        eventDrop: $scope.alertOnDrop,
+	        eventResize: $scope.alertOnResize,
+	        eventRender: $scope.eventRender
+	      }
+	    };
 
+	    $scope.events = [{
+	      title: 'All Day Event',
+	      start: new Date(y, m, 1)
+	    }, {
+	      title: 'Long Event',
+	      start: new Date(y, m, d - 5),
+	      end: new Date(y, m, d - 2)
+	    }, {
+	      id: 999,
+	      title: 'Repeating Event',
+	      start: new Date(y, m, d - 3, 16, 0),
+	      allDay: false
+	    }, {
+	      id: 999,
+	      title: 'Repeating Event',
+	      start: new Date(y, m, d + 4, 16, 0),
+	      allDay: false
+	    }, {
+	      title: 'Birthday Party',
+	      start: new Date(y, m, d + 1, 19, 0),
+	      end: new Date(y, m, d + 1, 22, 30),
+	      allDay: false
+	    }, {
+	      title: 'Click for Google',
+	      start: new Date(y, m, 28),
+	      end: new Date(y, m, 29),
+	      url: 'https://google.com/'
+	    }];
+
+	    $scope.eventSources = [$scope.events];
 	});
 </script>
 
 
 </head>
-<body ng-app="mainApplication">
-	View Friend Request
-	<div ng-controller="viewPostController">View Timeline</div>
+<body ng-app="application">
+	<div ng-controller="calendarController">
+		<div ui-calendar="uiConfig.calendar" ng-model="eventSources"
+			calendar="myCalendar"></div>
+
+	</div>
 </body>
 </html>

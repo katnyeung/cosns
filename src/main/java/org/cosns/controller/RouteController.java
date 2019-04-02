@@ -28,7 +28,7 @@ public class RouteController {
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
 		}
-		
+
 		return "index";
 	}
 
@@ -39,8 +39,19 @@ public class RouteController {
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
 		}
-		
+
 		return "writePost";
+	}
+
+	@GetMapping(path = "c/")
+	public String viewCalendar(HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
+
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		}
+
+		return "viewCalendar";
 	}
 
 	@GetMapping(path = "u/{username}")
