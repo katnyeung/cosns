@@ -14,15 +14,18 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.HttpSession;
 
 import org.cosns.repository.Post;
+import org.cosns.repository.PostReaction;
 import org.cosns.repository.User;
 import org.cosns.service.HashTagService;
 import org.cosns.service.PostService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.ImageUploadDTO;
 import org.cosns.web.DTO.PostFormDTO;
+import org.cosns.web.DTO.PostReactionDTO;
 import org.cosns.web.DTO.SearchPostDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.PostListResult;
+import org.cosns.web.result.PostReactionResult;
 import org.cosns.web.result.UploadImageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +34,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -213,12 +215,31 @@ public class PostRestController {
 	}
 
 	@PostMapping(path = "/likePost")
-	public DefaultResult likePost(@RequestParam("postId") Long postId, HttpSession session) {
+	public DefaultResult likePost(@RequestBody PostReactionDTO postReactionDTO, HttpSession session) {
+		PostReactionResult prr = new PostReactionResult();
+		User user = (User) session.getAttribute("user");
+
+		if (user != null) {
+			PostReaction postReaction = postService.likePost(postReactionDTO.getPostId(), user);
+
+			prr.setPostReaction(postReaction);
+			prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		} else {
+			prr.setStatus(ConstantsUtil.RESULT_ERROR);
+			prr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+		}
+
+		return prr;
+	}
+
+	@PostMapping(path = "/retweetPost")
+	public DefaultResult retweet(@RequestBody PostReactionDTO postReactionDTO, HttpSession session) {
+		logger.info("postReactionDTO : " + postReactionDTO.getPostId());
 		DefaultResult dr = new DefaultResult();
 		User user = (User) session.getAttribute("user");
 
 		if (user != null) {
-			Post post = postService.likePost(postId);
+			postService.retweetPost(postReactionDTO.getPostId(), user);
 
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {

@@ -1,11 +1,12 @@
 <!-- components/header.html -->
 <header th:fragment="headerLibrary">
-	<script
-		src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-	<link
-		href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
-		rel="stylesheet" />
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+<link
+	href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
+	rel="stylesheet" />
 </header>
+
 <header th:fragment="headerScript">
 	<div th:include="components/loginRegister :: loginRegisterScript"
 		th:remove="tag"></div>
@@ -22,11 +23,6 @@
 				</button>
 				<a class="brand" href="#">COSNS</a>
 				<div class="nav-collapse collapse">
-					<ul class="nav">
-						<li class="active"><a href="/">Home</a></li>
-						<li><a href="/w/">Write</a></li>
-					</ul>
-
 
 					<div th:include="components/loginRegister :: loginRegisterBody"></div>
 

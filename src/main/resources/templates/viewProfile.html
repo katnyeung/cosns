@@ -69,6 +69,8 @@
 			}
 		});
 	</script>
+	<div th:include="components/post :: viewPostsScript" th:remove="tag"></div>
+	
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
@@ -78,7 +80,6 @@
 			th:attr="ng-click='addFriend('+${user.userId}+');',ng-show='' + ${user.userId != checkId} + ''">Add
 			Friend</button>
 	</div>
-	<div ng-controller="viewPostController">
 		<div th:include="components/post :: viewPosts" th:remove="tag"></div>
 
 	</div>

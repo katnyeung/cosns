@@ -16,9 +16,11 @@ import org.cosns.dao.PostDAO;
 import org.cosns.dao.PostReactionDAO;
 import org.cosns.repository.Image;
 import org.cosns.repository.Post;
+import org.cosns.repository.PostReaction;
 import org.cosns.repository.User;
 import org.cosns.repository.extend.LikeReaction;
 import org.cosns.repository.extend.PhotoPost;
+import org.cosns.repository.extend.RetweetPost;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.PostFormDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,12 +134,16 @@ public class PostService {
 		List<Entry<Long, Integer>> list = new LinkedList<>(unsortMap.entrySet());
 
 		// Sorting the list based on values
-		list.sort((o1, o2) -> order ? o1.getValue().compareTo(o2.getValue()) == 0 ? o1.getKey().compareTo(o2.getKey()) : o1.getValue().compareTo(o2.getValue()) : o2.getValue().compareTo(o1.getValue()) == 0 ? o2.getKey().compareTo(o1.getKey()) : o2.getValue().compareTo(o1.getValue()));
+		list.sort((o1, o2) -> order
+				? o1.getValue().compareTo(o2.getValue()) == 0 ? o1.getKey().compareTo(o2.getKey())
+						: o1.getValue().compareTo(o2.getValue())
+				: o2.getValue().compareTo(o1.getValue()) == 0 ? o2.getKey().compareTo(o1.getKey())
+						: o2.getValue().compareTo(o1.getValue()));
 		return list.stream().collect(Collectors.toMap(Entry::getKey, Entry::getValue, (a, b) -> b, LinkedHashMap::new));
 
 	}
 
-	public Post likePost(Long postId) {
+	public PostReaction likePost(Long postId, User user) {
 
 		Optional<Post> postOptional = postDAO.findById(postId);
 
@@ -145,15 +151,59 @@ public class PostService {
 
 			Post post = postOptional.get();
 
-			LikeReaction likeReaction = new LikeReaction();
-			likeReaction.setPost(post);
+			Optional<PostReaction> optPR = postReactionDAO.findByPostIdUserId(post.getPostId(), user.getUserId());
 
-			postReactionDAO.save(likeReaction);
+			if (optPR.isPresent()) {
 
-			return post;
+				PostReaction reaction = optPR.get();
+				if (reaction.getStatus().equals(ConstantsUtil.POST_REACTION_ACTIVE)) {
+					reaction.setStatus(ConstantsUtil.POST_REACTION_CANCEL);
+				} else {
+					reaction.setStatus(ConstantsUtil.POST_REACTION_ACTIVE);
+				}
+
+				postReactionDAO.save(reaction);
+
+				return reaction;
+
+			} else {
+				LikeReaction reaction = new LikeReaction();
+				reaction.setPost(post);
+				reaction.setUser(user);
+				reaction.setStatus(ConstantsUtil.POST_REACTION_ACTIVE);
+				postReactionDAO.save(reaction);
+
+				return reaction;
+			}
+
 		} else {
 			return null;
 		}
+	}
 
+	public Post retweetPost(Long postId, User user) {
+
+		Optional<Post> postOptional = postDAO.findById(postId);
+
+		if (postOptional.isPresent()) {
+
+			Post post = postOptional.get();
+
+			if (post.getUser().getUserId() != user.getUserId()) {
+				RetweetPost retweetPost = new RetweetPost();
+				retweetPost.setPost(post);
+				retweetPost.setStatus(ConstantsUtil.POST_ACTIVE);
+				retweetPost.setUser(user);
+
+				retweetPost = postDAO.save(retweetPost);
+
+				return retweetPost;
+			} else {
+				return null;
+			}
+
+		} else {
+			return null;
+		}
 	}
 }

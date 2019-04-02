@@ -16,7 +16,10 @@ public class ConstantsUtil {
 	public static final String POST_PEND = "P";
 	public static final String POST_ACTIVE = "A";
 	public static final String POST_DELETED = "D";
-
+	
+	public static final String POST_REACTION_ACTIVE = "A";
+	public static final String POST_REACTION_CANCEL = "D";
+	
 	public static final String ERROR_MESSAGE_LOGIN = "Please Login";
 	public static final String ERROR_MESSAGE_ADD_FRIEND_FAIL = "NO SUCH FRIEND";
 

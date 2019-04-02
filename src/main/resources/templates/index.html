@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <title>Example - example-ng-submit</title>
 
-<script th:include="components/header :: headerLibrary"
-	th:remove="tag"></script>
-	
+<script th:include="components/header :: headerLibrary" th:remove="tag"></script>
+
 </head>
 <body ng-app="application">
 	<script>
@@ -49,30 +48,13 @@
 				});
 			}
 
-			$scope.like = function(postId) {
-				$http({
-					url : "/post/likePost",
-					method : "POST",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						postId : postId
-					}
-				}).success(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
-
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
-				});
-
-			}
-
 			$scope.loadRandomPosts();
 
 		});
 	</script>
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
+	<div th:include="components/post :: viewPostsScript" th:remove="tag"></div>
+
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div class="container" ng-controller="mainController">
@@ -82,10 +64,10 @@
 			Search <input type="text" ng-mode="keyword" />
 			<button type="button" ng-click="search()">Search</button>
 		</div>
-		
+
 		<div th:include="components/post :: viewPosts" th:remove="tag"></div>
-		
-				Main Section , list out the hot post
+
+		Main Section , list out the hot post
 		<hr>
 
 		<footer>

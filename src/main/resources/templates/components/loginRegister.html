@@ -25,6 +25,23 @@
 					});
 				}
 			};
+			$scope.logout = function() {
+				$http({
+					url : "/user/logout",
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				}).success(function(data, status, headers, config) {
+					$scope.status = status;
+					$scope.user = data.user;
+					alert(data.status + '\n' + data.remarks);
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+			};
+			
 			$scope.register = function() {
 				if ($scope.register.email) {
 					if ($scope.register.password == $scope.register.passwordAgain) {
@@ -61,6 +78,11 @@
 <header th:fragment="loginRegisterBody">
 
 	<div ng-controller="userController">
+		<ul class="nav">
+			<li class="active"><a href="/">Home</a></li>
+			<li><a href="/w/" ng-show="user">Write</a></li>
+		</ul>
+
 		<div ng-hide="user">
 			<form class="navbar-form pull-right" ng-submit="login()">
 				<input class="span2" type="text" ng-model="login.email" name="email"
@@ -71,8 +93,8 @@
 					ng-click="showRegister=true">Register</a>
 			</form>
 		</div>
-		<div ng-show="user" class="text-white pull-right">
-			{{user.email}}</div>
+		<div ng-show="user" class="nav-pills pull-right">
+			{{user.email}} <a href="#" ng-click="logout()">Logout</a></div>
 
 		<div id="myModal" ng-show="showRegister" class="modal">
 			<div class="modal-header">

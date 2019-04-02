@@ -13,7 +13,7 @@ public interface PostDAO extends JpaRepository<Post, Long> {
 	@Query("FROM Post WHERE status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY createdate DESC")
 	public Set<Post> findTimelinePosts(Long userId);
 	
-	@Query("FROM Post WHERE status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY createdate DESC")
+	@Query("FROM Post WHERE post_type = 'photo' AND status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY createdate DESC")
 	public Set<Post> findRandomPost();
 
 	@Query("FROM Post p INNER JOIN p.user u WHERE u.uniqueName = :uniqueName AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")

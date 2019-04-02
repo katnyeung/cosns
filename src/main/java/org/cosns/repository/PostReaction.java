@@ -9,28 +9,38 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.cosns.util.Auditable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "reaction_type")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public abstract class PostReaction extends Auditable<String> {
+public class PostReaction extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long reactionId;
 
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "post_id", referencedColumnName = "postId")
 	private Post post;
 
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "userId")
 	private User user;
+
+	@JsonIgnore
+	@NotNull
+	@Size(max = 1)
+	private String status;
 
 	public Post getPost() {
 		return post;
@@ -38,6 +48,30 @@ public abstract class PostReaction extends Auditable<String> {
 
 	public void setPost(Post post) {
 		this.post = post;
+	}
+
+	public Long getReactionId() {
+		return reactionId;
+	}
+
+	public void setReactionId(Long reactionId) {
+		this.reactionId = reactionId;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

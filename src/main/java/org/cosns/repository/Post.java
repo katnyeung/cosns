@@ -3,6 +3,7 @@ package org.cosns.repository;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -36,8 +37,8 @@ public abstract class Post extends Auditable<String> {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long postId;
 
-	@NotNull
 	@Lob
+	@Column(nullable = true)
 	private String message;
 
 	@JsonIgnore

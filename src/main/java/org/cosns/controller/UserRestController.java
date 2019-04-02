@@ -45,6 +45,17 @@ public class UserRestController {
 		return ur;
 	}
 
+	@GetMapping(path = "/logout")
+	public DefaultResult logout(HttpSession session) throws DefaultException {
+		UserResult ur = new UserResult();
+
+		session.setAttribute("user", null);
+
+		ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+		return ur;
+	}
+
 	@PostMapping(path = "/register")
 	public DefaultResult register(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
 		UserResult ur = new UserResult();

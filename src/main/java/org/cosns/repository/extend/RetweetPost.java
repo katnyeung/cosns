@@ -7,6 +7,7 @@ import javax.persistence.OneToOne;
 
 import org.cosns.repository.Post;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class RetweetPost extends Post {
 
+	@JsonIgnore
 	@OneToOne
 	@JoinColumn(name = "post_id", referencedColumnName = "postId")
 	Post post;
