@@ -17,6 +17,10 @@ public class ConstantsUtil {
 	public static final String POST_ACTIVE = "A";
 	public static final String POST_DELETED = "D";
 	
+	public static final String EVENT_PEND = "P";
+	public static final String EVENT_ACTIVE = "A";
+	public static final String EVENT_DELETED = "D";
+	
 	public static final String POST_REACTION_ACTIVE = "A";
 	public static final String POST_REACTION_CANCEL = "D";
 	

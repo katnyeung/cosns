@@ -8,9 +8,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.cosns.util.Auditable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -29,7 +31,9 @@ public class FriendRequest extends Auditable<String> {
 	@JoinColumn(name = "target_user_id", referencedColumnName = "userId")
 	User targetUser;
 
+	@JsonIgnore
 	@NotNull
+	@Size(max = 1)
 	String status = "P";
 
 	public Long getRequestId() {
