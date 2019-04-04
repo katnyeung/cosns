@@ -1,5 +1,6 @@
 package org.cosns.dao;
 
+import java.util.Date;
 import java.util.Set;
 
 import org.cosns.repository.Post;
@@ -24,4 +25,7 @@ public interface PostDAO extends JpaRepository<Post, Long> {
 
 	@Query("FROM Post p WHERE p.postId IN :postIdSet")
 	public Set<Post> findPostByPostIdSet(@Param("postIdSet") Set<Long> postIdSet);
+
+	@Query("FROM Post p WHERE p.createdate >= :start  AND p.createdate <= :end")
+	public Set<Post> findPostByDateRange(@Param("start") Date start, @Param("end") Date end);
 }

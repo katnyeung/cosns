@@ -8,8 +8,8 @@ import org.cosns.repository.Event;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@DiscriminatorValue(value = "cosplay")
+@DiscriminatorValue(value = "photo")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class CosplayEvent extends Event {
+public class PhotoEvent extends Event {
 
 }

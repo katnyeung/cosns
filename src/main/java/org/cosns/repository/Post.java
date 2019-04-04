@@ -1,5 +1,6 @@
 package org.cosns.repository;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -45,7 +46,7 @@ public abstract class Post extends Auditable<String> {
 	@NotNull
 	@Size(max = 1)
 	private String status;
-
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", referencedColumnName = "userId")
 	private User user;

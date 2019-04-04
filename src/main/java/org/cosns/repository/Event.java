@@ -11,11 +11,13 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.cosns.util.Auditable;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -26,11 +28,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public abstract class Event extends Auditable<String> {
 
+	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long eventId;
 
+	Long id;
+
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
 	Date start;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
 	Date end;
 
 	@NotNull
@@ -40,11 +47,14 @@ public abstract class Event extends Auditable<String> {
 	@NotNull
 	@Lob
 	String url;
-	
+
 	@JsonIgnore
 	@NotNull
 	@Size(max = 1)
 	String status = "P";
+
+	@Transient
+	String color;
 
 	public Long getEventId() {
 		return eventId;
@@ -92,6 +102,22 @@ public abstract class Event extends Auditable<String> {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
 	}
 
 }

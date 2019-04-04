@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -51,6 +52,13 @@ public class User extends Auditable<String> {
 	@Column(unique = true)
 	private String uniqueName;
 
+	@Lob
+	@Column(nullable = true)
+	private String message;
+	
+	@Column(nullable = true)
+	private String profileImagePath;
+	
 	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private Set<Post> posts;

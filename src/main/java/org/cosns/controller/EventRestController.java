@@ -10,9 +10,7 @@ import javax.servlet.http.HttpSession;
 
 import org.cosns.repository.Event;
 import org.cosns.service.EventService;
-import org.cosns.util.ConstantsUtil;
-import org.cosns.web.result.DefaultResult;
-import org.cosns.web.result.EventResult;
+import org.cosns.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,19 +26,19 @@ public class EventRestController {
 	EventService eventService;
 
 	@GetMapping(path = "/getEvents")
-	public DefaultResult getEvents(@RequestParam("start") String start, @RequestParam("end") String end, HttpSession session) throws ParseException {
+	public Set<Event> getEvents(@RequestParam("start") String start, @RequestParam("end") String end,
+			HttpSession session) throws ParseException {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-
-		EventResult er = new EventResult();
 
 		Date dateStart = sdf.parse(start);
 		Date dateEnd = sdf.parse(end);
 
 		Set<Event> eventSet = eventService.getAllEvents(dateStart, dateEnd);
 
-		er.setStatus(ConstantsUtil.RESULT_SUCCESS);
-		er.setEvents(eventSet);
+		Set<Event> postSet = eventService.getPostSchedule(dateStart, dateEnd);
 
-		return er;
+		eventSet.addAll(postSet);
+
+		return eventSet;
 	}
 }

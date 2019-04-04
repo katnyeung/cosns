@@ -59,22 +59,22 @@ public class RouteController {
 		try {
 			User loggedUser = (User) session.getAttribute("user");
 			if (loggedUser != null) {
-				model.addAttribute("checkId", loggedUser.getUserId());
+				model.addAttribute("user", loggedUser);
 			}
 
-			User user = userService.getUserByUniqueName(username);
+			User targetUser = userService.getUserByUniqueName(username);
 
-			if (user != null) {
-				model.addAttribute("user", user);
+			if (targetUser != null) {
+				model.addAttribute("targetUser", targetUser);
 			} else {
 				logger.info("not found uniquename " + username);
-				user = userService.getUserById(Long.parseLong(username));
-				if (user != null) {
+				targetUser = userService.getUserById(Long.parseLong(username));
+				if (targetUser != null) {
 					logger.info("found id " + username);
-					if (user.getUniqueName() != null) {
-						return "redirect:/viewProfile/" + user.getUniqueName();
+					if (targetUser.getUniqueName() != null) {
+						return "redirect:/viewProfile/" + targetUser.getUniqueName();
 					} else {
-						model.addAttribute("user", user);
+						model.addAttribute("user", targetUser);
 					}
 				} else {
 
