@@ -23,8 +23,10 @@ import javax.validation.constraints.Size;
 
 import org.cosns.util.Auditable;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @Table(name = "user", indexes = { @Index(name = "user_email", columnList = "email", unique = true), @Index(name = "user_uniquename", columnList = "uniqueName", unique = true) })
@@ -55,10 +57,10 @@ public class User extends Auditable<String> {
 	@Lob
 	@Column(nullable = true)
 	private String message;
-	
+
 	@Column(nullable = true)
 	private String profileImagePath;
-	
+
 	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private Set<Post> posts;
@@ -69,10 +71,12 @@ public class User extends Auditable<String> {
 
 	@ManyToMany
 	@JoinTable(name = "followers", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "followerId"))
+	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "userId")
 	private List<User> followers;
 
 	@ManyToMany
 	@JoinTable(name = "followedBy", joinColumns = @JoinColumn(name = "followerId"), inverseJoinColumns = @JoinColumn(name = "userId"))
+	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "followerId")
 	private List<User> followedBy;
 
 	@OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL)
@@ -168,6 +172,22 @@ public class User extends Auditable<String> {
 
 	public void setFriendRequest(Set<FriendRequest> friendRequest) {
 		this.friendRequest = friendRequest;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public String getProfileImagePath() {
+		return profileImagePath;
+	}
+
+	public void setProfileImagePath(String profileImagePath) {
+		this.profileImagePath = profileImagePath;
 	}
 
 }

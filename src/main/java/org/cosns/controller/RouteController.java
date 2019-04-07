@@ -32,7 +32,7 @@ public class RouteController {
 		return "index";
 	}
 
-	@GetMapping(path = "w/")
+	@GetMapping(path = "w")
 	public String writePost(HttpSession session, Model model) {
 		User loggedUser = (User) session.getAttribute("user");
 
@@ -43,7 +43,7 @@ public class RouteController {
 		return "writePost";
 	}
 
-	@GetMapping(path = "c/")
+	@GetMapping(path = "c")
 	public String viewCalendar(HttpSession session, Model model) {
 		User loggedUser = (User) session.getAttribute("user");
 
@@ -52,6 +52,43 @@ public class RouteController {
 		}
 
 		return "viewCalendar";
+	}
+
+	@GetMapping(path = "t")
+	public String viewTimeline(HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
+
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		}
+
+		return "viewTimeline";
+	}
+
+	@GetMapping(path = "p/{postId}")
+	public String viewPost(@PathVariable("postId") Long postId, HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
+
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		}
+
+		model.addAttribute("postId", postId);
+
+		return "viewPost";
+	}
+
+	@GetMapping(path = "u")
+	public String viewProfile(HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+			model.addAttribute("targetUser", loggedUser);
+		} else {
+			return "redirect:/";
+		}
+
+		return "viewProfile";
 	}
 
 	@GetMapping(path = "u/{username}")
@@ -74,7 +111,7 @@ public class RouteController {
 					if (targetUser.getUniqueName() != null) {
 						return "redirect:/viewProfile/" + targetUser.getUniqueName();
 					} else {
-						model.addAttribute("user", targetUser);
+						model.addAttribute("targetUser", targetUser);
 					}
 				} else {
 

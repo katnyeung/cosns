@@ -1,11 +1,11 @@
 package org.cosns.repository;
 
-import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -19,11 +19,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.cosns.util.Auditable;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -46,7 +48,7 @@ public abstract class Post extends Auditable<String> {
 	@NotNull
 	@Size(max = 1)
 	private String status;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", referencedColumnName = "userId")
 	private User user;
@@ -60,6 +62,13 @@ public abstract class Post extends Auditable<String> {
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private Set<PostReaction> postReaction;
+
+	@Transient
+	public String getType() {
+		DiscriminatorValue val = this.getClass().getAnnotation(DiscriminatorValue.class);
+
+		return val == null ? null : val.value();
+	}
 
 	public Long getPostId() {
 		return postId;

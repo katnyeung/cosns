@@ -45,6 +45,23 @@ public class UserRestController {
 		return ur;
 	}
 
+	@PostMapping(path = "/registUniqueName")
+	public DefaultResult registUniqueName(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
+		UserResult ur = new UserResult();
+
+		User user = userService.registUniqueName(userDTO);
+
+		if (user != null) {
+			session.setAttribute("user", user);
+			ur.setUser(user);
+			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		} else {
+			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+		}
+
+		return ur;
+	}
+
 	@GetMapping(path = "/logout")
 	public DefaultResult logout(HttpSession session) throws DefaultException {
 		UserResult ur = new UserResult();
@@ -91,7 +108,7 @@ public class UserRestController {
 	}
 
 	@GetMapping(path = "/addFriend/{userId}")
-	public DefaultResult addFriend(@PathVariable("userId") Long userId, HttpSession session) {
+	public DefaultResult addFriendRequest(@PathVariable("userId") Long userId, HttpSession session) {
 		UserResult ur = new UserResult();
 
 		User user = (User) session.getAttribute("user");
@@ -101,7 +118,41 @@ public class UserRestController {
 			FriendRequest fr = userService.findFriendRequest(user, userId);
 
 			if (fr == null) {
-				user = userService.addFriend(user, userId);
+				user = userService.addFriendRequest(user, userId);
+
+				if (user != null) {
+					ur.setUser(user);
+					ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+				} else {
+					ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_ADD_FRIEND_FAIL);
+					ur.setStatus(ConstantsUtil.RESULT_ERROR);
+				}
+
+			} else {
+				ur.setRemarks("Friend request exist");
+				ur.setStatus(ConstantsUtil.RESULT_ERROR);
+			}
+
+		} else {
+			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			ur.setStatus(ConstantsUtil.RESULT_ERROR);
+		}
+
+		return ur;
+	}
+
+	@GetMapping(path = "/follow/{targetUserId}")
+	public DefaultResult follow(@PathVariable("targetUserId") Long targetUserId, HttpSession session) {
+		UserResult ur = new UserResult();
+
+		User user = (User) session.getAttribute("user");
+
+		if (user != null) {
+
+			User userInDB = userService.getUserById(user.getUserId());
+
+			if (userInDB != null) {
+				user = userService.follow(userInDB, targetUserId);
 
 				if (user != null) {
 					ur.setUser(user);

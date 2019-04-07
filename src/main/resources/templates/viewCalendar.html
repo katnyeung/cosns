@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Example - example-ng-submit</title>
 
+<script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
 <link href='/js/core/main.css' rel='stylesheet' />
 <link href='/js/daygrid/main.css' rel='stylesheet' />
@@ -14,20 +15,30 @@
 	document.addEventListener('DOMContentLoaded', function() {
 		var calendarEl = document.getElementById('calendar');
 
-
-
 		var calendar = new FullCalendar.Calendar(calendarEl, {
-				plugins : [ 'dayGrid' ],
-				events: '/event/getEvents/'
-			});
-		
+			plugins : [ 'dayGrid' ],
+			events : '/event/getEvents/'
+		});
+
 		calendar.render();
+	});
+	
+	var main = angular.module('application', []);
+
+	main.controller('calendarController', function($scope, $http) {
+	
 	});
 </script>
 </head>
-<body>
+<body ng-app="application">
+	<div th:include="components/header :: headerScript" th:remove="tag"></div>
+	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
-	<div id='calendar'></div>
-
+	<div class="container" ng-controller="calendarController">
+		<div class="hero-unit">Calendar</div>
+		<div class="row span10">
+			<div id='calendar'></div>
+		</div>
+	</div>
 </body>
 </html>

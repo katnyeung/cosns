@@ -61,12 +61,12 @@ public class PostService {
 		logger.info("Writing Post By User : " + user.getUserId());
 
 		// create post
-		Post post = new PhotoPost();
+		PhotoPost post = new PhotoPost();
 		post.setMessage(postDTO.getPostMessage());
 		post.setStatus(ConstantsUtil.POST_ACTIVE);
 		post.setUser(user);
 
-		post = postDAO.save(post);
+		post = (PhotoPost) postDAO.save(post);
 
 		int count = 1;
 		for (String file : postDTO.getFileList()) {
@@ -134,11 +134,7 @@ public class PostService {
 		List<Entry<Long, Integer>> list = new LinkedList<>(unsortMap.entrySet());
 
 		// Sorting the list based on values
-		list.sort((o1, o2) -> order
-				? o1.getValue().compareTo(o2.getValue()) == 0 ? o1.getKey().compareTo(o2.getKey())
-						: o1.getValue().compareTo(o2.getValue())
-				: o2.getValue().compareTo(o1.getValue()) == 0 ? o2.getKey().compareTo(o1.getKey())
-						: o2.getValue().compareTo(o1.getValue()));
+		list.sort((o1, o2) -> order ? o1.getValue().compareTo(o2.getValue()) == 0 ? o1.getKey().compareTo(o2.getKey()) : o1.getValue().compareTo(o2.getValue()) : o2.getValue().compareTo(o1.getValue()) == 0 ? o2.getKey().compareTo(o1.getKey()) : o2.getValue().compareTo(o1.getValue()));
 		return list.stream().collect(Collectors.toMap(Entry::getKey, Entry::getValue, (a, b) -> b, LinkedHashMap::new));
 
 	}
@@ -182,28 +178,36 @@ public class PostService {
 	}
 
 	public Post retweetPost(Long postId, User user) {
+		
+		// find if this user already retweeted this post
+		Set<Post> postRetweeted = postDAO.findRetweetedPost(postId, user.getUserId());
+		
+		if (postRetweeted.iterator().hasNext()) {
+			return null;
+		} else {
+			Optional<Post> postOptional = postDAO.findById(postId);
 
-		Optional<Post> postOptional = postDAO.findById(postId);
+			if (postOptional.isPresent()) {
 
-		if (postOptional.isPresent()) {
+				Post post = postOptional.get();
+				// cannot retweet by original poster
+				if (post.getUser().getUserId() != user.getUserId()) {
+					RetweetPost retweetPost = new RetweetPost();
+					retweetPost.setPost(post);
+					retweetPost.setStatus(ConstantsUtil.POST_ACTIVE);
+					retweetPost.setUser(user);
 
-			Post post = postOptional.get();
+					retweetPost = (RetweetPost) postDAO.save(retweetPost);
 
-			if (post.getUser().getUserId() != user.getUserId()) {
-				RetweetPost retweetPost = new RetweetPost();
-				retweetPost.setPost(post);
-				retweetPost.setStatus(ConstantsUtil.POST_ACTIVE);
-				retweetPost.setUser(user);
+					return retweetPost;
+				} else {
+					return null;
+				}
 
-				retweetPost = postDAO.save(retweetPost);
-
-				return retweetPost;
 			} else {
 				return null;
 			}
-
-		} else {
-			return null;
 		}
+
 	}
 }

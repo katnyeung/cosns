@@ -1,5 +1,6 @@
 package org.cosns.service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -100,7 +101,7 @@ public class UserService {
 		}
 	}
 
-	public User addFriend(User fromUser, Long targetUserId) {
+	public User addFriendRequest(User fromUser, Long targetUserId) {
 		logger.info(" adding friend form " + fromUser.getUserId() + " to targetUser : " + targetUserId);
 		Set<User> targetUserSet = userDAO.findActiveUserById(targetUserId);
 
@@ -124,5 +125,40 @@ public class UserService {
 			return null;
 		}
 
+	}
+
+	@Transactional
+	public User follow(User userInDB, Long targetUserId) {
+		logger.info(" adding friend form " + userInDB.getUserId() + " to targetUser : " + targetUserId);
+		Set<User> targetUserSet = userDAO.findActiveUserById(targetUserId);
+
+		if (targetUserSet.iterator().hasNext()) {
+			User targetUser = targetUserSet.iterator().next();
+
+			logger.info("found target user: " + targetUser.getEmail());
+			List<User> followerList = userInDB.getFollowers();
+			followerList.add(targetUser);
+
+			userInDB.setFollowers(followerList);
+
+			List<User> followedByList = targetUser.getFollowedBy();
+
+			followedByList.add(userInDB);
+
+			targetUser.setFollowedBy(followedByList);
+
+			userDAO.save(targetUser);
+
+			userDAO.save(userInDB);
+
+			return userInDB;
+		} else {
+			return null;
+		}
+	}
+
+	public User registUniqueName(UserFormDTO userDTO) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

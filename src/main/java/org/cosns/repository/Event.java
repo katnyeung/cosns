@@ -28,12 +28,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public abstract class Event extends Auditable<String> {
 
-	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long eventId;
-
-	Long id;
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
 	Date start;
@@ -102,14 +99,6 @@ public abstract class Event extends Auditable<String> {
 
 	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getColor() {

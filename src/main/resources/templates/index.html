@@ -11,23 +11,7 @@
 	<script>
 		var main = angular.module('application', []);
 
-		main.controller('mainController', function($scope, $http) {
-			$scope.loadRandomPosts = function() {
-				$http({
-					url : "/post/getRandomPosts",
-					method : "GET",
-					headers : {
-						'Content-Type' : 'application/json'
-					}
-				}).success(function(data, status, headers, config) {
-					$scope.postList = data.postList;
-					$scope.status = status;
-
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
-				});
-
-			}
+		main.controller('searchController', function($scope, $http) {
 
 			$scope.search = function() {
 				$http({
@@ -48,34 +32,90 @@
 				});
 			}
 
+		});
+
+		main.controller('viewPostController', function($scope, $http) {
+			$scope.likePost = function(postId) {
+				$http({
+					url : "/post/likePost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				}).success(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+
+			$scope.retweetPost = function(postId) {
+				$http({
+					url : "/post/retweetPost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				}).success(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+
+			$scope.loadRandomPosts = function() {
+				$http({
+					url : "/post/getRandomPosts",
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				}).success(function(data, status, headers, config) {
+					$scope.postList = data.postList;
+					$scope.status = status;
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
 			$scope.loadRandomPosts();
 
 		});
 	</script>
-	<div th:include="components/header :: headerScript" th:remove="tag"></div>
-	<div th:include="components/post :: viewPostsScript" th:remove="tag"></div>
 
+	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
-	<div class="container" ng-controller="mainController">
-
-		<!-- Main hero unit for a primary marketing message or call to action -->
-		<div class="hero-unit">
+	<div class="container">
+		<div ng-controller="searchController" class="hero-unit">
+			<!-- Main hero unit for a primary marketing message or call to action -->
 			Search <input type="text" ng-mode="keyword" />
 			<button type="button" ng-click="search()">Search</button>
+
 		</div>
 
-		<div th:include="components/post :: viewPosts" th:remove="tag"></div>
-
-		Main Section , list out the hot post
-		<hr>
-
-		<footer>
-			<p>&copy; Company 2013</p>
-		</footer>
+		<div ng-controller="viewPostController" class="row offset1">
+			<div th:include="components/post :: viewPosts" th:remove="tag"></div>
+		</div>
 
 	</div>
-	<!-- /container -->
+	<hr>
+
+	<footer>
+		<p>&copy; Company 2013</p>
+	</footer>
+
 
 
 </body>

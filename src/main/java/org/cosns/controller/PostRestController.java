@@ -9,6 +9,8 @@ import java.util.Calendar;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpSession;
@@ -75,15 +77,20 @@ public class PostRestController {
 		return plr;
 	}
 
-	@PostMapping(path = "/getPost/")
-	public Post getPost(@PathVariable("postId") Long postId, HttpSession session) {
+	@GetMapping(path = "/getPost/{postId}")
+	public DefaultResult getPost(@PathVariable("postId") Long postId, HttpSession session) {
 		Optional<Post> post = postService.getPost(postId);
 
+		PostListResult plr = new PostListResult();
+
 		if (post.isPresent()) {
-			return post.get();
+			plr.setPostList(Stream.of(post.get()).collect(Collectors.toSet()));
+			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
-			return null;
+			plr.setRemarks("Post not found");
+			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		}
+		return plr;
 	}
 
 	@PostMapping(path = "/searchPosts")
@@ -134,6 +141,7 @@ public class PostRestController {
 		Set<Post> postList = postService.getUserPosts(userId);
 
 		plr.setPostList(postList);
+		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
 		return plr;
 	}
@@ -239,9 +247,14 @@ public class PostRestController {
 		User user = (User) session.getAttribute("user");
 
 		if (user != null) {
-			postService.retweetPost(postReactionDTO.getPostId(), user);
+			Post post = postService.retweetPost(postReactionDTO.getPostId(), user);
+			if (post != null) {
+				dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			} else {
+				dr.setStatus(ConstantsUtil.RESULT_ERROR);
+				dr.setRemarks("Retweet Failed");
+			}
 
-			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			dr.setStatus(ConstantsUtil.RESULT_ERROR);
 			dr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);

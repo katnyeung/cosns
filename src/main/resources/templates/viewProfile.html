@@ -4,18 +4,53 @@
 <meta charset="UTF-8">
 <title>Example - example-ng-submit</title>
 
-
 <script th:include="components/header :: headerLibrary" th:remove="tag"></script>
-
 
 </head>
 <body ng-app="application">
 	<script>
 		var main = angular.module('application', []);
 		main.controller('viewPostController', function($scope, $http) {
+			$scope.likePost = function(postId) {
+				$http({
+					url : "/post/likePost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				}).success(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+
+			$scope.retweetPost = function(postId) {
+				$http({
+					url : "/post/retweetPost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				}).success(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
 			$scope.loadPosts = function() {
 				$http({
-					url : "/post/getUserPosts/[[${user.userId}]]",
+					url : "/post/getUserPosts/[[${targetUser?.userId}]]",
 					method : "GET",
 					headers : {
 						'Content-Type' : 'application/json'
@@ -36,7 +71,7 @@
 		main.controller('viewUserController', function($scope, $http) {
 			$scope.loadUser = function() {
 				$http({
-					url : "/user/getUser/[[${user.userId}]]",
+					url : "/user/getUser/[[${targetUser?.userId}]]",
 					method : "GET",
 					headers : {
 						'Content-Type' : 'application/json'
@@ -52,9 +87,9 @@
 			}
 			$scope.loadUser();
 
-			$scope.addFriend = function(userId) {
+			$scope.follow = function(userId) {
 				$http({
-					url : "/user/addFriend/" + userId,
+					url : "/user/follow/" + userId,
 					method : "GET",
 					headers : {
 						'Content-Type' : 'application/json'
@@ -69,18 +104,22 @@
 			}
 		});
 	</script>
-	<div th:include="components/post :: viewPostsScript" th:remove="tag"></div>
-	
+
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
-	<div ng-controller="viewUserController">
-		{{user}}
-		<button type="button"
-			th:attr="ng-click='addFriend('+${targetUser.userId}+');',ng-show='' + ${user.userId != targetUser.userId} + ''">Add
-			Friend</button>
+	<div class="container" ng-controller="viewUserController">
+		<div class="hero-unit">
+			{{user.email}} {{user.uniqueName}} {{user.message}}
+
+			<button type="button"
+				th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ''">Follow</button>
+		</div>
+		<div ng-controller="viewPostController" class="row offset1">
+			<div th:include="components/post :: viewPosts" th:remove="tag"></div>
+		</div>
 	</div>
-		<div th:include="components/post :: viewPosts" th:remove="tag"></div>
+
 
 	</div>
 </body>

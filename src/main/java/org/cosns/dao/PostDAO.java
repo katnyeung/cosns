@@ -10,22 +10,25 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface PostDAO extends JpaRepository<Post, Long> {
-	
-	@Query("FROM Post WHERE status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY createdate DESC")
-	public Set<Post> findTimelinePosts(Long userId);
-	
-	@Query("FROM Post WHERE post_type = 'photo' AND status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY createdate DESC")
+
+	@Query("SELECT p FROM Post p INNER JOIN p.user u WHERE u.userId IN (SELECT u.followers.userId FROM User u WHERE u.userId = :userId ) AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")
+	public Set<Post> findTimelinePosts(@Param("userId") Long userId);
+
+	@Query("SELECT p FROM Post p WHERE TYPE(p) = PhotoPost AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")
 	public Set<Post> findRandomPost();
 
-	@Query("FROM Post p INNER JOIN p.user u WHERE u.uniqueName = :uniqueName AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")
+	@Query("SELECT p FROM Post p INNER JOIN p.user u WHERE u.uniqueName = :uniqueName AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")
 	public Set<Post> findPostByUniqueName(@Param("uniqueName") String uniqueName);
 
-	@Query("FROM Post p INNER JOIN p.user u WHERE u.userId = :userId AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")
+	@Query("SELECT p FROM Post p INNER JOIN p.user u WHERE u.userId = :userId AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")
 	public Set<Post> findPostByUserId(@Param("userId") Long userId);
 
-	@Query("FROM Post p WHERE p.postId IN :postIdSet")
+	@Query("SELECT p FROM Post p WHERE p.postId IN :postIdSet")
 	public Set<Post> findPostByPostIdSet(@Param("postIdSet") Set<Long> postIdSet);
 
-	@Query("FROM Post p WHERE p.createdate >= :start  AND p.createdate <= :end")
+	@Query("SELECT p FROM Post p WHERE TYPE(p) <> RetweetPost AND p.createdate >= :start AND p.createdate <= :end")
 	public Set<Post> findPostByDateRange(@Param("start") Date start, @Param("end") Date end);
+
+	@Query("SELECT p FROM Post p INNER JOIN p.user u WHERE TYPE(p) = RetweetPost AND (p.post.postId = :postId AND p.user.userId = :userId)")
+	public Set<Post> findRetweetedPost(@Param("postId") Long postId, @Param("userId") Long userId);
 }

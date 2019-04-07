@@ -28,7 +28,6 @@ public class EventService {
 		Set<Event> eventSet = eventDAO.findActiveEvent(start, end);
 
 		eventSet.stream().forEach(u -> {
-			u.setId(u.getEventId());
 			u.setColor("red");
 		});
 

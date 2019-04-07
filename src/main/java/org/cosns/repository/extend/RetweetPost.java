@@ -7,17 +7,18 @@ import javax.persistence.OneToOne;
 
 import org.cosns.repository.Post;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @DiscriminatorValue(value = "retweet")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class RetweetPost extends Post {
 
-	@JsonIgnore
 	@OneToOne
-	@JoinColumn(name = "post_id", referencedColumnName = "postId")
+	@JoinColumn(name = "retweet_post_id", referencedColumnName = "postId")
+	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "postId")
 	Post post;
 
 	public Post getPost() {

@@ -53,7 +53,7 @@ public class HashTagService {
 
 	public void saveHashToRedis(Post post, Set<String> hashTagSet, String prefix) {
 		for (String hashTag : hashTagSet) {
-			stringRedisTemplate.opsForSet().add(hashTag, "" + post.getPostId());
+			stringRedisTemplate.opsForSet().add(hashTag, prefix + ":" + post.getPostId());
 		}
 	}
 
