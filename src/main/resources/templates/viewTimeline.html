@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <title>Example - example-ng-submit</title>
 
+<script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
-<script
-	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
 <script>
 	var main = angular.module('application', []);
 	main.controller('viewPostController', function($scope, $http) {
@@ -33,8 +32,16 @@
 
 
 </head>
-<body ng-app="mainApplication">
-	View Friend Request
-	<div ng-controller="viewPostController">View Timeline</div>
+<body ng-app="application">
+
+	<div th:include="components/header :: headerScript" th:remove="tag"></div>
+	<div th:include="components/header :: headerBody" th:remove="tag"></div>
+	<div class="container">
+		<div class="hero-unit">View Friend Request</div>
+
+		<div ng-controller="viewPostController" class="row offset1">
+			<div th:include="components/post :: viewPosts" th:remove="tag"></div>
+		</div>
+	</div>
 </body>
 </html>
