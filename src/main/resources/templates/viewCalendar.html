@@ -11,12 +11,12 @@
 
 <script src='/js/core/main.js'></script>
 <script src='/js/daygrid/main.js'></script>
-<style type="text/css">
-th.ui-widget-header {
-	font-size: 9pt;
-	font-family: Sans-Serif;
-}
-</style><script>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
 	document.addEventListener('DOMContentLoaded', function() {
 		var calendarEl = document.getElementById('calendar');
 
@@ -27,7 +27,26 @@ th.ui-widget-header {
 				center : 'title',
 				right : 'dayGridMonth'
 			},
-			fixedWeekCount:false,
+			fixedWeekCount : false,
+			themeSystem : 'spacelab',
+			eventClick : function(info) {
+				info.jsEvent.preventDefault(); // don't let the browser navigate
+
+				console.log('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+				$("#dialogCalendar .message").html(info.event.title + "<br/> <a href ='" + info.event.url + "'>" + info.event.url + "</a>");
+				$('#dialogCalendar').dialog({
+					title : info.event.start,
+					position : {
+						my : "center",
+						at : "left+" + info.jsEvent.pageX + "px top+" + (info.jsEvent.pageY + 120) +  "px ",
+						of : window
+					},
+				});
+
+				// change the border color just for fun
+				//info.el.style.height = '50px';
+			},
+
 			events : '/event/getEvents/'
 		});
 
@@ -51,5 +70,16 @@ th.ui-widget-header {
 			<div id='calendar'></div>
 		</div>
 	</div>
+
+	<!-- The Modal -->
+	<div id="dialogCalendar">
+
+		<!-- Modal content -->
+		<div>
+			<p class="message"></p>
+		</div>
+
+	</div>
+
 </body>
 </html>
