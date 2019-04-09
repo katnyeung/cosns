@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Example - example-ng-submit</title>
+
+<script th:include="components/header :: headerLibrary" th:remove="tag"></script>
+
+</head>
+<body ng-app="application">
+	<script>
+		var main = angular.module('application', []);
+		main.controller('viewPostController', function($scope, $http) {
+			$scope.likePost = function(postId) {
+				$http({
+					url : "/post/likePost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				}).success(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+
+			$scope.retweetPost = function(postId) {
+				$http({
+					url : "/post/retweetPost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				}).success(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+			$scope.loadPosts = function() {
+				$http({
+					url : "/post/getUserPosts/[[${targetUser?.userId}]]",
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				}).success(function(data, status, headers, config) {
+					$scope.postList = data.postList;
+					$scope.status = status;
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+			$scope.loadPosts();
+
+		});
+
+		main.controller('viewUserController', function($scope, $http) {
+			$scope.loadUser = function() {
+				$http({
+					url : "/user/getUser/[[${targetUser?.userId}]]",
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				}).success(function(data, status, headers, config) {
+					$scope.user = data.user;
+					$scope.status = status;
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+			$scope.loadUser();
+
+			$scope.follow = function(userId) {
+				$http({
+					url : "/user/follow/" + userId,
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				}).success(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+
+				}).error(function(data, status, headers, config) {
+					alert(data.status + '\n' + data.remarks);
+				});
+
+			}
+		});
+	</script>
+
+	<div th:include="components/header :: headerScript" th:remove="tag"></div>
+	<div th:include="components/header :: headerBody" th:remove="tag"></div>
+
+	<div class="container" ng-controller="settingController">
+		<div class="hero-unit">Settings</div>
+		<div ng-controller="viewPostController" class="row offset1">
+
+			password password again
+
+			<form ng-submit="profileUpdate()" name="profileUpdateForm">
+				<div class="modal-body">
+					<table>
+
+						<tr>
+							<td>Password :</td>
+							<td><input type="password" ng-model="profile.password" name="password" /></td>
+						</tr>
+						<tr>
+							<td>Assign Unique Name :</td>
+							<td><input type="password" ng-model="profile.uniqueName" name="uniqueName" /></td>
+						</tr>
+						<tr>
+							<td>Profile Message :</td>
+							<td><textarea type="password" ng-model="profile.message" name="message"></textarea></td>
+						</tr>
+						
+					</table>
+
+
+				</div>
+				<div class="modal-footer">
+					<a href="#" class="btn" ng-click="showRegister=false">Close</a> <input type="submit" id="register" value="register" class="btn btn-primary" />
+				</div>
+			</form>
+
+		</div>
+	</div>
+
+
+	</div>
+</body>
+</html>

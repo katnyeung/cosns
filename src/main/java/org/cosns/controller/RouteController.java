@@ -127,4 +127,16 @@ public class RouteController {
 		return "viewProfile";
 	}
 
+	@GetMapping(path = "setting")
+	public String viewSetting(HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+			model.addAttribute("targetUser", loggedUser);
+		} else {
+			return "redirect:/";
+		}
+
+		return "viewProfile";
+	}
 }
