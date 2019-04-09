@@ -4,7 +4,7 @@ public class UserFormDTO {
 	String email;
 	String password;
 	String passwordAgain;
-
+	
 	public String getEmail() {
 		return email;
 	}

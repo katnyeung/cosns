@@ -9,6 +9,7 @@ import org.cosns.repository.User;
 import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.util.DefaultException;
+import org.cosns.web.DTO.RegistNameDTO;
 import org.cosns.web.DTO.UserFormDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.UserResult;
@@ -46,16 +47,18 @@ public class UserRestController {
 	}
 
 	@PostMapping(path = "/registUniqueName")
-	public DefaultResult registUniqueName(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
+	public DefaultResult registUniqueName(@RequestBody RegistNameDTO registNameDTO, HttpSession session)
+			throws DefaultException {
+		User loggedUser = (User) session.getAttribute("user");
+
 		UserResult ur = new UserResult();
 
-		User user = userService.registUniqueName(userDTO);
+		if (loggedUser != null) {
+			User user = userService.registUniqueName(registNameDTO, loggedUser);
 
-		if (user != null) {
-			session.setAttribute("user", user);
 			ur.setUser(user);
 			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
-		} else {
+		}else {
 			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
 		}
 

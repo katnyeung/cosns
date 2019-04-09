@@ -39,6 +39,10 @@ public abstract class Post extends Auditable<String> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long postId;
+	
+	@Lob
+	@Column(nullable = true)
+	private String uniqueName;
 
 	@Lob
 	@Column(nullable = true)

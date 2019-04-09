@@ -51,7 +51,7 @@ public class User extends Auditable<String> {
 	private String status;
 
 	@Null
-	@Column(unique = true)
+	@Column(nullable = true)
 	private String uniqueName;
 
 	@Lob
