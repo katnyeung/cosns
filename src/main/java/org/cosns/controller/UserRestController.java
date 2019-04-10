@@ -46,19 +46,21 @@ public class UserRestController {
 		return ur;
 	}
 
-	@PostMapping(path = "/registUniqueName")
-	public DefaultResult registUniqueName(@RequestBody RegistNameDTO registNameDTO, HttpSession session)
-			throws DefaultException {
+	@PostMapping(path = "/checkUniqueName")
+	public DefaultResult registUniqueName(@RequestBody RegistNameDTO registNameDTO, HttpSession session) throws DefaultException {
 		User loggedUser = (User) session.getAttribute("user");
 
 		UserResult ur = new UserResult();
 
 		if (loggedUser != null) {
-			User user = userService.registUniqueName(registNameDTO, loggedUser);
 
-			ur.setUser(user);
-			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
-		}else {
+			User user = userService.getUserByUniqueName(registNameDTO.getUniqueName());
+			if (user == null) {
+				ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			} else {
+				ur.setStatus(ConstantsUtil.RESULT_ERROR);
+			}
+		} else {
 			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
 		}
 

@@ -87,7 +87,7 @@ public class UserService {
 	}
 
 	public User getUserByUniqueName(String uniqueName) {
-		Set<User> userSet = userDAO.findActiveUserByEmail(uniqueName);
+		Set<User> userSet = userDAO.findAllUserByUniqueName(uniqueName);
 
 		if (userSet.iterator().hasNext()) {
 			return userSet.iterator().next();

@@ -10,65 +10,10 @@
 <body ng-app="application">
 	<script>
 		var main = angular.module('application', []);
-		main.controller('viewPostController', function($scope, $http) {
-			$scope.likePost = function(postId) {
-				$http({
-					url : "/post/likePost",
-					method : "POST",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						postId : postId
-					}
-				}).success(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
 
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
-				});
+		main.controller('settingController', function($scope, $http) {
+			$scope.uniqueUserNameFlag = false;
 
-			}
-
-			$scope.retweetPost = function(postId) {
-				$http({
-					url : "/post/retweetPost",
-					method : "POST",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						postId : postId
-					}
-				}).success(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
-
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
-				});
-
-			}
-			$scope.loadPosts = function() {
-				$http({
-					url : "/post/getUserPosts/[[${targetUser?.userId}]]",
-					method : "GET",
-					headers : {
-						'Content-Type' : 'application/json'
-					}
-				}).success(function(data, status, headers, config) {
-					$scope.postList = data.postList;
-					$scope.status = status;
-
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
-				});
-
-			}
-			$scope.loadPosts();
-
-		});
-
-		main.controller('viewUserController', function($scope, $http) {
 			$scope.loadUser = function() {
 				$http({
 					url : "/user/getUser/[[${targetUser?.userId}]]",
@@ -79,6 +24,7 @@
 				}).success(function(data, status, headers, config) {
 					$scope.user = data.user;
 					$scope.status = status;
+					$scope.checkName = data.user.uniqueName;
 
 				}).error(function(data, status, headers, config) {
 					alert(data.status + '\n' + data.remarks);
@@ -87,19 +33,54 @@
 			}
 			$scope.loadUser();
 
-			$scope.follow = function(userId) {
+			$scope.checkUniqueName = function() {
 				$http({
-					url : "/user/follow/" + userId,
+					url : "/user/checkUniqueName/",
 					method : "GET",
 					headers : {
 						'Content-Type' : 'application/json'
+					},
+					data : {
+						uniqueName : $scope.profile.uniqueName
 					}
 				}).success(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
+					if (data.status == 'success') {
+						$scope.uniqueUserNameFlag = true;
+						$scope.uniqueNameMessage = "OK";
+					} else {
+						$scope.uniqueUserNameFlag = false;
+						$scope.uniqueNameMessage = "someone using this name already";
+					}
 
 				}).error(function(data, status, headers, config) {
 					alert(data.status + '\n' + data.remarks);
 				});
+
+			}
+
+			$scope.updateSetting = function(userId) {
+				if ($scope.checkName != $scope.profile.uniqueName && $scope.uniqueUserNameFlag) {
+
+					$http({
+						url : "/user/updateSetting/" + userId,
+						method : "GET",
+						headers : {
+							'Content-Type' : 'application/json'
+						},
+						data : {
+							password : $scope.profile.password,
+							uniqueName : $scope.profile.uniqueName,
+							message : $scope.profile.message
+						}
+					}).success(function(data, status, headers, config) {
+						alert(data.status + '\n' + data.remarks);
+
+					}).error(function(data, status, headers, config) {
+						alert(data.status + '\n' + data.remarks);
+					});
+				} else {
+					$scope.uniqueUserNameMessage = "please verify"
+				}
 
 			}
 		});
@@ -112,9 +93,7 @@
 		<div class="hero-unit">Settings</div>
 		<div ng-controller="viewPostController" class="row offset1">
 
-			password password again
-
-			<form ng-submit="profileUpdate()" name="profileUpdateForm">
+			<form ng-submit="updateSetting" name="profileUpdateForm">
 				<div class="modal-body">
 					<table>
 
@@ -124,19 +103,20 @@
 						</tr>
 						<tr>
 							<td>Assign Unique Name :</td>
-							<td><input type="password" ng-model="profile.uniqueName" name="uniqueName" /></td>
+							<td><input type="hidden" ng-model="checkName" /><input type="text" ng-model="profile.uniqueName" name="uniqueName" /><label ng-model="uniqueNameMessage"></label>
+								<button type="button" ng-click="checkUniqueName()">Check</button></td>
 						</tr>
 						<tr>
 							<td>Profile Message :</td>
-							<td><textarea type="password" ng-model="profile.message" name="message"></textarea></td>
+							<td><textarea ng-model="profile.message" name="message"></textarea></td>
 						</tr>
-						
+
 					</table>
 
 
 				</div>
 				<div class="modal-footer">
-					<a href="#" class="btn" ng-click="showRegister=false">Close</a> <input type="submit" id="register" value="register" class="btn btn-primary" />
+					<input type="submit" id="update" value="update" class="btn btn-primary" />
 				</div>
 			</form>
 
