@@ -10,6 +10,46 @@
 <body ng-app="application">
 	<script>
 		var main = angular.module('application', []);
+		main.factory('postService', function($http) {
+			var service = {};
+
+			service.likePost = function(postId) {
+				return $http({
+					url : "/post/likePost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				});
+			};
+
+			service.retweetPost = function(postId) {
+				return $http({
+					url : "/post/retweetPost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				});
+			};
+			service.loadPosts = function(functionName) {
+				return $http({
+					url : "/post/" + functionName,
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				});
+			};
+
+			return service;
+		});
 
 		main.controller('searchController', function($scope, $http) {
 
@@ -30,59 +70,36 @@
 
 		});
 
-		main.controller('viewPostController', function($scope, $http) {
-			$scope.likePost = function(postId) {
-				$http({
-					url : "/post/likePost",
-					method : "POST",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						postId : postId
-					}
-				}).then(function(response) {
-					if (response.data.status == 'success') {
-						$scope.message("Like Success");
-					} else {
-						$scope.message("Like Failed");
-					}
-				});
+		main.controller('viewPostController', function($scope, $timeout, postService) {
+			var handleResponse = function(response, type) {
+				if (response.data.status == 'success') {
+					$scope.message(type + " Success");
+				} else {
+					$scope.message(type + " Failed");
+				}
 			}
+			
+			postService.likePost.then(function(response) {
+				handleResponse(response, 'like')
+			});
 
-			$scope.retweetPost = function(postId) {
-				$http({
-					url : "/post/retweetPost",
-					method : "POST",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						postId : postId
-					}
-				}).then(function(response) {
-					if (response.data.status == 'success') {
-						$scope.message("Retweet Success");
-					} else {
-						$scope.message("Retweet Failed");
-					}
-				});
+			postService.retweetPost.then(function(response) {
+				handleResponse(response, 'retweet')
+			});
+
+			
+			$scope.postList = postService.loadPosts("getRandomPosts");
+
+			$scope.message = function(message) {
+
+				$scope.dialogMessageFlag = true;
+				$scope.dialogMessage = message;
+
+				$timeout(function() {
+					$scope.dialogMessageFlag = false;
+				}, 3000);
 
 			}
-
-			$scope.loadRandomPosts = function() {
-				$http({
-					url : "/post/getRandomPosts",
-					method : "GET",
-					headers : {
-						'Content-Type' : 'application/json'
-					}
-				}).then(function(response) {
-					$scope.postList = response.data.postList;
-				});
-
-			}
-			$scope.loadRandomPosts();
 
 		});
 	</script>
@@ -100,6 +117,9 @@
 
 		<div ng-controller="viewPostController" class="row offset1">
 			<div th:include="components/post :: viewPosts" th:remove="tag"></div>
+			<div id="postMessage" ng-show="dialogMessageFlag" ng-init="dialogMessageFlag = false" class="alert modal">
+				<span class="row offset2">{{dialogMessage}} <a href="#" class="close" ng-click="dialogMessageFlag = false">X</a></span>
+			</div>
 		</div>
 
 	</div>
