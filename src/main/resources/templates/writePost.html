@@ -27,7 +27,7 @@
 		main.controller('messageController', function($scope, $http, $timeout, $window) {
 			$scope.submit = function(flow) {
 				$scope.posting = true;
-				
+
 				if ($scope.postMessage != '') {
 					console.log($scope.postMessage);
 					console.log(flow.files);
@@ -52,37 +52,32 @@
 							'postMessage' : $scope.postMessage,
 							'fileList' : fileList
 						}
-					}).success(function(data, status, headers, config) {
-						if (data.status == 'success') {
+					}).then(function(response) {
+						if (response.data.status == 'success') {
 							$scope.message("Post Success");
+
 							$timeout(function() {
 								$window.location.href = '/u';
 							}, 1000);
 						} else {
+
 							$scope.message("Something error, please contact system adminsitrator");
 
 							$timeout(function() {
 								$scope.dialogMessageFlag = false;
-								
 								$scope.posting = false;
-								
-							}, 3000);
 
+							}, 3000);
 						}
 
-						$scope.status = status;
-
-					}).error(function(data, status, headers, config) {
-						alert(data.status + '\n' + data.remarks);
 					});
 				}
 
 			}
+			
 			$scope.message = function(message) {
-
 				$scope.dialogMessageFlag = true;
 				$scope.dialogMessage = message;
-
 			}
 		});
 	</script>
@@ -94,31 +89,41 @@
 			<div class="text">
 				<textarea ng-model="postMessage"></textarea>
 			</div>
-			<form flow-init="{target: '/post/uploadImage', testChunks:false}" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message" ng-submit="submit($flow)">
+			<form flow-init="{target: '/post/uploadImage', testChunks:false}"
+				flow-files-submitted="$flow.upload()"
+				flow-file-success="$file.msg = $message" ng-submit="submit($flow)">
 
-				<div class="alert" flow-drop flow-drag-enter="style={border:'4px solid green'}" flow-drag-leave="style={}" ng-style="style">Drag And Drop your file here</div>
+				<div class="alert" flow-drop
+					flow-drag-enter="style={border:'4px solid green'}"
+					flow-drag-leave="style={}" ng-style="style">Drag And Drop
+					your file here</div>
 
 				<span class="btn" flow-btn>Select File</span>
 
 
 				<table sv-root sv-part="$flow.files">
-					<tr ng-repeat="file in $flow.files" sv-element="opts" class="well grid">
+					<tr ng-repeat="file in $flow.files" sv-element="opts"
+						class="well grid">
 						<td><div class="btn" sv-handle>{{$index+1}}</div></td>
 						<td>{{file.name}}</td>
 						<td>{{file.msg}}</td>
 						<td><img flow-img="file" style="width: 200px" /></td>
-						<td><a href="#" class="btn btn-danger" ng-click="file.cancel()"> Remove </a></td>
+						<td><a href="#" class="btn btn-danger"
+							ng-click="file.cancel()"> Remove </a></td>
 
 					</tr>
 				</table>
 				<div>
-					<button type="submit" class="btn" ng-disabled="posting" ng-init="posting = false">Post</button>
+					<button type="submit" class="btn" ng-disabled="posting"
+						ng-init="posting = false">Post</button>
 				</div>
 
 			</form>
 		</div>
-		<div id="myModalPostMessage" ng-show="dialogMessageFlag" ng-init="dialogMessageFlag = false" class="alert modal">
-			<span class="row offset2">{{dialogMessage}} <a href="#" class="close" ng-click="dialogMessageFlag = false">X</a></span>
+		<div id="myModalPostMessage" ng-show="dialogMessageFlag"
+			ng-init="dialogMessageFlag = false" class="alert modal">
+			<span class="row offset2">{{dialogMessage}} <a href="#"
+				class="close" ng-click="dialogMessageFlag = false">X</a></span>
 		</div>
 	</div>
 </body>

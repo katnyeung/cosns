@@ -20,13 +20,13 @@
 				data : {
 					postId : postId
 				}
-			}).success(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
-
-			}).error(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
+			}).then(function(response) {
+				if (response.data.status == 'success') {
+					$scope.message("Like Success");
+				} else {
+					$scope.message("Like Failed");
+				}
 			});
-
 		}
 
 		$scope.retweetPost = function(postId) {
@@ -39,14 +39,16 @@
 				data : {
 					postId : postId
 				}
-			}).success(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
-
-			}).error(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
+			}).then(function(response) {
+				if (response.data.status == 'success') {
+					$scope.message("Retweet Success");
+				} else {
+					$scope.message("Retweet Failed");
+				}
 			});
 
 		}
+
 		$scope.loadPost = function() {
 			$http({
 				url : "/post/getPost/[[${postId}]]",
@@ -54,11 +56,8 @@
 				headers : {
 					'Content-Type' : 'application/json'
 				}
-			}).success(function(data, status, headers, config) {
-				$scope.postList = data.postList;
-				$scope.status = status;
-			}).error(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
+			}).then(function(response) {
+				$scope.postList = response.data.postList;
 			});
 
 		}

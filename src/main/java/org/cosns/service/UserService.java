@@ -10,10 +10,8 @@ import org.cosns.repository.FriendRequest;
 import org.cosns.repository.Post;
 import org.cosns.repository.User;
 import org.cosns.util.ConstantsUtil;
-import org.cosns.web.DTO.RegistNameDTO;
 import org.cosns.web.DTO.UserFormDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +26,7 @@ public class UserService {
 	FriendRequestDAO friendRequestDAO;
 
 	@Autowired
-	private StringRedisTemplate stringRedisTemplate;
+	RedisService redisService;
 
 	@Transactional
 	public User registerUser(UserFormDTO userDTO) {
@@ -162,21 +160,11 @@ public class UserService {
 		}
 	}
 
-	public User registUniqueName(RegistNameDTO registNameDTO, User loggedUser) {
-		Long userId = registNameDTO.getId();
-		if (loggedUser.getUserId() == userId) {
-			User user = userDAO.getOne(userId);
-			user.setUniqueName(registNameDTO.getUniqueName());
-			// set redis
-			setKeysInRedis(registNameDTO.getUniqueName(), userId, ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX);
-			return user;
-		} else {
-			return null;
-		}
-
+	public void setKeysInRedis(String uniqueName, Long id, String prefix) {
+		redisService.setValue(prefix + ":" + uniqueName, "" + id);
 	}
 
-	private void setKeysInRedis(String uniqueName, Long id, String prefix) {
-		stringRedisTemplate.opsForValue().set(prefix + ":" + uniqueName, "" + id);
+	public void updateUser(User user) {
+		userDAO.save(user);
 	}
 }

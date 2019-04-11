@@ -21,15 +21,14 @@
 					headers : {
 						'Content-Type' : 'application/json'
 					}
-				}).success(function(data, status, headers, config) {
-					$scope.user = data.user;
-					$scope.status = status;
-					$scope.checkName = data.user.uniqueName;
-
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
+				}).then(function(response) {
+					if (response.data.status == 'success') {
+						$scope.user = response.data.user;
+						$scope.checkName = response.data.user.uniqueName;
+					} else {
+						$scope.message("Load User Failed");
+					}
 				});
-
 			}
 			$scope.loadUser();
 
@@ -43,17 +42,14 @@
 					data : {
 						uniqueName : $scope.profile.uniqueName
 					}
-				}).success(function(data, status, headers, config) {
-					if (data.status == 'success') {
+				}).then(function(response) {
+					if (response.data.status == 'success') {
 						$scope.uniqueUserNameFlag = true;
 						$scope.uniqueNameMessage = "OK";
 					} else {
 						$scope.uniqueUserNameFlag = false;
 						$scope.uniqueNameMessage = "someone using this name already";
 					}
-
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
 				});
 
 			}
@@ -62,21 +58,22 @@
 				if ($scope.checkName != $scope.profile.uniqueName && $scope.uniqueUserNameFlag) {
 
 					$http({
-						url : "/user/updateSetting/" + userId,
-						method : "GET",
+						url : "/user/updateSetting/,
+						method : "POST",
 						headers : {
 							'Content-Type' : 'application/json'
 						},
 						data : {
 							password : $scope.profile.password,
-							uniqueName : $scope.profile.uniqueName,
+							uniqueName : ($scope.checkName == $scope.profile.uniqueName) ? null : $scope.profile.uniqueName,
 							message : $scope.profile.message
 						}
-					}).success(function(data, status, headers, config) {
-						alert(data.status + '\n' + data.remarks);
-
-					}).error(function(data, status, headers, config) {
-						alert(data.status + '\n' + data.remarks);
+					}).then(function(response) {
+						if (response.data.status == 'success') {
+							$scope.message("Retweet Success");
+						} else {
+							$scope.message("Retweet Failed");
+						}
 					});
 				} else {
 					$scope.uniqueUserNameMessage = "please verify"
@@ -99,11 +96,14 @@
 
 						<tr>
 							<td>Password :</td>
-							<td><input type="password" ng-model="profile.password" name="password" /></td>
+							<td><input type="password" ng-model="profile.password"
+								name="password" /></td>
 						</tr>
 						<tr>
 							<td>Assign Unique Name :</td>
-							<td><input type="hidden" ng-model="checkName" /><input type="text" ng-model="profile.uniqueName" name="uniqueName" /><label ng-model="uniqueNameMessage"></label>
+							<td><input type="hidden" ng-model="checkName" /><input
+								type="text" ng-model="profile.uniqueName" name="uniqueName" /><label
+								ng-model="uniqueNameMessage"></label>
 								<button type="button" ng-click="checkUniqueName()">Check</button></td>
 						</tr>
 						<tr>
@@ -116,7 +116,8 @@
 
 				</div>
 				<div class="modal-footer">
-					<input type="submit" id="update" value="update" class="btn btn-primary" />
+					<input type="submit" id="update" value="update"
+						class="btn btn-primary" />
 				</div>
 			</form>
 

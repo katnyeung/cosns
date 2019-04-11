@@ -16,12 +16,8 @@
 				headers : {
 					'Content-Type' : 'application/json'
 				}
-			}).success(function(data, status, headers, config) {
-				$scope.postList = data.postList;
-				$scope.status = status;
-
-			}).error(function(data, status, headers, config) {
-				alert(data.status + '\n' + data.remarks);
+			}).then(function(response) {
+				$scope.postList = response.data.postList;
 			});
 
 		}

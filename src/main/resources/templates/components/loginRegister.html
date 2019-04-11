@@ -15,19 +15,16 @@
 							'password' : $scope.login.password,
 
 						}
-					}).success(function(data, status, headers, config) {
-						$scope.status = status;
-						if (data.status == 'success') {
+					}).then(function(response) {
+						if (response.data.status == 'success') {
 
-							$scope.user = data.user;
+							$scope.user = response.data.user;
 							$scope.message("Welcome.")
 						} else {
 
 							$scope.message("Login Failed : either password or login not found")
 						}
 
-					}).error(function(data, status, headers, config) {
-						alert(data.status + '\n' + data.remarks);
 					});
 				}
 			};
@@ -38,12 +35,9 @@
 					headers : {
 						'Content-Type' : 'application/json'
 					}
-				}).success(function(data, status, headers, config) {
-					$scope.status = status;
-					$scope.user = data.user;
+				}).then(function(response) {
+					$scope.user = response.data.user;
 
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
 				});
 			};
 
@@ -61,14 +55,11 @@
 								'password' : $scope.register.password,
 								'passwordAgain' : $scope.register.passwordAgain,
 							}
-						}).success(function(data, status, headers, config) {
-							$scope.status = status;
-							$scope.message("Account Create Success")
-						}).error(function(data, status, headers, config) {
-							alert(data.status + '\n' + data.remarks);
+						}).then(function(response) {
+							$scope.message("Account Create Success");
 						});
 					} else {
-						alert("please verify your password")
+						$scope.message("please verify your password")
 					}
 
 				}
@@ -100,13 +91,17 @@
 
 		<div ng-hide="user">
 			<form class="navbar-form pull-right" ng-submit="login()">
-				<input class="span2" type="text" ng-model="login.email" name="email" placeholder="Email"> <input class="span2" type="password" ng-model="login.password" name="password" placeholder="Password">
+				<input class="span2" type="text" ng-model="login.email" name="email"
+					placeholder="Email"> <input class="span2" type="password"
+					ng-model="login.password" name="password" placeholder="Password">
 				<button type="submit" class="btn">Sign in</button>
-				<a href="#myModal" role="button" class="btn" ng-click="showRegister=true">Register</a>
+				<a href="#myModal" role="button" class="btn"
+					ng-click="showRegister=true">Register</a>
 			</form>
 		</div>
 		<div ng-show="user" class="nav-pills pull-right">
-			<a href="/u/">{{user.email}}</a> &nbsp; <a href="#" ng-click="logout()">Logout</a>
+			<a href="/u/">{{user.email}}</a> &nbsp; <a href="#"
+				ng-click="logout()">Logout</a>
 		</div>
 
 		<div id="myModal" ng-show="showRegister" class="modal">
@@ -120,15 +115,18 @@
 						<tr>
 
 							<td>Email :</td>
-							<td><input type="text" ng-model="register.email" name="email" /></td>
+							<td><input type="text" ng-model="register.email"
+								name="email" /></td>
 						</tr>
 						<tr>
 							<td>Password :</td>
-							<td><input type="password" ng-model="register.password" name="password" /></td>
+							<td><input type="password" ng-model="register.password"
+								name="password" /></td>
 						</tr>
 						<tr>
 							<td>Password Again :</td>
-							<td><input type="password" ng-model="register.passwordAgain" name="passwordAgain" /></td>
+							<td><input type="password" ng-model="register.passwordAgain"
+								name="passwordAgain" /></td>
 						</tr>
 
 					</table>
@@ -136,13 +134,17 @@
 
 				</div>
 				<div class="modal-footer">
-					<a href="#" class="btn" ng-click="showRegister=false">Close</a> <input type="submit" id="register" value="register" class="btn btn-primary" />
+					<a href="#" class="btn" ng-click="showRegister=false">Close</a> <input
+						type="submit" id="register" value="register"
+						class="btn btn-primary" />
 				</div>
 			</form>
 		</div>
 
-		<div id="myModal" ng-show="dialogMessageFlag" ng-init="dialogMessageFlag = false" class="alert modal">
-			<span class="row offset2">{{dialogMessage}} <a href="#" class="close" ng-click="dialogMessageFlag = false">X</a></span>
+		<div id="myModal" ng-show="dialogMessageFlag"
+			ng-init="dialogMessageFlag = false" class="alert modal">
+			<span class="row offset2">{{dialogMessage}} <a href="#"
+				class="close" ng-click="dialogMessageFlag = false">X</a></span>
 		</div>
 	</div>
 

@@ -21,13 +21,13 @@
 					data : {
 						postId : postId
 					}
-				}).success(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
-
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
+				}).then(function(response) {
+					if (response.data.status == 'success') {
+						$scope.message("Like Success");
+					} else {
+						$scope.message("Like Failed");
+					}
 				});
-
 			}
 
 			$scope.retweetPost = function(postId) {
@@ -40,31 +40,29 @@
 					data : {
 						postId : postId
 					}
-				}).success(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
-
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
+				}).then(function(response) {
+					if (response.data.status == 'success') {
+						$scope.message("Retweet Success");
+					} else {
+						$scope.message("Retweet Failed");
+					}
 				});
 
 			}
-			$scope.loadPosts = function() {
+
+			$scope.loadPost = function() {
 				$http({
 					url : "/post/getUserPosts/[[${targetUser?.userId}]]",
 					method : "GET",
 					headers : {
 						'Content-Type' : 'application/json'
 					}
-				}).success(function(data, status, headers, config) {
-					$scope.postList = data.postList;
-					$scope.status = status;
-
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
+				}).then(function(response) {
+					$scope.postList = response.data.postList;
 				});
 
 			}
-			$scope.loadPosts();
+			$scope.loadPost();
 
 		});
 
@@ -76,12 +74,9 @@
 					headers : {
 						'Content-Type' : 'application/json'
 					}
-				}).success(function(data, status, headers, config) {
-					$scope.user = data.user;
-					$scope.status = status;
+				}).then(function(response) {
 
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
+					$scope.user = response.data.user;
 				});
 
 			}
@@ -94,13 +89,13 @@
 					headers : {
 						'Content-Type' : 'application/json'
 					}
-				}).success(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
-
-				}).error(function(data, status, headers, config) {
-					alert(data.status + '\n' + data.remarks);
+				}).then(function(response) {
+					if (response.data.status == 'success') {
+						$scope.message("Followed");
+					} else {
+						$scope.message("Follow Failed");
+					}
 				});
-
 			}
 		});
 	</script>

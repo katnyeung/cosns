@@ -6,11 +6,13 @@ import javax.servlet.http.HttpSession;
 
 import org.cosns.repository.FriendRequest;
 import org.cosns.repository.User;
+import org.cosns.service.RedisService;
 import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.util.DefaultException;
 import org.cosns.web.DTO.RegistNameDTO;
 import org.cosns.web.DTO.UserFormDTO;
+import org.cosns.web.DTO.UserSettingDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.UserResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,9 @@ public class UserRestController {
 
 	@Autowired
 	UserService userService;
+
+	@Autowired
+	RedisService redisService;
 
 	@PostMapping(path = "/login")
 	public DefaultResult login(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
@@ -54,12 +59,56 @@ public class UserRestController {
 
 		if (loggedUser != null) {
 
-			User user = userService.getUserByUniqueName(registNameDTO.getUniqueName());
-			if (user == null) {
+			// User user = userService.getUserByUniqueName(registNameDTO.getUniqueName());
+
+			String value = redisService.getValue(ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX + ":" + registNameDTO.getUniqueName());
+
+			if (value == null) {
 				ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 			} else {
 				ur.setStatus(ConstantsUtil.RESULT_ERROR);
 			}
+		} else {
+			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+		}
+
+		return ur;
+	}
+
+	@PostMapping(path = "/updateSetting")
+	public DefaultResult updateSetting(@RequestBody UserSettingDTO userSettingDTO, HttpSession session) throws DefaultException {
+		User loggedUser = (User) session.getAttribute("user");
+
+		UserResult ur = new UserResult();
+
+		if (loggedUser != null) {
+			User user = userService.getUserById(loggedUser.getUserId());
+			if (user.getPassword().equals(userSettingDTO.getPassword())) {
+				User checkUser = userService.getUserByUniqueName(userSettingDTO.getUniqueName());
+
+				if (checkUser == null) {
+					if (userSettingDTO.getUniqueName() != null) {
+						user.setUniqueName(userSettingDTO.getUniqueName());
+					}
+
+					if (userSettingDTO.getMessage() != null) {
+						user.setMessage(userSettingDTO.getMessage());
+					}
+
+					userService.updateUser(user);
+
+					userService.setKeysInRedis(userSettingDTO.getUniqueName(), user.getUserId(), ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX);
+
+					ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+				} else {
+					ur.setRemarks("Unique Name already in use");
+					ur.setStatus(ConstantsUtil.RESULT_ERROR);
+				}
+			} else {
+				ur.setRemarks("Password error");
+				ur.setStatus(ConstantsUtil.RESULT_ERROR);
+			}
+
 		} else {
 			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
 		}
