@@ -11,29 +11,27 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.cosns.dao.ImageDAO;
 import org.cosns.dao.PostDAO;
 import org.cosns.dao.PostReactionDAO;
-import org.cosns.repository.Image;
 import org.cosns.repository.Post;
 import org.cosns.repository.PostReaction;
 import org.cosns.repository.User;
 import org.cosns.repository.extend.LikeReaction;
 import org.cosns.repository.extend.PhotoPost;
+import org.cosns.repository.extend.PostImage;
 import org.cosns.repository.extend.RetweetPost;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.PostFormDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class PostService {
 	Logger logger = Logger.getLogger(this.getClass().getName());
 
 	@Autowired
-	ImageDAO imageDAO;
+	ImageService imageService;
 
 	@Autowired
 	PostDAO postDAO;
@@ -47,22 +45,13 @@ public class PostService {
 	@Autowired
 	StringRedisTemplate stringRedisTemplate;
 
-	public void saveImage(String prefix, MultipartFile file, User user) {
-		Image image = new Image();
-		image.setFilename(prefix + file.getOriginalFilename());
-		image.setSize(file.getSize());
-		image.setStatus(ConstantsUtil.IMAGE_PEND);
-		image.setUser(user);
-
-		imageDAO.save(image);
-	}
-
 	public Post writePost(PostFormDTO postDTO, User user) {
 		logger.info("Writing Post By User : " + user.getUserId());
 
 		// create post
 		PhotoPost post = new PhotoPost();
 		post.setMessage(postDTO.getPostMessage());
+		post.setReleaseDate(postDTO.getReleaseDate());
 		post.setStatus(ConstantsUtil.POST_ACTIVE);
 		post.setUser(user);
 
@@ -70,12 +59,12 @@ public class PostService {
 
 		int count = 1;
 		for (String file : postDTO.getFileList()) {
-			Set<Image> imageSet = imageDAO.findPendImageByFilename(file);
-			for (Image image : imageSet) {
+			Set<PostImage> imageSet = imageService.findPendPostImageByFilename(file);
+			for (PostImage image : imageSet) {
 				image.setStatus(ConstantsUtil.IMAGE_ACTIVE);
 				image.setPost(post);
 				image.setSeq(count++);
-				imageDAO.save(image);
+				imageService.savePostImage(image);
 			}
 		}
 
@@ -178,10 +167,10 @@ public class PostService {
 	}
 
 	public Post retweetPost(Long postId, User user) {
-		
+
 		// find if this user already retweeted this post
 		Set<Post> postRetweeted = postDAO.findRetweetedPost(postId, user.getUserId());
-		
+
 		if (postRetweeted.iterator().hasNext()) {
 			return null;
 		} else {
@@ -210,4 +199,5 @@ public class PostService {
 		}
 
 	}
+
 }

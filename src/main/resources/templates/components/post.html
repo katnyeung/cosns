@@ -1,27 +1,73 @@
-<body th:fragment="viewPosts">
+<header th:fragment="viewPostScript">
+	<script>
+		main.factory('postService', function($http) {
+			var service = {};
 
+			service.likePost = function(postId) {
+				return $http({
+					url : "/post/likePost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				});
+			};
+
+			service.retweetPost = function(postId) {
+				return $http({
+					url : "/post/retweetPost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : postId
+					}
+				});
+			};
+			service.loadPosts = function(functionName) {
+				return $http({
+					url : "/post/" + functionName,
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				});
+			};
+
+			return service;
+		});
+	</script>
+</header>
+
+<body th:fragment="viewPosts">
 
 	<div ng-repeat="post in postList" class="span8 row">
 		<div>
 			<a href="/u/{{post.user.userId}}">{{post.user.email}}</a> &nbsp; <a href="/p/{{post.postId}}">{{post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a>
 		</div>
 		<div ng-show="post.type == 'retweet'" class="well">
-		<div>
-			Retweet <a href="/u/{{post.post.user.userId}}">{{post.post.user.email}}</a> &nbsp; <a href="/p/{{post.post.postId}}">{{post.post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a>
-		</div>
+			<div>
+				Retweet <a href="/u/{{post.post.user.userId}}">{{post.post.user.email}}</a> &nbsp; <a href="/p/{{post.post.postId}}">{{post.post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a>
+			</div>
 			<pre>{{post.post.message}}
-						<div ng-repeat="image in post.post.images">{{image.filename}}</div>
+						<div ng-repeat="image in post.post.postImages">{{image.filename}}</div>
 					</pre>
 			<a href="#" class="btn" ng-click="likePost(post.post.postId); $event.preventDefault();">Like</a> <a href="#" class="btn" ng-click="retweetPost(post.post.postId); $event.preventDefault();">Retweet</a>
-	
+
 		</div>
 		<div ng-show="post.type !='retweet'">
 			<pre>{{post.message}}
-						<div ng-repeat="image in post.images">{{image.filename}}</div>
+						<div ng-repeat="image in post.postImages">{{image.filename}}</div>
 					</pre>
 			<a href="#" class="btn" ng-click="likePost(post.postId); $event.preventDefault();">Like</a> <a href="#" class="btn" ng-click="retweetPost(post.postId); $event.preventDefault();">Retweet</a>
 
 		</div>
 	</div>
-
+	<div id="postMessage" ng-show="dialogMessageFlag" ng-init="dialogMessageFlag = false" class="alert modal">
+		<span class="row offset2">{{dialogMessage}} <a href="#" class="close" ng-click="dialogMessageFlag = false">X</a></span>
+	</div>
 </body>

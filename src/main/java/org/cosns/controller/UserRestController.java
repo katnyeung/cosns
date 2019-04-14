@@ -1,27 +1,36 @@
 package org.cosns.controller;
 
+import java.io.IOException;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.FilenameUtils;
 import org.cosns.repository.FriendRequest;
 import org.cosns.repository.User;
+import org.cosns.service.ImageService;
+import org.cosns.service.PostService;
 import org.cosns.service.RedisService;
 import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.util.DefaultException;
+import org.cosns.web.DTO.ImageUploadDTO;
 import org.cosns.web.DTO.RegistNameDTO;
 import org.cosns.web.DTO.UserFormDTO;
 import org.cosns.web.DTO.UserSettingDTO;
 import org.cosns.web.result.DefaultResult;
+import org.cosns.web.result.UploadImageResult;
 import org.cosns.web.result.UserResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/user")
@@ -32,7 +41,19 @@ public class UserRestController {
 	UserService userService;
 
 	@Autowired
+	PostService postService;
+
+	@Autowired
 	RedisService redisService;
+
+	@Autowired
+	ImageService imageService;
+
+	@Value("${cosns.image.profile.uploadFolder}")
+	String uploadFolder;
+
+	@Value("${cosns.image.profile.uploadPattern}")
+	String uploadPattern;
 
 	@PostMapping(path = "/login")
 	public DefaultResult login(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
@@ -83,37 +104,69 @@ public class UserRestController {
 
 		if (loggedUser != null) {
 			User user = userService.getUserById(loggedUser.getUserId());
+
 			if (user.getPassword().equals(userSettingDTO.getPassword())) {
-				User checkUser = userService.getUserByUniqueName(userSettingDTO.getUniqueName());
 
-				if (checkUser == null) {
-					if (userSettingDTO.getUniqueName() != null) {
-						user.setUniqueName(userSettingDTO.getUniqueName());
-					}
+				user = userService.updateSetting(user, userSettingDTO);
 
-					if (userSettingDTO.getMessage() != null) {
-						user.setMessage(userSettingDTO.getMessage());
-					}
-
-					userService.updateUser(user);
-
-					userService.setKeysInRedis(userSettingDTO.getUniqueName(), user.getUserId(), ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX);
-
-					ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
-				} else {
+				if (user == null) {
 					ur.setRemarks("Unique Name already in use");
 					ur.setStatus(ConstantsUtil.RESULT_ERROR);
+					return ur;
 				}
+
 			} else {
 				ur.setRemarks("Password error");
 				ur.setStatus(ConstantsUtil.RESULT_ERROR);
+				return ur;
 			}
-
 		} else {
 			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
 		}
 
+		ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		return ur;
+	}
+
+	@PostMapping(value = "/uploadProfileImage", consumes = { "multipart/form-data" })
+	public DefaultResult uploadProfileImage(ImageUploadDTO imageInfo, HttpSession session) throws IOException, NullPointerException {
+		UploadImageResult result = new UploadImageResult();
+		User user = (User) session.getAttribute("user");
+
+		if (user != null) {
+			try {
+
+				String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
+
+				logger.info("inside upload image");
+
+				MultipartFile fromFile = imageInfo.getFile();
+
+				String fileName = uuidPrefix + "." + FilenameUtils.getExtension(fromFile.getOriginalFilename());
+
+				String targetPath = uploadFolder + fileName;
+
+				imageService.uploadImage(fromFile, targetPath, 150);
+
+				imageService.saveProfileImage(fileName, fromFile.getSize(), user);
+
+				result.setFilePath(fileName);
+				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+			} catch (Exception ex) {
+				ex.printStackTrace();
+
+				result.setStatus(ConstantsUtil.RESULT_ERROR);
+				result.setRemarks(ex.getLocalizedMessage());
+
+			}
+
+		} else {
+			result.setStatus(ConstantsUtil.RESULT_ERROR);
+			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+		}
+
+		return result;
 	}
 
 	@GetMapping(path = "/logout")

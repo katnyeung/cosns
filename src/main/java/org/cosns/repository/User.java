@@ -18,10 +18,12 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
+import org.cosns.repository.extend.ProfileImage;
 import org.cosns.util.Auditable;
+import org.cosns.util.ConstantsUtil;
+import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -50,7 +52,6 @@ public class User extends Auditable<String> {
 	@Size(max = 1)
 	private String status;
 
-	@Null
 	@Column(nullable = true)
 	private String uniqueName;
 
@@ -58,25 +59,22 @@ public class User extends Auditable<String> {
 	@Column(nullable = true)
 	private String message;
 
-	@Column(nullable = true)
-	private String profileImagePath;
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@Where(clause = "status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
+	private Set<ProfileImage> profileImage;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private Set<Post> posts;
 
-	@JsonIgnore
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private Set<Image> images;
-
 	@ManyToMany
 	@JoinTable(name = "followers", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "followerId"))
-	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "userId")
+	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "followerId")
 	private List<User> followers;
 
 	@ManyToMany
 	@JoinTable(name = "followedBy", joinColumns = @JoinColumn(name = "followerId"), inverseJoinColumns = @JoinColumn(name = "userId"))
-	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "followerId")
+	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "followedById")
 	private List<User> followedBy;
 
 	@OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL)
@@ -124,14 +122,6 @@ public class User extends Auditable<String> {
 
 	public void setPosts(Set<Post> posts) {
 		this.posts = posts;
-	}
-
-	public Set<Image> getImages() {
-		return images;
-	}
-
-	public void setImages(Set<Image> images) {
-		this.images = images;
 	}
 
 	public String getUniqueName() {
@@ -182,12 +172,12 @@ public class User extends Auditable<String> {
 		this.message = message;
 	}
 
-	public String getProfileImagePath() {
-		return profileImagePath;
+	public Set<ProfileImage> getProfileImage() {
+		return profileImage;
 	}
 
-	public void setProfileImagePath(String profileImagePath) {
-		this.profileImagePath = profileImagePath;
+	public void setProfileImage(Set<ProfileImage> profileImage) {
+		this.profileImage = profileImage;
 	}
 
 }

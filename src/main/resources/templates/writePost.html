@@ -25,23 +25,46 @@
 		var main = angular.module('application', [ 'flow', 'angular-sortable-view' ])
 
 		main.controller('messageController', function($scope, $http, $timeout, $window) {
-			$scope.submit = function(flow) {
+			$scope.obj = {};
+
+			$scope.releaseDate = new Date('[[${releaseDate}]]');
+
+			$scope.validate = function(file) {
+				console.log(file.size);
+				if (file.size > 5000000) {
+					$scope.message("file is too big");
+					return false;
+				}
+				return true;
+			}
+
+			$scope.message = function(message) {
+				$scope.dialogMessageFlag = true;
+				$scope.dialogMessage = message;
+
+				$timeout(function() {
+					$scope.dialogMessageFlag = false;
+					$scope.posting = false;
+
+				}, 3000);
+			}
+
+			$scope.submit = function() {
+
 				$scope.posting = true;
 
-				if ($scope.postMessage != '') {
-					console.log($scope.postMessage);
-					console.log(flow.files);
+				if ($scope.postMessage) {
 					var fileList = [];
 
-					angular.forEach(flow.files, function(value, key) {
+					angular.forEach($scope.obj.flow.files, function(value, key) {
 						var msg = JSON.parse(value.msg);
 						if (msg.status === 'success') {
 							fileList.push(msg.filePath);
 						}
-						console.log(key + ': ' + msg.filePath);
 					});
 
 					console.log(fileList);
+
 					$http({
 						url : "/post/writePost",
 						method : "POST",
@@ -50,6 +73,7 @@
 						},
 						data : {
 							'postMessage' : $scope.postMessage,
+							'releaseDate' : $scope.releaseDate,
 							'fileList' : fileList
 						}
 					}).then(function(response) {
@@ -63,67 +87,62 @@
 
 							$scope.message("Something error, please contact system adminsitrator");
 
-							$timeout(function() {
-								$scope.dialogMessageFlag = false;
-								$scope.posting = false;
-
-							}, 3000);
 						}
 
 					});
+				} else {
+
+					$scope.message("Opps , you need to write something");
+
 				}
 
 			}
-			
-			$scope.message = function(message) {
-				$scope.dialogMessageFlag = true;
-				$scope.dialogMessage = message;
-			}
+
 		});
 	</script>
 
-	<div th:include="components/header :: header"></div>
+	<div th:include="components/header :: headerScript" th:remove="tag"></div>
+	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div ng-controller="messageController" class="container">
-		<div class="hero-unit">
-			<div class="text">
-				<textarea ng-model="postMessage"></textarea>
-			</div>
-			<form flow-init="{target: '/post/uploadImage', testChunks:false}"
-				flow-files-submitted="$flow.upload()"
-				flow-file-success="$file.msg = $message" ng-submit="submit($flow)">
-
-				<div class="alert" flow-drop
-					flow-drag-enter="style={border:'4px solid green'}"
-					flow-drag-leave="style={}" ng-style="style">Drag And Drop
-					your file here</div>
-
-				<span class="btn" flow-btn>Select File</span>
-
-
-				<table sv-root sv-part="$flow.files">
-					<tr ng-repeat="file in $flow.files" sv-element="opts"
-						class="well grid">
-						<td><div class="btn" sv-handle>{{$index+1}}</div></td>
-						<td>{{file.name}}</td>
-						<td>{{file.msg}}</td>
-						<td><img flow-img="file" style="width: 200px" /></td>
-						<td><a href="#" class="btn btn-danger"
-							ng-click="file.cancel()"> Remove </a></td>
-
-					</tr>
-				</table>
-				<div>
-					<button type="submit" class="btn" ng-disabled="posting"
-						ng-init="posting = false">Post</button>
+		<form ng-submit="submit($scope.obj.flow)">
+			<div class="hero-unit">
+				<div class="row">
+					<textarea ng-model="postMessage" rows="10" class="form-control" style="min-width: 100%" placeholder="(message)"></textarea>
 				</div>
+				<div class="row">
+					<h4>Release Date</h4>
+					<input type="date" ng-model="releaseDate" placeholder="Release Date" />
+				</div>
+				<div class="row">
+					<h4>Images</h4>
+					<div flow-init="{target: '/post/uploadImage', testChunks:false,  chunkSize:10000000}" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message" flow-name="obj.flow">
+						<div class="alert" flow-drop flow-btn flow-drag-enter="style={border:'4px solid green'}" flow-drag-leave="style={}" ng-style="style">Click or Drop image here</div>
 
-			</form>
-		</div>
-		<div id="myModalPostMessage" ng-show="dialogMessageFlag"
-			ng-init="dialogMessageFlag = false" class="alert modal">
-			<span class="row offset2">{{dialogMessage}} <a href="#"
-				class="close" ng-click="dialogMessageFlag = false">X</a></span>
+						<table sv-root sv-part="$flow.files">
+							<tr ng-repeat="file in $flow.files" sv-element="opts" class="well grid">
+								<td><div class="btn" sv-handle>{{$index+1}}</div></td>
+								<td></td>
+								<td><img flow-img="file" style="max-height: 300px; width: auto" />
+									<div class="progress" style="width: auto" ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
+										<div style="width: {{file.progress()* 100}}%" class="bar">
+											<span>{{(file.progress() * 100).toFixed(0)}}%</span>
+										</div>
+									</div></td>
+								<td><a href="#" class="btn btn-danger" ng-click="file.cancel()"> Remove </a></td>
+
+							</tr>
+						</table>
+
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer row">
+				<button type="submit" class="btn btn-primary" ng-disabled="posting" ng-init="posting = false">Post</button>
+			</div>
+		</form>
+		<div id="myModalPostMessage" ng-show="dialogMessageFlag" ng-init="dialogMessageFlag = false" class="alert modal">
+			<span class="row offset2">{{dialogMessage}}</span><a href="#" class="close" ng-click="dialogMessageFlag = false">X</a>
 		</div>
 	</div>
 </body>

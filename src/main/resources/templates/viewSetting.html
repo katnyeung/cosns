@@ -6,31 +6,46 @@
 
 <script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
+<script src="/js/ng-flow-standalone.min.js"></script>
+
 </head>
 <body ng-app="application">
 	<script>
-		var main = angular.module('application', []);
+		var main = angular.module('application', [ 'flow' ]);
 
-		main.controller('settingController', function($scope, $http) {
-			$scope.uniqueUserNameFlag = false;
+		main.controller('settingController', function($scope, $http, $timeout) {
+			$scope.obj = {};
 
-			$scope.loadUser = function() {
-				$http({
-					url : "/user/getUser/[[${targetUser?.userId}]]",
-					method : "GET",
-					headers : {
-						'Content-Type' : 'application/json'
-					}
-				}).then(function(response) {
-					if (response.data.status == 'success') {
-						$scope.user = response.data.user;
-						$scope.checkName = response.data.user.uniqueName;
-					} else {
-						$scope.message("Load User Failed");
-					}
-				});
+			$scope.message = function(message) {
+				$scope.dialogMessageFlag = true;
+				$scope.dialogMessage = message;
+
+				$timeout(function() {
+					$scope.dialogMessageFlag = false;
+					$scope.posting = false;
+
+				}, 3000);
 			}
-			$scope.loadUser();
+
+			
+			$http({
+				url : "/user/getUser/[[${targetUser?.userId}]]",
+				method : "GET",
+				headers : {
+					'Content-Type' : 'application/json'
+				}
+			}).then(function(response) {
+				if (response.data.status == 'success') {
+					if(response.data.user.profileImage[0]) {
+						$scope.profileImage = response.data.user.profileImage[0].filename;
+					}
+					
+					$scope.uniqueName = response.data.user.uniqueName;
+					$scope.profileMessage = response.data.user.message;
+				} else {
+					$scope.message("Load User Failed");
+				}
+			});
 
 			$scope.checkUniqueName = function() {
 				$http({
@@ -40,7 +55,7 @@
 						'Content-Type' : 'application/json'
 					},
 					data : {
-						uniqueName : $scope.profile.uniqueName
+						uniqueName : $scope.uniqueName
 					}
 				}).then(function(response) {
 					if (response.data.status == 'success') {
@@ -54,31 +69,36 @@
 
 			}
 
-			$scope.updateSetting = function(userId) {
-				if ($scope.checkName != $scope.profile.uniqueName && $scope.uniqueUserNameFlag) {
+			$scope.submit = function() {
 
-					$http({
-						url : "/user/updateSetting/,
-						method : "POST",
-						headers : {
-							'Content-Type' : 'application/json'
-						},
-						data : {
-							password : $scope.profile.password,
-							uniqueName : ($scope.checkName == $scope.profile.uniqueName) ? null : $scope.profile.uniqueName,
-							message : $scope.profile.message
-						}
-					}).then(function(response) {
-						if (response.data.status == 'success') {
-							$scope.message("Retweet Success");
-						} else {
-							$scope.message("Retweet Failed");
-						}
-					});
-				} else {
-					$scope.uniqueUserNameMessage = "please verify"
-				}
+				var image;
 
+				angular.forEach($scope.obj.flow.files, function(value, key) {
+					var msg = JSON.parse(value.msg);
+					if (msg.status === 'success') {
+						image = msg.filePath;
+					}
+				});
+
+				$http({
+					url : "/user/updateSetting/",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						password : $scope.password,
+						uniqueName : $scope.uniqueName,
+						message : $scope.profileMessage,
+						image : image
+					}
+				}).then(function(response) {
+					if (response.data.status == 'success') {
+						$scope.message("Success");
+					} else {
+						$scope.message("Failed");
+					}
+				});
 			}
 		});
 	</script>
@@ -87,44 +107,61 @@
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div class="container" ng-controller="settingController">
-		<div class="hero-unit">Settings</div>
-		<div ng-controller="viewPostController" class="row offset1">
+		<form ng-submit="submit()">
+			<div class="hero-unit row">Settings</div>
+			<div class="row">
 
-			<form ng-submit="updateSetting" name="profileUpdateForm">
-				<div class="modal-body">
-					<table>
+				<table class="table">
+					<tr>
+						<td class="span3">Profile Image :</td>
+						<td>
+							<div flow-init="{target: '/user/uploadProfileImage', testChunks:false, singleFile:true, chunkSize : 10000000}" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)" flow-name="obj.flow">
 
-						<tr>
-							<td>Password :</td>
-							<td><input type="password" ng-model="profile.password"
-								name="password" /></td>
-						</tr>
-						<tr>
-							<td>Assign Unique Name :</td>
-							<td><input type="hidden" ng-model="checkName" /><input
-								type="text" ng-model="profile.uniqueName" name="uniqueName" /><label
-								ng-model="uniqueNameMessage"></label>
-								<button type="button" ng-click="checkUniqueName()">Check</button></td>
-						</tr>
-						<tr>
-							<td>Profile Message :</td>
-							<td><textarea ng-model="profile.message" name="message"></textarea></td>
-						</tr>
+								<div class="span2">
+									<div class="thumbnail" ng-show="!$flow.files.length">
+										<img ng-src="{{profileImage ? '/images/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" style="width: 150px; height: 150px" flow-btn /> <span style="color: #CFCFCF">(Optional)</span>
+									</div>
+									<div class="thumbnail" ng-show="$flow.files.length">
+										<img flow-img="$flow.files[0]" style="width: 150px; height: 150px" flow-btn />
+									</div>
+									<div ng-repeat="file in $flow.files">
+										<div class="progress" style="width: auto" ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
+											<div class="bar" style="width: {{file.progress()* 100}}%">
+												<span>{{(file.progress() * 100).toFixed(0)}}%</span>
+											</div>
+										</div>
+									</div>
+									<button type="button" class="btn btn-info" flow-btn>select image</button>
+								</div>
 
-					</table>
-
-
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>Assign Unique Name :</td>
+						<td><div>
+								<input type="text" ng-model="uniqueName" name="uniqueName" placeholder="(Optional)" /><span ng-model="uniqueNameMessage"></span> <br />
+								<button type="button" ng-click="checkUniqueName()" class="btn btn-info btn-sm">Check</button>
+							</div></td>
+					</tr>
+					<tr>
+						<td>Profile Message :</td>
+						<td><div>
+								<textarea ng-model="profileMessage" name="message" rows="10" class="form-control" style="min-width: 100%" placeholder="(Optional)"></textarea>
+							</div></td>
+					</tr>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<div class="form-group">
+					<input class="form-control" type="password" ng-model="password" name="password" placeholder="Password" /><br /> <input type="submit" id="update" value="update" class="btn btn-primary btn-lg" />
 				</div>
-				<div class="modal-footer">
-					<input type="submit" id="update" value="update"
-						class="btn btn-primary" />
-				</div>
-			</form>
-
-		</div>
+			</div>
+			</from>
+			<div id="myModalPostMessage" ng-show="dialogMessageFlag" ng-init="dialogMessageFlag = false" class="alert modal">
+				<span class="row offset2">{{dialogMessage}}</span><a href="#" class="close" ng-click="dialogMessageFlag = false">X</a>
+			</div>
 	</div>
 
-
-	</div>
 </body>
 </html>

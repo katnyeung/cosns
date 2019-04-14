@@ -9,8 +9,10 @@ import org.cosns.dao.UserDAO;
 import org.cosns.repository.FriendRequest;
 import org.cosns.repository.Post;
 import org.cosns.repository.User;
+import org.cosns.repository.extend.ProfileImage;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.UserFormDTO;
+import org.cosns.web.DTO.UserSettingDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
 	Logger logger = Logger.getLogger(this.getClass().getName());
+
+	@Autowired
+	ImageService imageService;
 
 	@Autowired
 	UserDAO userDAO;
@@ -166,5 +171,55 @@ public class UserService {
 
 	public void updateUser(User user) {
 		userDAO.save(user);
+	}
+
+	@Transactional
+	public User updateSetting(User user, UserSettingDTO userSettingDTO) {
+
+		// check uniqueName
+		if (userSettingDTO.getUniqueName() != null && !userSettingDTO.getUniqueName().equals(user.getUniqueName())) {
+
+			User checkUser = getUserByUniqueName(userSettingDTO.getUniqueName());
+
+			if (checkUser == null) {
+				if (userSettingDTO.getUniqueName() != null) {
+					user.setUniqueName(userSettingDTO.getUniqueName());
+				}
+
+				if (userSettingDTO.getMessage() != null) {
+					user.setMessage(userSettingDTO.getMessage());
+				}
+
+				user.setUniqueName(userSettingDTO.getUniqueName());
+
+				setKeysInRedis(userSettingDTO.getUniqueName(), user.getUserId(), ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX);
+
+			} else {
+				return null;
+			}
+		}
+
+		// profileImage
+		if (userSettingDTO.getImage() != null) {
+			// deactive current image
+			imageService.disableAllProfileImageByUserId(user.getUserId());
+
+			Set<ProfileImage> imageSet = imageService.findPendProfileImageByFilename(userSettingDTO.getImage());
+			for (ProfileImage image : imageSet) {
+				image.setStatus(ConstantsUtil.IMAGE_ACTIVE);
+				image.setUser(user);
+				image.setSeq(1);
+				imageService.saveProfileImage(image);
+			}
+		}
+
+		// message
+		if (userSettingDTO.getMessage() != null) {
+			user.setMessage(userSettingDTO.getMessage());
+		}
+
+		updateUser(user);
+
+		return user;
 	}
 }

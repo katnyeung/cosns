@@ -1,9 +1,12 @@
 package org.cosns.web.DTO;
 
+import java.util.Date;
 import java.util.List;
 
 public class PostFormDTO {
 	String postMessage;
+	Date releaseDate;
+	
 	List<String> fileList;
 
 	public String getPostMessage() {
@@ -20,6 +23,14 @@ public class PostFormDTO {
 
 	public void setFileList(List<String> fileList) {
 		this.fileList = fileList;
+	}
+
+	public Date getReleaseDate() {
+		return releaseDate;
+	}
+
+	public void setReleaseDate(Date releaseDate) {
+		this.releaseDate = releaseDate;
 	}
 
 	@Override

@@ -3,6 +3,8 @@ package org.cosns.web.DTO;
 public class UserSettingDTO {
 	String password;
 
+	String image;
+
 	String uniqueName;
 
 	String message;
@@ -13,6 +15,14 @@ public class UserSettingDTO {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 
 	public String getUniqueName() {
@@ -30,6 +40,5 @@ public class UserSettingDTO {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
-	
+
 }

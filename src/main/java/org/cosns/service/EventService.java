@@ -41,10 +41,23 @@ public class EventService {
 
 		for (Post post : postSet) {
 			Event event = new PhotoEvent();
-			event.setStart(post.getCreatedate());
-			event.setEnd(post.getCreatedate());
+			if (post.getReleaseDate() != null) {
+				event.setStart(post.getReleaseDate());
+				event.setEnd(post.getReleaseDate());
+			} else {
+				event.setStart(post.getCreatedate());
+				event.setEnd(post.getCreatedate());
+			}
 
-			StringBuilder sb = new StringBuilder(post.getUser().getEmail());
+			String userName;
+
+			if (post.getUser().getUniqueName() != null) {
+				userName = post.getUser().getUniqueName();
+			} else {
+				userName = "#" + post.getUser().getUserId();
+			}
+
+			StringBuilder sb = new StringBuilder(userName);
 			for (HashTag hashTag : post.getHashtags()) {
 				sb.append("#");
 				sb.append(hashTag.getHashTag());
@@ -53,7 +66,7 @@ public class EventService {
 
 			event.setUrl("/p/" + post.getPostId());
 			event.setColor("blue");
-			
+
 			eventSet.add(event);
 		}
 

@@ -1,12 +1,13 @@
 package org.cosns.repository;
 
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -16,22 +17,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Image extends Auditable<String> {
+@Table(name = "image")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "image_type")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+public abstract class Image extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long imageId;
-
-	@JsonIgnore
-	@ManyToOne(optional = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "post_id", referencedColumnName = "postId")
-	private Post post;
-
-	@JsonIgnore
-	@ManyToOne(optional = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", referencedColumnName = "userId")
-	private User user;
 
 	private int seq;
 
@@ -40,7 +34,7 @@ public class Image extends Auditable<String> {
 	private String filename;
 
 	private double size;
-	
+
 	@JsonIgnore
 	@NotNull
 	@Size(max = 1)
@@ -52,14 +46,6 @@ public class Image extends Auditable<String> {
 
 	public void setImageId(Long imageId) {
 		this.imageId = imageId;
-	}
-
-	public Post getPost() {
-		return post;
-	}
-
-	public void setPost(Post post) {
-		this.post = post;
 	}
 
 	public int getSeq() {
@@ -92,14 +78,6 @@ public class Image extends Auditable<String> {
 
 	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
 	}
 
 }

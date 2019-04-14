@@ -10,77 +10,54 @@
 <body ng-app="application">
 	<script>
 		var main = angular.module('application', []);
-		main.controller('viewPostController', function($scope, $http) {
+		main.controller('viewPostController', function($scope, $http, postService, $timeout) {
+			var handleResponse = function(response, type) {
+				if (response.data.status == 'success') {
+					$scope.message(type + " success");
+				} else {
+					$scope.message(type + " failed : " + response.data.remarks);
+				}
+			}
+
 			$scope.likePost = function(postId) {
-				$http({
-					url : "/post/likePost",
-					method : "POST",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						postId : postId
-					}
-				}).then(function(response) {
-					if (response.data.status == 'success') {
-						$scope.message("Like Success");
-					} else {
-						$scope.message("Like Failed");
-					}
+				postService.likePost(postId).then(function(response) {
+					handleResponse(response, 'like');
 				});
 			}
 
 			$scope.retweetPost = function(postId) {
-				$http({
-					url : "/post/retweetPost",
-					method : "POST",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						postId : postId
-					}
-				}).then(function(response) {
-					if (response.data.status == 'success') {
-						$scope.message("Retweet Success");
-					} else {
-						$scope.message("Retweet Failed");
-					}
+				postService.retweetPost(postId).then(function(response) {
+					handleResponse(response, 'retweet');
 				});
-
 			}
 
-			$scope.loadPost = function() {
-				$http({
-					url : "/post/getUserPosts/[[${targetUser?.userId}]]",
-					method : "GET",
-					headers : {
-						'Content-Type' : 'application/json'
-					}
-				}).then(function(response) {
-					$scope.postList = response.data.postList;
-				});
+			postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]").then(function(response) {
+				$scope.postList = response.data.postList;
+			});
+
+			$scope.message = function(message) {
+
+				$scope.dialogMessageFlag = true;
+				$scope.dialogMessage = message;
+
+				$timeout(function() {
+					$scope.dialogMessageFlag = false;
+				}, 3000);
 
 			}
-			$scope.loadPost();
-
 		});
 
-		main.controller('viewUserController', function($scope, $http) {
-			$scope.loadUser = function() {
-				$http({
-					url : "/user/getUser/[[${targetUser?.userId}]]",
-					method : "GET",
-					headers : {
-						'Content-Type' : 'application/json'
-					}
-				}).then(function(response) {
+		main.controller('viewUserController', function($scope, $http, $timeout) {
+			$http({
+				url : "/user/getUser/[[${targetUser?.userId}]]",
+				method : "GET",
+				headers : {
+					'Content-Type' : 'application/json'
+				}
+			}).then(function(response) {
 
-					$scope.user = response.data.user;
-				});
-
-			}
-			$scope.loadUser();
+				$scope.user = response.data.user;
+			});
 
 			$scope.follow = function(userId) {
 				$http({
@@ -97,25 +74,42 @@
 					}
 				});
 			}
+			$scope.message = function(message) {
+
+				$scope.dialogMessageFlag = true;
+				$scope.dialogMessage = message;
+
+				$timeout(function() {
+					$scope.dialogMessageFlag = false;
+				}, 3000);
+
+			}
 		});
 	</script>
 
+	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div class="container" ng-controller="viewUserController">
 		<div class="hero-unit">
-			{{user.email}} {{user.uniqueName}} {{user.message}}
-
-			<button type="button"
-				th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ''">Follow</button>
+			{{user.uniqueName}} ( {{user.email}} )
+			<pre>{{user.message}}</pre>
+			<br />
+			Following
+			<ul>
+				<li ng-repeat="follower in user.followers"><a href="/u/{{follower.uniqueName ? follower.uniqueName : follower.userId}}">{{follower.uniqueName ? follower.uniqueName : follower.userId}}</a></li>
+			</ul>
+			<button type="button" th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ''">Follow</button>
 		</div>
 		<div ng-controller="viewPostController" class="row offset1">
 			<div th:include="components/post :: viewPosts" th:remove="tag"></div>
 		</div>
+		<div id="myModalPostMessage" ng-show="dialogMessageFlag" ng-init="dialogMessageFlag = false" class="alert modal">
+			<span class="row offset2">{{dialogMessage}}</span><a href="#" class="close" ng-click="dialogMessageFlag = false">X</a>
+		</div>
 	</div>
 
 
-	</div>
 </body>
 </html>

@@ -9,64 +9,48 @@
 <script>
 	var main = angular.module('application', []);
 
-	main.controller('viewPostController', function($scope, $http) {
+	main.controller('viewPostController', function($scope, $timeout, postService) {
+		var handleResponse = function(response, type) {
+			if (response.data.status == 'success') {
+				$scope.message(type + " success");
+			} else {
+				$scope.message(type + " failed : " + response.data.remarks);
+			}
+		}
+
 		$scope.likePost = function(postId) {
-			$http({
-				url : "/post/likePost",
-				method : "POST",
-				headers : {
-					'Content-Type' : 'application/json'
-				},
-				data : {
-					postId : postId
-				}
-			}).then(function(response) {
-				if (response.data.status == 'success') {
-					$scope.message("Like Success");
-				} else {
-					$scope.message("Like Failed");
-				}
+			postService.likePost(postId).then(function(response) {
+				handleResponse(response, 'like');
 			});
 		}
 
 		$scope.retweetPost = function(postId) {
-			$http({
-				url : "/post/retweetPost",
-				method : "POST",
-				headers : {
-					'Content-Type' : 'application/json'
-				},
-				data : {
-					postId : postId
-				}
-			}).then(function(response) {
-				if (response.data.status == 'success') {
-					$scope.message("Retweet Success");
-				} else {
-					$scope.message("Retweet Failed");
-				}
+			postService.retweetPost(postId).then(function(response) {
+				handleResponse(response, 'retweet');
 			});
+		}
+
+		postService.loadPosts("getPost/[[${postId}]]").then(function(response) {
+			$scope.postList = response.data.postList;
+		});
+
+		$scope.message = function(message) {
+
+			$scope.dialogMessageFlag = true;
+			$scope.dialogMessage = message;
+
+			$timeout(function() {
+				$scope.dialogMessageFlag = false;
+			}, 3000);
 
 		}
 
-		$scope.loadPost = function() {
-			$http({
-				url : "/post/getPost/[[${postId}]]",
-				method : "GET",
-				headers : {
-					'Content-Type' : 'application/json'
-				}
-			}).then(function(response) {
-				$scope.postList = response.data.postList;
-			});
-
-		}
-		$scope.loadPost();
 	});
 </script>
 </head>
 <body ng-app="application">
 
+	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 	<div class="container">

@@ -57,6 +57,7 @@
 							}
 						}).then(function(response) {
 							$scope.message("Account Create Success");
+							$scope.showRegister = false;
 						});
 					} else {
 						$scope.message("please verify your password")
@@ -100,7 +101,7 @@
 			</form>
 		</div>
 		<div ng-show="user" class="nav-pills pull-right">
-			<a href="/u/">{{user.email}}</a> &nbsp; <a href="#"
+			<a href="/u/">{{user.email}}</a> &nbsp;<a href="/setting/">Setting</a> <a href="#"
 				ng-click="logout()">Logout</a>
 		</div>
 

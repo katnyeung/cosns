@@ -1,24 +1,22 @@
 package org.cosns.controller;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.tomcat.util.http.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.cosns.repository.Post;
 import org.cosns.repository.PostReaction;
 import org.cosns.repository.User;
 import org.cosns.service.HashTagService;
+import org.cosns.service.ImageService;
 import org.cosns.service.PostService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.ImageUploadDTO;
@@ -39,10 +37,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleFilters;
-import com.mortennobel.imagescaling.ResampleOp;
-
 @RestController
 @RequestMapping("/post")
 public class PostRestController {
@@ -50,6 +44,9 @@ public class PostRestController {
 
 	@Autowired
 	PostService postService;
+
+	@Autowired
+	ImageService imageService;
 
 	@Autowired
 	HashTagService hashTagService;
@@ -111,6 +108,7 @@ public class PostRestController {
 		Set<Post> postList = postService.findRandomPosts();
 
 		plr.setPostList(postList);
+		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
 		return plr;
 	}
@@ -147,38 +145,29 @@ public class PostRestController {
 	}
 
 	@PostMapping(value = "/uploadImage", consumes = { "multipart/form-data" })
-	public DefaultResult uploadImageContent(ImageUploadDTO imageInfo, HttpSession session) throws IOException {
+	public DefaultResult uploadImageContent(ImageUploadDTO imageInfo, HttpSession session) throws IOException, NullPointerException, SizeLimitExceededException {
 		UploadImageResult result = new UploadImageResult();
 		User user = (User) session.getAttribute("user");
 
 		if (user != null) {
 			try {
-				SimpleDateFormat sdf = new SimpleDateFormat(uploadPattern);
-				String prefix = sdf.format(Calendar.getInstance().getTime()) + "_";
+				String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
+
 				logger.info("inside upload image");
 
-				MultipartFile file = imageInfo.getFile();
+				MultipartFile fromFile = imageInfo.getFile();
 
-				File uploadedFile = new File(uploadFolder + prefix + file.getOriginalFilename());
-				file.transferTo(uploadedFile);
+				String fileName = uuidPrefix + "." + FilenameUtils.getExtension(fromFile.getOriginalFilename());
 
-				logger.info("file : " + uploadedFile);
+				String targetPath = uploadFolder + fileName;
 
-				// resize image
-				BufferedImage in = ImageIO.read(uploadedFile);
+				logger.info("targetPath : " + targetPath);
 
-				BufferedImage newImage = new BufferedImage(in.getWidth(), in.getHeight(), BufferedImage.TYPE_INT_ARGB);
+				imageService.uploadImage(fromFile, targetPath, 2048);
 
-				ResampleOp resizeOp = new ResampleOp(DimensionConstrain.createMaxDimension(2048, -1));
-				resizeOp.setFilter(ResampleFilters.getLanczos3Filter());
-				BufferedImage scaledImage = resizeOp.filter(newImage, null);
+				imageService.savePostImage(fileName, fromFile.getSize(), user);
 
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				ImageIO.write(scaledImage, file.getContentType(), baos);
-
-				postService.saveImage(prefix, file, user);
-
-				result.setFilePath(prefix + file.getOriginalFilename());
+				result.setFilePath(fileName);
 				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
 			} catch (Exception ex) {
@@ -242,7 +231,6 @@ public class PostRestController {
 
 	@PostMapping(path = "/retweetPost")
 	public DefaultResult retweet(@RequestBody PostReactionDTO postReactionDTO, HttpSession session) {
-		logger.info("postReactionDTO : " + postReactionDTO.getPostId());
 		DefaultResult dr = new DefaultResult();
 		User user = (User) session.getAttribute("user");
 

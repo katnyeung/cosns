@@ -38,9 +38,24 @@ public class RouteController {
 
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
+			return "writePost";
 		}
 
-		return "writePost";
+		return "redirect:/";
+	}
+
+	@GetMapping(path = "w/{dateStart}")
+	public String writePostWithDate(@PathVariable("dateStart") String dateStart, HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
+
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+			model.addAttribute("releaseDate", dateStart);
+			logger.info("releaseDate : " + dateStart);
+			return "writePost";
+		}
+
+		return "redirect:/";
 	}
 
 	@GetMapping(path = "c")
@@ -109,7 +124,7 @@ public class RouteController {
 				if (targetUser != null) {
 					logger.info("found id " + username);
 					if (targetUser.getUniqueName() != null) {
-						return "redirect:/viewProfile/" + targetUser.getUniqueName();
+						return "redirect:/u/" + targetUser.getUniqueName();
 					} else {
 						model.addAttribute("targetUser", targetUser);
 					}
@@ -137,6 +152,6 @@ public class RouteController {
 			return "redirect:/";
 		}
 
-		return "viewProfile";
+		return "viewSetting";
 	}
 }

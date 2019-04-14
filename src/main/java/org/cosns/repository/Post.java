@@ -1,5 +1,6 @@
 package org.cosns.repository;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -23,9 +24,9 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.cosns.repository.extend.PostImage;
 import org.cosns.util.Auditable;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -39,10 +40,8 @@ public abstract class Post extends Auditable<String> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long postId;
-	
-	@Lob
-	@Column(nullable = true)
-	private String uniqueName;
+
+	private Date releaseDate;
 
 	@Lob
 	@Column(nullable = true)
@@ -59,7 +58,7 @@ public abstract class Post extends Auditable<String> {
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	@OrderBy("seq ASC")
-	private Set<Image> images;
+	private Set<PostImage> postImages;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private Set<HashTag> hashtags;
@@ -106,12 +105,12 @@ public abstract class Post extends Auditable<String> {
 		this.user = user;
 	}
 
-	public Set<Image> getImages() {
-		return images;
+	public Set<PostImage> getPostImages() {
+		return postImages;
 	}
 
-	public void setImages(Set<Image> images) {
-		this.images = images;
+	public void setPostImages(Set<PostImage> postImages) {
+		this.postImages = postImages;
 	}
 
 	public Set<HashTag> getHashtags() {
@@ -128,6 +127,14 @@ public abstract class Post extends Auditable<String> {
 
 	public void setPostReaction(Set<PostReaction> postReaction) {
 		this.postReaction = postReaction;
+	}
+
+	public Date getReleaseDate() {
+		return releaseDate;
+	}
+
+	public void setReleaseDate(Date releaseDate) {
+		this.releaseDate = releaseDate;
 	}
 
 }

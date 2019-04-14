@@ -9,15 +9,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UserDAO extends JpaRepository<User, Long> {
-	@Query("FROM User WHERE uniqueName = :uniqueName and status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
+	@Query("SELECT u FROM User u WHERE u.uniqueName = :uniqueName and u.status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
 	public Set<User> findActiveUserByUniqueName(@Param("uniqueName") String uniqueName);
 	
-	@Query("FROM User WHERE email = :email and status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
+	@Query("SELECT u FROM User u WHERE u.email = :email and u.status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
 	public Set<User> findActiveUserByEmail(@Param("email") String email);
 	
-	@Query("FROM User WHERE userId = :userId and status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
+	@Query("SELECT u FROM User u WHERE u.userId = :userId and u.status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
 	public Set<User> findActiveUserById(@Param("userId") Long userId);
 	
-	@Query("FROM User WHERE uniqueName = :uniqueName and status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
+	@Query("SELECT u FROM User u WHERE u.uniqueName = :uniqueName and u.status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
 	public Set<User> findAllUserByUniqueName(@Param("uniqueName") String uniqueName);
 }

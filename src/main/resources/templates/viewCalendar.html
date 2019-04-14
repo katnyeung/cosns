@@ -11,9 +11,14 @@
 
 <script src='/js/core/main.js'></script>
 <script src='/js/daygrid/main.js'></script>
+<script src='/js/moment/main.js'></script>
+<script src='/js/moment-timezone/main.js'></script>
+<script src='/js/interaction/main.js'></script>
+<script src='/js/bootstrap/main.js'></script>
 
-<link rel="stylesheet"
-	href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
@@ -22,7 +27,8 @@
 		var calendarEl = document.getElementById('calendar');
 
 		var calendar = new FullCalendar.Calendar(calendarEl, {
-			plugins : [ 'dayGrid' ],
+			plugins : [ 'dayGrid', 'interaction', 'bootstrap' ],
+			themeSystem : 'bootstrap',
 			header : {
 				left : 'prev,next today',
 				center : 'title',
@@ -31,23 +37,34 @@
 			fixedWeekCount : false,
 			themeSystem : 'spacelab',
 			eventClick : function(info) {
-				info.jsEvent.preventDefault(); // don't let the browser navigate
+				info.jsEvent.preventDefault();
 
 				console.log(info.jsEvent);
-				$("#dialogCalendar .message").html(
-						info.event.title
-								+ "<br/> <a href ='" + info.event.url + "'>"
-								+ info.event.url + "</a>");
-				$('#dialogCalendar').dialog(
-						{
-							title : info.event.start,
-							position : {
-								my : "center",
-								at : "left+" + info.jsEvent.clientX + "px top+"
-										+ (info.jsEvent.clientY + 80) + "px ",
-								of : window
-							},
-						});
+				$("#dialogCalendar .message").html(info.event.title + "<br/> <a href ='" + info.event.url + "'>" + info.event.url + "</a>");
+				$('#dialogCalendar').dialog({
+					title : info.event.start,
+					position : {
+						my : "center",
+						at : "left+" + info.jsEvent.clientX + "px top+" + (info.jsEvent.clientY + 70) + "px ",
+						of : window
+					},
+				});
+				$(".ui-dialog-titlebar").hide();
+			},
+			selectable : true,
+			select : function(info) {
+				info.jsEvent.preventDefault();
+
+				$("#dialogCalendar .message").html("<a href ='w/" + info.startStr + "'> Write Post </a><br/><a href='registEvent/"+ info.startStr + "&" + info.endStr + "'>Regist Event</a>");
+				$('#dialogCalendar').dialog({
+					width : 60,
+					height : 100,
+					position : {
+						my : "center",
+						at : "left+" + info.jsEvent.clientX + "px top+" + (info.jsEvent.clientY + 60) + "px ",
+						of : window
+					},
+				});
 				$(".ui-dialog-titlebar").hide();
 			},
 
@@ -81,9 +98,7 @@
 		<!-- Modal content -->
 		<div>
 			<p class="message"></p>
-			<button
-				onclick="$(this).closest('.ui-dialog-content').dialog('close');"
-				class="close">X</button>
+			<button onclick="$(this).closest('.ui-dialog-content').dialog('close');" class="close">X</button>
 		</div>
 
 	</div>
