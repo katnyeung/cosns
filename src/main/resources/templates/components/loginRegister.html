@@ -1,7 +1,7 @@
 <!-- components/header.html -->
 <header th:fragment="loginRegisterScript">
 	<script th:inline="javascript">
-		main.controller('userController', function($scope, $http, $timeout) {
+		main.controller('userController', function($scope, $http, $timeout, messageService) {
 			$scope.login = function() {
 				if ($scope.login.email) {
 					$http({
@@ -22,7 +22,7 @@
 							$scope.message("Welcome.")
 						} else {
 
-							$scope.message("Login Failed : either password or login not found")
+							$scope.message(response.data.remarks)
 						}
 
 					});
@@ -67,14 +67,7 @@
 			};
 
 			$scope.message = function(message) {
-
-				$scope.dialogMessageFlag = true;
-				$scope.dialogMessage = message;
-
-				$timeout(function() {
-					$scope.dialogMessageFlag = false;
-				}, 3000);
-
+				messageService.setMessage(message);
 			}
 
 			$scope.user = /*[[${user}]]*/{};
@@ -85,24 +78,20 @@
 
 	<div ng-controller="userController">
 		<ul class="nav">
-			<li class="navbar-item"><a href="/c">Caneldar</a></li>
+			<li class="navbar-item"><a href="/c">Calendar</a></li>
 			<li class="navbar-item"><a href="/t" ng-show="user">Timeline</a></li>
 			<li class="navbar-item"><a href="/w" ng-show="user">Write</a></li>
 		</ul>
 
 		<div ng-hide="user">
 			<form class="navbar-form pull-right" ng-submit="login()">
-				<input class="span2" type="text" ng-model="login.email" name="email"
-					placeholder="Email"> <input class="span2" type="password"
-					ng-model="login.password" name="password" placeholder="Password">
+				<input class="span2" type="text" ng-model="login.email" name="email" placeholder="Email"> <input class="span2" type="password" ng-model="login.password" name="password" placeholder="Password">
 				<button type="submit" class="btn">Sign in</button>
-				<a href="#myModal" role="button" class="btn"
-					ng-click="showRegister=true">Register</a>
+				<a href="#myModal" role="button" class="btn" ng-click="showRegister=true">Register</a>
 			</form>
 		</div>
 		<div ng-show="user" class="nav-pills pull-right">
-			<a href="/u/">{{user.email}}</a> &nbsp;<a href="/setting/">Setting</a> <a href="#"
-				ng-click="logout()">Logout</a>
+			<a href="/u/">{{user.email}}</a> &nbsp;<a href="/setting/">Setting</a> <a href="#" ng-click="logout()">Logout</a>
 		</div>
 
 		<div id="myModal" ng-show="showRegister" class="modal">
@@ -116,18 +105,15 @@
 						<tr>
 
 							<td>Email :</td>
-							<td><input type="text" ng-model="register.email"
-								name="email" /></td>
+							<td><input type="text" ng-model="register.email" name="email" /></td>
 						</tr>
 						<tr>
 							<td>Password :</td>
-							<td><input type="password" ng-model="register.password"
-								name="password" /></td>
+							<td><input type="password" ng-model="register.password" name="password" /></td>
 						</tr>
 						<tr>
 							<td>Password Again :</td>
-							<td><input type="password" ng-model="register.passwordAgain"
-								name="passwordAgain" /></td>
+							<td><input type="password" ng-model="register.passwordAgain" name="passwordAgain" /></td>
 						</tr>
 
 					</table>
@@ -135,18 +121,11 @@
 
 				</div>
 				<div class="modal-footer">
-					<a href="#" class="btn" ng-click="showRegister=false">Close</a> <input
-						type="submit" id="register" value="register"
-						class="btn btn-primary" />
+					<a href="#" class="btn" ng-click="showRegister=false">Close</a> <input type="submit" id="register" value="register" class="btn btn-primary" />
 				</div>
 			</form>
 		</div>
 
-		<div id="myModal" ng-show="dialogMessageFlag"
-			ng-init="dialogMessageFlag = false" class="alert modal">
-			<span class="row offset2">{{dialogMessage}} <a href="#"
-				class="close" ng-click="dialogMessageFlag = false">X</a></span>
-		</div>
 	</div>
 
 </header>

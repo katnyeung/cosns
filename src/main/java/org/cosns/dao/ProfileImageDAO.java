@@ -20,4 +20,7 @@ public interface ProfileImageDAO extends JpaRepository<ProfileImage, Long> {
 	@Modifying
 	@Query("UPDATE ProfileImage i SET i.status = '" + ConstantsUtil.IMAGE_DELETED + "' WHERE i.user.userId = :userId AND i.status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
 	public void disableAllProfileImageByUserId(@Param("userId") Long userId);
+	
+	@Query("SELECT i FROM ProfileImage i WHERE i.filename = :filename and i.status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
+	public Set<ProfileImage> findActiveImageByFilename(@Param("filename") String filename);
 }

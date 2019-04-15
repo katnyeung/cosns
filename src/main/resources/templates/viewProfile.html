@@ -10,7 +10,7 @@
 <body ng-app="application">
 	<script>
 		var main = angular.module('application', []);
-		main.controller('viewPostController', function($scope, $http, postService, $timeout) {
+		main.controller('viewPostController', function($scope, $http, postService, messageService) {
 			var handleResponse = function(response, type) {
 				if (response.data.status == 'success') {
 					$scope.message(type + " success");
@@ -36,18 +36,11 @@
 			});
 
 			$scope.message = function(message) {
-
-				$scope.dialogMessageFlag = true;
-				$scope.dialogMessage = message;
-
-				$timeout(function() {
-					$scope.dialogMessageFlag = false;
-				}, 3000);
-
+				messageService.setMessage(message);
 			}
 		});
 
-		main.controller('viewUserController', function($scope, $http, $timeout) {
+		main.controller('viewUserController', function($scope, $http, messageService) {
 			$http({
 				url : "/user/getUser/[[${targetUser?.userId}]]",
 				method : "GET",
@@ -57,6 +50,11 @@
 			}).then(function(response) {
 
 				$scope.user = response.data.user;
+				
+				if(response.data.user.profileImage[0]) {
+					$scope.profileImage = response.data.user.profileImage[0].filename;
+				}
+				
 			});
 
 			$scope.follow = function(userId) {
@@ -74,15 +72,9 @@
 					}
 				});
 			}
+			
 			$scope.message = function(message) {
-
-				$scope.dialogMessageFlag = true;
-				$scope.dialogMessage = message;
-
-				$timeout(function() {
-					$scope.dialogMessageFlag = false;
-				}, 3000);
-
+				messageService.setMessage(message);
 			}
 		});
 	</script>
@@ -93,10 +85,10 @@
 
 	<div class="container" ng-controller="viewUserController">
 		<div class="hero-unit">
+			<img src="/pimages/{{profileImage}}"/><br/>
 			{{user.uniqueName}} ( {{user.email}} )
 			<pre>{{user.message}}</pre>
-			<br />
-			Following
+			<br /> Following
 			<ul>
 				<li ng-repeat="follower in user.followers"><a href="/u/{{follower.uniqueName ? follower.uniqueName : follower.userId}}">{{follower.uniqueName ? follower.uniqueName : follower.userId}}</a></li>
 			</ul>
@@ -104,9 +96,6 @@
 		</div>
 		<div ng-controller="viewPostController" class="row offset1">
 			<div th:include="components/post :: viewPosts" th:remove="tag"></div>
-		</div>
-		<div id="myModalPostMessage" ng-show="dialogMessageFlag" ng-init="dialogMessageFlag = false" class="alert modal">
-			<span class="row offset2">{{dialogMessage}}</span><a href="#" class="close" ng-click="dialogMessageFlag = false">X</a>
 		</div>
 	</div>
 

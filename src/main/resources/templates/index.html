@@ -29,7 +29,7 @@
 			}
 
 		});
-		main.controller('viewPostController', function($scope, $timeout, postService) {
+		main.controller('viewPostController', function($scope, postService, messageService) {
 			var handleResponse = function(response, type) {
 				if (response.data.status == 'success') {
 					$scope.message(type + " success");
@@ -37,42 +37,33 @@
 					$scope.message(type + " failed : " + response.data.remarks);
 				}
 			}
-			
+
 			$scope.likePost = function(postId) {
 				postService.likePost(postId).then(function(response) {
 					handleResponse(response, 'like');
 				});
 			}
-			
+
 			$scope.retweetPost = function(postId) {
 				postService.retweetPost(postId).then(function(response) {
 					handleResponse(response, 'retweet');
-				});				
+				});
 			}
-			
-			postService.loadPosts("getRandomPosts").then(function(response){
+
+			postService.loadPosts("getRandomPosts").then(function(response) {
 				$scope.postList = response.data.postList;
 			});
 
 			$scope.message = function(message) {
-
-				$scope.dialogMessageFlag = true;
-				$scope.dialogMessage = message;
-
-				$timeout(function() {
-					$scope.dialogMessageFlag = false;
-				}, 3000);
-
+				messageService.setMessage(message);
 			}
-
 		});
 	</script>
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
-	
+
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
-	
 	<div class="container">
 		<div ng-controller="searchController" class="hero-unit">
 			<!-- Main hero unit for a primary marketing message or call to action -->

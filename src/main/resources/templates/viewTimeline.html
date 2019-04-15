@@ -9,19 +9,15 @@
 <script>
 	var main = angular.module('application', []);
 	main.controller('viewPostController', function($scope, $http) {
-		$scope.loadPosts = function() {
-			$http({
-				url : "/post/getTimelinePosts",
-				method : "GET",
-				headers : {
-					'Content-Type' : 'application/json'
-				}
-			}).then(function(response) {
-				$scope.postList = response.data.postList;
-			});
-
-		}
-		$scope.loadPosts();
+		$http({
+			url : "/post/getTimelinePosts",
+			method : "GET",
+			headers : {
+				'Content-Type' : 'application/json'
+			}
+		}).then(function(response) {
+			$scope.postList = response.data.postList;
+		});
 
 	});
 </script>

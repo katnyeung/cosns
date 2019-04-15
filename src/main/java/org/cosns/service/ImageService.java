@@ -33,8 +33,9 @@ public class ImageService {
 	@Autowired
 	ProfileImageDAO profileImageDAO;
 
-	public void savePostImage(String targetFileName, Long fileSize, User user) {
+	public void savePostImage(String storedPath, String targetFileName, Long fileSize, User user) {
 		PostImage image = new PostImage();
+		image.setStoredPath(storedPath);
 		image.setFilename(targetFileName);
 		image.setSize(fileSize);
 		image.setStatus(ConstantsUtil.IMAGE_PEND);
@@ -42,8 +43,9 @@ public class ImageService {
 		postImageDAO.save(image);
 	}
 
-	public void saveProfileImage(String targetFileName, Long fileSize, User user) {
+	public void saveProfileImage(String storedPath, String targetFileName, Long fileSize, User user) {
 		ProfileImage image = new ProfileImage();
+		image.setStoredPath(storedPath);
 		image.setFilename(targetFileName);
 		image.setSize(fileSize);
 		image.setStatus(ConstantsUtil.IMAGE_PEND);
@@ -87,6 +89,10 @@ public class ImageService {
 		return postImageDAO.findPendImageByFilename(file);
 	}
 
+	public Set<PostImage> findActivePostImageByFilename(String file) {
+		return postImageDAO.findActiveImageByFilename(file);
+	}
+
 	public void saveProfileImage(ProfileImage image) {
 		profileImageDAO.save(image);
 	}
@@ -97,6 +103,10 @@ public class ImageService {
 
 	public void disableAllProfileImageByUserId(Long userId) {
 		profileImageDAO.disableAllProfileImageByUserId(userId);
+	}
+
+	public Set<ProfileImage> findActiveProfileImageByFilename(String file) {
+		return profileImageDAO.findActiveImageByFilename(file);
 	}
 
 }

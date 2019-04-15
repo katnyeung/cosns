@@ -24,7 +24,7 @@
 	<script>
 		var main = angular.module('application', [ 'flow', 'angular-sortable-view' ])
 
-		main.controller('messageController', function($scope, $http, $timeout, $window) {
+		main.controller('writePostController', function($scope, $http, $timeout, $window , messageService) {
 			$scope.obj = {};
 
 			$scope.releaseDate = new Date('[[${releaseDate}]]');
@@ -37,20 +37,9 @@
 				}
 				return true;
 			}
-
-			$scope.message = function(message) {
-				$scope.dialogMessageFlag = true;
-				$scope.dialogMessage = message;
-
-				$timeout(function() {
-					$scope.dialogMessageFlag = false;
-					$scope.posting = false;
-
-				}, 3000);
-			}
-
+			
 			$scope.submit = function() {
-
+				
 				$scope.posting = true;
 
 				if ($scope.postMessage) {
@@ -63,7 +52,6 @@
 						}
 					});
 
-					console.log(fileList);
 
 					$http({
 						url : "/post/writePost",
@@ -77,25 +65,25 @@
 							'fileList' : fileList
 						}
 					}).then(function(response) {
+						
 						if (response.data.status == 'success') {
 							$scope.message("Post Success");
 
 							$timeout(function() {
 								$window.location.href = '/u';
 							}, 1000);
+							
 						} else {
-
 							$scope.message("Something error, please contact system adminsitrator");
-
 						}
-
 					});
 				} else {
-
 					$scope.message("Opps , you need to write something");
-
 				}
+			}
 
+			$scope.message = function(message) {
+				messageService.setMessage(message);
 			}
 
 		});
@@ -104,8 +92,8 @@
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
-	<div ng-controller="messageController" class="container">
-		<form ng-submit="submit($scope.obj.flow)">
+	<div ng-controller="writePostController" class="container">
+		<form ng-submit="submit()">
 			<div class="hero-unit">
 				<div class="row">
 					<textarea ng-model="postMessage" rows="10" class="form-control" style="min-width: 100%" placeholder="(message)"></textarea>
@@ -138,12 +126,9 @@
 				</div>
 			</div>
 			<div class="modal-footer row">
-				<button type="submit" class="btn btn-primary" ng-disabled="posting" ng-init="posting = false">Post</button>
+				<button type="submit" class="btn btn-primary">Post</button>
 			</div>
 		</form>
-		<div id="myModalPostMessage" ng-show="dialogMessageFlag" ng-init="dialogMessageFlag = false" class="alert modal">
-			<span class="row offset2">{{dialogMessage}}</span><a href="#" class="close" ng-click="dialogMessageFlag = false">X</a>
-		</div>
 	</div>
 </body>
 </html>

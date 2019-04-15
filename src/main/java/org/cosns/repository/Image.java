@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -28,6 +29,10 @@ public abstract class Image extends Auditable<String> {
 	private Long imageId;
 
 	private int seq;
+
+	@Lob
+	@NotNull
+	private String storedPath;
 
 	@NotNull
 	@Size(max = 255)
@@ -78,6 +83,14 @@ public abstract class Image extends Auditable<String> {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getStoredPath() {
+		return storedPath;
+	}
+
+	public void setStoredPath(String storedPath) {
+		this.storedPath = storedPath;
 	}
 
 }

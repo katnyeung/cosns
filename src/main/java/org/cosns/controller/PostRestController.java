@@ -69,7 +69,7 @@ public class PostRestController {
 			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			plr.setStatus(ConstantsUtil.RESULT_ERROR);
-			plr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			plr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 		return plr;
 	}
@@ -125,7 +125,7 @@ public class PostRestController {
 			plr.setPostList(postList);
 			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
-			plr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			plr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 			plr.setStatus(ConstantsUtil.RESULT_ERROR);
 		}
 
@@ -165,7 +165,7 @@ public class PostRestController {
 
 				imageService.uploadImage(fromFile, targetPath, 2048);
 
-				imageService.savePostImage(fileName, fromFile.getSize(), user);
+				imageService.savePostImage(uploadFolder, fileName, fromFile.getSize(), user);
 
 				result.setFilePath(fileName);
 				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
@@ -180,7 +180,7 @@ public class PostRestController {
 
 		} else {
 			result.setStatus(ConstantsUtil.RESULT_ERROR);
-			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
 		return result;
@@ -205,7 +205,7 @@ public class PostRestController {
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			dr.setStatus(ConstantsUtil.RESULT_ERROR);
-			dr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			dr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
 		return dr;
@@ -223,7 +223,7 @@ public class PostRestController {
 			prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			prr.setStatus(ConstantsUtil.RESULT_ERROR);
-			prr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			prr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
 		return prr;
@@ -245,7 +245,7 @@ public class PostRestController {
 
 		} else {
 			dr.setStatus(ConstantsUtil.RESULT_ERROR);
-			dr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			dr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
 		return dr;

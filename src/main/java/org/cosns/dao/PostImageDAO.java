@@ -12,4 +12,7 @@ public interface PostImageDAO extends JpaRepository<PostImage, Long> {
 
 	@Query("SELECT i FROM PostImage i WHERE i.filename = :filename and i.status = '" + ConstantsUtil.IMAGE_PEND + "'")
 	public Set<PostImage> findPendImageByFilename(@Param("filename") String filename);
+
+	@Query("SELECT i FROM PostImage i WHERE i.filename = :filename and i.status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
+	public Set<PostImage> findActiveImageByFilename(@Param("filename") String file);
 }

@@ -9,7 +9,7 @@
 <script>
 	var main = angular.module('application', []);
 
-	main.controller('viewPostController', function($scope, $timeout, postService) {
+	main.controller('viewPostController', function($scope, postService, messageService) {
 		var handleResponse = function(response, type) {
 			if (response.data.status == 'success') {
 				$scope.message(type + " success");
@@ -35,16 +35,8 @@
 		});
 
 		$scope.message = function(message) {
-
-			$scope.dialogMessageFlag = true;
-			$scope.dialogMessage = message;
-
-			$timeout(function() {
-				$scope.dialogMessageFlag = false;
-			}, 3000);
-
+			messageService.setMessage(message);
 		}
-
 	});
 </script>
 </head>

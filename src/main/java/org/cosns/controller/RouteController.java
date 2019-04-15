@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 
 import org.cosns.repository.User;
+import org.cosns.service.ImageService;
 import org.cosns.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,9 @@ public class RouteController {
 
 	@Autowired
 	UserService userService;
+
+	@Autowired
+	ImageService imageService;
 
 	@GetMapping(path = "/")
 	public String index(HttpSession session, Model model) {

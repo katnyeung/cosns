@@ -66,7 +66,7 @@ public class UserRestController {
 			ur.setUser(user);
 			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
-			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN_FAIL);
 		}
 
 		return ur;
@@ -90,7 +90,7 @@ public class UserRestController {
 				ur.setStatus(ConstantsUtil.RESULT_ERROR);
 			}
 		} else {
-			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
 		return ur;
@@ -121,7 +121,7 @@ public class UserRestController {
 				return ur;
 			}
 		} else {
-			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
 		ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
@@ -148,7 +148,7 @@ public class UserRestController {
 
 				imageService.uploadImage(fromFile, targetPath, 150);
 
-				imageService.saveProfileImage(fileName, fromFile.getSize(), user);
+				imageService.saveProfileImage(uploadFolder, fileName, fromFile.getSize(), user);
 
 				result.setFilePath(fileName);
 				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
@@ -163,7 +163,7 @@ public class UserRestController {
 
 		} else {
 			result.setStatus(ConstantsUtil.RESULT_ERROR);
-			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
 		return result;
@@ -241,7 +241,7 @@ public class UserRestController {
 			}
 
 		} else {
-			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 			ur.setStatus(ConstantsUtil.RESULT_ERROR);
 		}
 
@@ -275,7 +275,7 @@ public class UserRestController {
 			}
 
 		} else {
-			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN);
+			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 			ur.setStatus(ConstantsUtil.RESULT_ERROR);
 		}
 

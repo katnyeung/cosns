@@ -13,21 +13,9 @@
 	<script>
 		var main = angular.module('application', [ 'flow' ]);
 
-		main.controller('settingController', function($scope, $http, $timeout) {
+		main.controller('settingController', function($scope, $http, messageService) {
 			$scope.obj = {};
 
-			$scope.message = function(message) {
-				$scope.dialogMessageFlag = true;
-				$scope.dialogMessage = message;
-
-				$timeout(function() {
-					$scope.dialogMessageFlag = false;
-					$scope.posting = false;
-
-				}, 3000);
-			}
-
-			
 			$http({
 				url : "/user/getUser/[[${targetUser?.userId}]]",
 				method : "GET",
@@ -100,6 +88,10 @@
 					}
 				});
 			}
+			
+			$scope.message = function(message) {
+				messageService.setMessage(message);
+			}
 		});
 	</script>
 
@@ -119,7 +111,7 @@
 
 								<div class="span2">
 									<div class="thumbnail" ng-show="!$flow.files.length">
-										<img ng-src="{{profileImage ? '/images/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" style="width: 150px; height: 150px" flow-btn /> <span style="color: #CFCFCF">(Optional)</span>
+										<img ng-src="{{profileImage ? '/pimages/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" style="width: 150px; height: 150px" flow-btn /> <span style="color: #CFCFCF">(Optional)</span>
 									</div>
 									<div class="thumbnail" ng-show="$flow.files.length">
 										<img flow-img="$flow.files[0]" style="width: 150px; height: 150px" flow-btn />
@@ -158,9 +150,6 @@
 				</div>
 			</div>
 			</from>
-			<div id="myModalPostMessage" ng-show="dialogMessageFlag" ng-init="dialogMessageFlag = false" class="alert modal">
-				<span class="row offset2">{{dialogMessage}}</span><a href="#" class="close" ng-click="dialogMessageFlag = false">X</a>
-			</div>
 	</div>
 
 </body>

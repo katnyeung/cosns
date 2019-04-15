@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 	@ResponseBody
 	public ErrorResult jsonErrorHandler(HttpServletRequest req, DefaultException e) throws Exception {
 		ErrorResult r = new ErrorResult();
-		r.setErrorRemark(e.getLocalizedMessage());
+		r.setRemarks(e.getLocalizedMessage());
 		r.setErrorURL(req.getRequestURL().toString());
 		r.setStatus(ConstantsUtil.RESULT_ERROR);
 		return r;
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
 	public ErrorResult sizeLimitExceededException(HttpServletRequest req, SizeLimitExceededException e) throws Exception {
 		logger.info("here");
 		ErrorResult r = new ErrorResult();
-		r.setErrorRemark(e.getLocalizedMessage());
+		r.setRemarks(e.getLocalizedMessage());
 		r.setErrorURL(req.getRequestURL().toString());
 		r.setStatus(ConstantsUtil.RESULT_ERROR);
 		return r;

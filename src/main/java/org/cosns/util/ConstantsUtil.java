@@ -23,8 +23,9 @@ public class ConstantsUtil {
 	
 	public static final String POST_REACTION_ACTIVE = "A";
 	public static final String POST_REACTION_CANCEL = "D";
-	
-	public static final String ERROR_MESSAGE_LOGIN = "Please Login";
+
+	public static final String ERROR_MESSAGE_LOGIN_FAIL = "Either email not found or password incorrect";
+	public static final String ERROR_MESSAGE_LOGIN_REQUIRED = "Please Login";
 	public static final String ERROR_MESSAGE_ADD_FRIEND_FAIL = "NO SUCH FRIEND";
 
 	public static final String PHOTO_POST_PREFIX = "photo";
