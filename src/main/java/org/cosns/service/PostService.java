@@ -43,6 +43,9 @@ public class PostService {
 	HashTagService hashTagService;
 
 	@Autowired
+	RedisService redisService;
+
+	@Autowired
 	StringRedisTemplate stringRedisTemplate;
 
 	public Post writePost(PostFormDTO postDTO, User user) {
@@ -142,8 +145,10 @@ public class PostService {
 
 				PostReaction reaction = optPR.get();
 				if (reaction.getStatus().equals(ConstantsUtil.POST_REACTION_ACTIVE)) {
+					redisService.decrLike(post.getPostId());
 					reaction.setStatus(ConstantsUtil.POST_REACTION_CANCEL);
 				} else {
+					redisService.incrLike(post.getPostId());
 					reaction.setStatus(ConstantsUtil.POST_REACTION_ACTIVE);
 				}
 
@@ -181,11 +186,14 @@ public class PostService {
 				Post post = postOptional.get();
 				// cannot retweet by original poster
 				if (post.getUser().getUserId() != user.getUserId()) {
+					
+					//how about if user want to cancel the retweet? delete retweet, other function
 					RetweetPost retweetPost = new RetweetPost();
 					retweetPost.setPost(post);
 					retweetPost.setStatus(ConstantsUtil.POST_ACTIVE);
 					retweetPost.setUser(user);
 
+					redisService.incrRetweet(post.getPostId());
 					retweetPost = (RetweetPost) postDAO.save(retweetPost);
 
 					return retweetPost;

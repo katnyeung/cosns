@@ -25,7 +25,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.cosns.repository.extend.PostImage;
+import org.cosns.service.RedisService;
 import org.cosns.util.Auditable;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -42,6 +44,10 @@ public abstract class Post extends Auditable<String> {
 	private Long postId;
 
 	private Date releaseDate;
+
+	@Transient
+	@Autowired
+	RedisService redisService;
 
 	@Lob
 	@Column(nullable = true)
@@ -71,6 +77,16 @@ public abstract class Post extends Auditable<String> {
 		DiscriminatorValue val = this.getClass().getAnnotation(DiscriminatorValue.class);
 
 		return val == null ? null : val.value();
+	}
+
+	@Transient
+	public String getLikeCount() {
+		return redisService.getLikeCount(this.getPostId());
+	}
+
+	@Transient
+	public String getRetweetCount() {
+		return redisService.getRetweetCount(this.getPostId());
 	}
 
 	public Long getPostId() {
