@@ -1,6 +1,7 @@
 package org.cosns.controller;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -259,14 +260,23 @@ public class UserRestController {
 			User userInDB = userService.getUserById(user.getUserId());
 
 			if (userInDB != null) {
-				user = userService.follow(userInDB, targetUserId);
 
-				if (user != null) {
-					ur.setUser(user);
-					ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+				if (!isFollowed(userInDB, targetUserId)) {
+
+					user = userService.follow(userInDB, targetUserId);
+
+					if (user != null) {
+						ur.setUser(user);
+						ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+					} else {
+						ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_USER_NOT_FOUND);
+						ur.setStatus(ConstantsUtil.RESULT_ERROR);
+					}
+
 				} else {
-					ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_ADD_FRIEND_FAIL);
+					ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_USER_ALREADY_FOLLOWED);
 					ur.setStatus(ConstantsUtil.RESULT_ERROR);
+					;
 				}
 
 			} else {
@@ -280,5 +290,18 @@ public class UserRestController {
 		}
 
 		return ur;
+	}
+
+	private boolean isFollowed(User userInDB, Long targetUserId) {
+		List<User> followerList = userInDB.getFollowers();
+
+		for (User followingUser : followerList) {
+
+			if (followingUser.getUserId() == targetUserId) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

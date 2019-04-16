@@ -41,6 +41,8 @@
 		});
 
 		main.controller('viewUserController', function($scope, $http, messageService) {
+			$scope.shared = messageService.getShared();
+
 			$http({
 				url : "/user/getUser/[[${targetUser?.userId}]]",
 				method : "GET",
@@ -49,12 +51,20 @@
 				}
 			}).then(function(response) {
 
-				$scope.user = response.data.user;
-				
-				if(response.data.user.profileImage[0]) {
+				$scope.isFollowed = false;
+
+				if (response.data.user.profileImage[0]) {
 					$scope.profileImage = response.data.user.profileImage[0].filename;
 				}
-				
+
+				if ($scope.shared.user) {
+					angular.forEach(response.data.user.followedBy, function(followedByUser) {
+						if (followedByUser.userId == $scope.shared.user.userId) {
+							$scope.isFollowed = true;
+						}
+					});
+				}
+
 			});
 
 			$scope.follow = function(userId) {
@@ -66,13 +76,13 @@
 					}
 				}).then(function(response) {
 					if (response.data.status == 'success') {
-						$scope.message("Followed");
+						$scope.message(data.remarks);
 					} else {
-						$scope.message("Follow Failed");
+						$scope.message(data.remarks);
 					}
 				});
 			}
-			
+
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
@@ -85,14 +95,17 @@
 
 	<div class="container" ng-controller="viewUserController">
 		<div class="hero-unit">
-			<img src="/pimages/{{profileImage}}"/><br/>
-			{{user.uniqueName}} ( {{user.email}} )
+			<img src="/pimages/{{profileImage}}" /><br /> {{user.uniqueName}} (
+			{{user.email}} )
 			<pre>{{user.message}}</pre>
 			<br /> Following
 			<ul>
-				<li ng-repeat="follower in user.followers"><a href="/u/{{follower.uniqueName ? follower.uniqueName : follower.userId}}">{{follower.uniqueName ? follower.uniqueName : follower.userId}}</a></li>
+				<li ng-repeat="follower in user.followers"><a
+					href="/u/{{follower.uniqueName ? follower.uniqueName : follower.userId}}">{{follower.uniqueName
+						? follower.uniqueName : follower.userId}}</a></li>
 			</ul>
-			<button type="button" th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ''">Follow</button>
+			<button type="button"
+				th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>
 		</div>
 		<div ng-controller="viewPostController" class="row offset1">
 			<div th:include="components/post :: viewPosts" th:remove="tag"></div>

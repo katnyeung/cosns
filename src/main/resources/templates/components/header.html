@@ -10,7 +10,8 @@
 	<script>
 		main.factory('messageService', function() {
 			var shared = {
-				dialogMessage : ''
+				dialogMessage : '',
+				user : null
 			};
 
 			return {
@@ -19,6 +20,9 @@
 				},
 				setMessage : function(message) {
 					shared.dialogMessage = message;
+				},
+				setUser : function(user) {
+					shared.user = user;
 				}
 			}
 		});

@@ -77,6 +77,7 @@ public class User extends Auditable<String> {
 	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "followedById")
 	private List<User> followedBy;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL)
 	Set<FriendRequest> friendRequest;
 

@@ -34,5 +34,8 @@ public class ConstantsUtil {
 	public static final String REDIS_HASHTAG_PREFIX = "hashtag";
 	public static final String REDIS_USER_UNIQUENAME_PREFIX = "user";
 	public static final String REDIS_POST_UNIQUENAME_PREFIX = "post";
+	
+	public static final String ERROR_MESSAGE_USER_NOT_FOUND = "User not found";
+	public static final String ERROR_MESSAGE_USER_ALREADY_FOLLOWED = "User already followed";
 
 }

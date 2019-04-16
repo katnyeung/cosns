@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tomcat.util.http.fileupload.FileUploadBase.SizeLimitExceededException;
@@ -187,6 +188,7 @@ public class PostRestController {
 	}
 
 	@PostMapping(path = "/writePost")
+	@Transactional
 	public DefaultResult writePost(@RequestBody PostFormDTO postDTO, HttpSession session) {
 		DefaultResult dr = new DefaultResult();
 		User user = (User) session.getAttribute("user");
