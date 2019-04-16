@@ -42,6 +42,12 @@
 
 		main.controller('viewUserController', function($scope, $http, messageService) {
 			$scope.shared = messageService.getShared();
+			$scope.followedList = {};
+			$scope.isFollowed = false;
+
+			if ($scope.shared.user) {
+				$scope.followedList = $scope.shared.user.followers;
+			}
 
 			$http({
 				url : "/user/getUser/[[${targetUser?.userId}]]",
@@ -51,20 +57,17 @@
 				}
 			}).then(function(response) {
 
-				$scope.isFollowed = false;
-
+				$scope.user = response.data.user;
+				
 				if (response.data.user.profileImage[0]) {
 					$scope.profileImage = response.data.user.profileImage[0].filename;
 				}
 
-				if ($scope.shared.user) {
-					angular.forEach(response.data.user.followedBy, function(followedByUser) {
-						if (followedByUser.userId == $scope.shared.user.userId) {
-							$scope.isFollowed = true;
-						}
-					});
-				}
-
+				angular.forEach($scope.followedList, function(followedUser) {
+					if (followedUser.userId === response.data.user.userId) {
+						$scope.isFollowed = true;
+					}
+				});
 			});
 
 			$scope.follow = function(userId) {
@@ -76,9 +79,9 @@
 					}
 				}).then(function(response) {
 					if (response.data.status == 'success') {
-						$scope.message(data.remarks);
+						$scope.message(response.data.remarks);
 					} else {
-						$scope.message(data.remarks);
+						$scope.message(response.data.remarks);
 					}
 				});
 			}
@@ -95,14 +98,14 @@
 
 	<div class="container" ng-controller="viewUserController">
 		<div class="hero-unit">
-			<img src="/pimages/{{profileImage}}" /><br /> {{user.uniqueName}} (
-			{{user.email}} )
+			<img src="/pimages/{{profileImage}}" /><br />
+			{{user.uniqueName}} ( {{user.email}} )
 			<pre>{{user.message}}</pre>
 			<br /> Following
 			<ul>
-				<li ng-repeat="follower in user.followers"><a
-					href="/u/{{follower.uniqueName ? follower.uniqueName : follower.userId}}">{{follower.uniqueName
-						? follower.uniqueName : follower.userId}}</a></li>
+				<li ng-repeat="followedUser in followedList"><a
+					href="/u/{{followedUser.uniqueName ? followedUser.uniqueName : followedUser.userId}}">{{followedUser.uniqueName
+						? followedUser.uniqueName : followedUser.userId}}</a></li>
 			</ul>
 			<button type="button"
 				th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>

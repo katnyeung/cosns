@@ -82,8 +82,8 @@
 	<div ng-controller="userController">
 		<ul class="nav">
 			<li class="navbar-item"><a href="/c">Calendar</a></li>
-			<li class="navbar-item"><a href="/t" ng-show="user">Timeline</a></li>
-			<li class="navbar-item"><a href="/w" ng-show="user">Write</a></li>
+			<li class="navbar-item"><a href="/t" ng-show="shared.user">Timeline</a></li>
+			<li class="navbar-item"><a href="/w" ng-show="shared.user">Write</a></li>
 		</ul>
 
 		<div ng-hide="shared.user">

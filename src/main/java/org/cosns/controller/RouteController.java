@@ -102,6 +102,7 @@ public class RouteController {
 		User loggedUser = (User) session.getAttribute("user");
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
+			model.addAttribute("targetUser", loggedUser);
 		} else {
 			return "redirect:/";
 		}

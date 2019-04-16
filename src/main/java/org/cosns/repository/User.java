@@ -72,6 +72,7 @@ public class User extends Auditable<String> {
 	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "followerId")
 	private List<User> followers;
 
+	@JsonIgnore
 	@ManyToMany
 	@JoinTable(name = "followedBy", joinColumns = @JoinColumn(name = "followerId"), inverseJoinColumns = @JoinColumn(name = "userId"))
 	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "followedById")
