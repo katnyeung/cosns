@@ -40,7 +40,7 @@
 
 			$scope.likePost = function(postId) {
 				postService.likePost(postId).then(function(response) {
-					handleResponse(response, 'like');
+					//handleResponse(response, 'like');
 				});
 			}
 
@@ -57,6 +57,7 @@
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
+
 		});
 	</script>
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
@@ -72,7 +73,7 @@
 
 		</div>
 
-		<div ng-controller="viewPostController" class="row offset1">
+		<div ng-controller="viewPostController" class="row-fluid">
 			<div th:include="components/post :: viewPosts" th:remove="tag"></div>
 		</div>
 

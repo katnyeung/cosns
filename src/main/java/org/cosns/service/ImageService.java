@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -77,19 +78,19 @@ public class ImageService {
 		return targetFile;
 	}
 
-	public Set<ProfileImage> findPendProfileImageByFilename(String file) {
+	public List<ProfileImage> findPendProfileImageByFilename(String file) {
 		return profileImageDAO.findPendImageByFilename(file);
 	}
 
-	public Set<ProfileImage> findActiveProfileImageByUserId(Long userId) {
+	public List<ProfileImage> findActiveProfileImageByUserId(Long userId) {
 		return profileImageDAO.findActiveProfileImageByUserId(userId);
 	}
 
-	public Set<PostImage> findPendPostImageByFilename(String file) {
+	public List<PostImage> findPendPostImageByFilename(String file) {
 		return postImageDAO.findPendImageByFilename(file);
 	}
 
-	public Set<PostImage> findActivePostImageByFilename(String file) {
+	public List<PostImage> findActivePostImageByFilename(String file) {
 		return postImageDAO.findActiveImageByFilename(file);
 	}
 

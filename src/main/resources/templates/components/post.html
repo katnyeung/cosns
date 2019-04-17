@@ -3,7 +3,7 @@
 		main.factory('postService', function($http) {
 			var service = {};
 
-			service.likePost = function(postId) {
+			service.likePost = function(post) {
 				return $http({
 					url : "/post/likePost",
 					method : "POST",
@@ -11,12 +11,23 @@
 						'Content-Type' : 'application/json'
 					},
 					data : {
-						postId : postId
+						postId : post.postId
 					}
+				}).then(function(response) {
+					if (response.data.status === 'success') {
+						if (response.data.type === 'incr') {
+							post.likeCount++;
+						} else if (response.data.type === 'decr') {
+							post.likeCount--;
+						}
+					}
+					return response;
 				});
 			};
 
-			service.retweetPost = function(postId) {
+			service.retweetPost = function(post) {
+
+				post.retweetCount++;
 				return $http({
 					url : "/post/retweetPost",
 					method : "POST",
@@ -24,10 +35,18 @@
 						'Content-Type' : 'application/json'
 					},
 					data : {
-						postId : postId
+						postId : post.postId
 					}
+				}).then(function(response) {
+					if (response.data.status === 'success') {
+						if (response.data.type === 'incr') {
+							post.likeCount++;
+						}
+					}
+					return response;
 				});
 			};
+
 			service.loadPosts = function(functionName) {
 				return $http({
 					url : "/post/" + functionName,
@@ -45,27 +64,40 @@
 
 <body th:fragment="viewPosts">
 
-	<div ng-repeat="post in postList" class="span8 row">
+	<div ng-repeat="post in postList" class="span4">
 		<div>
-			<a href="/u/{{post.user.userId}}">{{post.user.email}}</a> &nbsp; <a href="/p/{{post.postId}}">{{post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a>
+			#{{post.postId}} <a href="/u/{{post.user.userId}}">{{post.user.email}}</a> &nbsp; <a href="/p/{{post.postId}}">{{post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a>
 		</div>
+
+
 		<div ng-show="post.type == 'retweet'" class="well">
+			{{postContent = post.post;""}}
 			<div>
-				Retweet <a href="/u/{{post.post.user.userId}}">{{post.post.user.email}}</a> &nbsp; <a href="/p/{{post.post.postId}}">{{post.post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a>
+				Retweet <a href="/u/{{postContent.user.userId}}">{{postContent.user.email}}</a> &nbsp; <a href="/p/{{postContent.postId}}">{{postContent.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a>
 			</div>
-			<pre>{{post.post.message}}
-						<div ng-repeat="image in post.post.postImages"><img src="/images/{{image.filename}}"/></div>
-					</pre>
-			<a href="#" class="btn" ng-click="likePost(post.post.postId); $event.preventDefault();">Like</a> <a href="#" class="btn" ng-click="retweetPost(post.post.postId); $event.preventDefault();">Retweet</a>
+			<div>
+				<div th:include="components/post :: viewPostBody"></div>
+			</div>
 
 		</div>
 		<div ng-show="post.type !='retweet'">
-			<pre>{{post.message}}
-						<div ng-repeat="image in post.postImages"><img src="/images/{{image.filename}}"/></div>
-					</pre>
-			<a href="#" class="btn" ng-click="likePost(post.postId); $event.preventDefault();">Like</a> <a href="#" class="btn" ng-click="retweetPost(post.postId); $event.preventDefault();">Retweet</a>
+			{{postContent = post;""}}
 
+			<div th:include="components/post :: viewPostBody"></div>
 		</div>
 	</div>
 
+</body>
+
+<body th:fragment="viewPostBody">
+	<pre>{{postContent.message}}</pre>
+	<div class="container">
+		<div ng-repeat="image in postContent.postImages">
+			<img class="span2" src="/images/{{image.filename}}" />
+		</div>
+	</div>
+	<div class="container">
+
+		<a href="#" class="btn" ng-click="likePost(postContent); $event.preventDefault();">Like {{postContent.likeCount}}</a> <a href="#" class="btn" ng-click="retweetPost(postContent); $event.preventDefault();">Retweet {{postContent.retweetCount}}</a>
+	</div>
 </body>

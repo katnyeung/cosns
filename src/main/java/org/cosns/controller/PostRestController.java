@@ -1,6 +1,7 @@
 package org.cosns.controller;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -82,7 +83,7 @@ public class PostRestController {
 		PostListResult plr = new PostListResult();
 
 		if (post.isPresent()) {
-			plr.setPostList(Stream.of(post.get()).collect(Collectors.toSet()));
+			plr.setPostList(Stream.of(post.get()).collect(Collectors.toList()));
 			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			plr.setRemarks("Post not found");
@@ -95,7 +96,7 @@ public class PostRestController {
 	public DefaultResult getPost(@RequestBody SearchPostDTO searchPost, HttpSession session) {
 		PostListResult plr = new PostListResult();
 
-		Set<Post> postList = postService.searchPosts(searchPost.getKeyword());
+		List<Post> postList = postService.searchPosts(searchPost.getKeyword());
 
 		plr.setPostList(postList);
 
@@ -106,7 +107,7 @@ public class PostRestController {
 	public DefaultResult getPost() {
 		PostListResult plr = new PostListResult();
 
-		Set<Post> postList = postService.findRandomPosts();
+		List<Post> postList = postService.findRandomPosts();
 
 		plr.setPostList(postList);
 		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
@@ -122,7 +123,7 @@ public class PostRestController {
 
 		if (user != null) {
 
-			Set<Post> postList = postService.findTimelinePosts(user);
+			List<Post> postList = postService.findTimelinePosts(user);
 			plr.setPostList(postList);
 			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
@@ -137,7 +138,7 @@ public class PostRestController {
 	public DefaultResult getUserPost(@PathVariable("userId") Long userId) {
 		PostListResult plr = new PostListResult();
 
-		Set<Post> postList = postService.getUserPosts(userId);
+		List<Post> postList = postService.getUserPosts(userId);
 
 		plr.setPostList(postList);
 		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
@@ -221,7 +222,12 @@ public class PostRestController {
 		if (user != null) {
 			PostReaction postReaction = postService.likePost(postReactionDTO.getPostId(), user);
 
-			prr.setPostReaction(postReaction);
+			if (postReaction.getStatus().equals(ConstantsUtil.POST_REACTION_ACTIVE)) {
+				prr.setType(ConstantsUtil.POST_REACTION_TYPE_INCREASE);
+			} else {
+				prr.setType(ConstantsUtil.POST_REACTION_TYPE_DECREASE);
+			}
+
 			prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			prr.setStatus(ConstantsUtil.RESULT_ERROR);
@@ -233,24 +239,25 @@ public class PostRestController {
 
 	@PostMapping(path = "/retweetPost")
 	public DefaultResult retweet(@RequestBody PostReactionDTO postReactionDTO, HttpSession session) {
-		DefaultResult dr = new DefaultResult();
+		PostReactionResult prr = new PostReactionResult();
 		User user = (User) session.getAttribute("user");
 
 		if (user != null) {
 			Post post = postService.retweetPost(postReactionDTO.getPostId(), user);
 			if (post != null) {
-				dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+				prr.setType(ConstantsUtil.POST_REACTION_TYPE_INCREASE);
+				prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 			} else {
-				dr.setStatus(ConstantsUtil.RESULT_ERROR);
-				dr.setRemarks("Retweet Failed");
+				prr.setStatus(ConstantsUtil.RESULT_ERROR);
+				prr.setRemarks("Retweet Failed");
 			}
 
 		} else {
-			dr.setStatus(ConstantsUtil.RESULT_ERROR);
-			dr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+			prr.setStatus(ConstantsUtil.RESULT_ERROR);
+			prr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
-		return dr;
+		return prr;
 	}
 
 }

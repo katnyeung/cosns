@@ -2,6 +2,7 @@ package org.cosns.service;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -37,7 +38,7 @@ public class EventService {
 	public Set<Event> getPostSchedule(Date start, Date end) {
 		Set<Event> eventSet = new HashSet<>();
 
-		Set<Post> postSet = postDAO.findPostByDateRange(start, end);
+		List<Post> postSet = postDAO.findPostByDateRange(start, end);
 
 		for (Post post : postSet) {
 			Event event = new PhotoEvent();

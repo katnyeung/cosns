@@ -65,7 +65,7 @@ public class UserService {
 		return loggedUser;
 	}
 
-	public Set<Post> getPosts(User user) {
+	public List<Post> getPosts(User user) {
 		return user.getPosts();
 	}
 
@@ -204,7 +204,7 @@ public class UserService {
 			// deactive current image
 			imageService.disableAllProfileImageByUserId(user.getUserId());
 
-			Set<ProfileImage> imageSet = imageService.findPendProfileImageByFilename(userSettingDTO.getImage());
+			List<ProfileImage> imageSet = imageService.findPendProfileImageByFilename(userSettingDTO.getImage());
 			for (ProfileImage image : imageSet) {
 				image.setStatus(ConstantsUtil.IMAGE_ACTIVE);
 				image.setUser(user);

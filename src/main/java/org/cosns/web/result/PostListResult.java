@@ -1,21 +1,21 @@
 package org.cosns.web.result;
 
-import java.util.Set;
+import java.util.List;
 
 import org.cosns.repository.Post;
 
 public class PostListResult extends DefaultResult {
-	Set<Post> postList;
-
+	List<Post> postList;
+	
 	public PostListResult() {
 		super();
 	}
 
-	public Set<Post> getPostList() {
+	public List<Post> getPostList() {
 		return postList;
 	}
 
-	public void setPostList(Set<Post> postList) {
+	public void setPostList(List<Post> postList) {
 		this.postList = postList;
 	}
 

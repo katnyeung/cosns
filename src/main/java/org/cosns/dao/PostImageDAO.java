@@ -1,6 +1,6 @@
 package org.cosns.dao;
 
-import java.util.Set;
+import java.util.List;
 
 import org.cosns.repository.extend.PostImage;
 import org.cosns.util.ConstantsUtil;
@@ -11,8 +11,8 @@ import org.springframework.data.repository.query.Param;
 public interface PostImageDAO extends JpaRepository<PostImage, Long> {
 
 	@Query("SELECT i FROM PostImage i WHERE i.filename = :filename and i.status = '" + ConstantsUtil.IMAGE_PEND + "'")
-	public Set<PostImage> findPendImageByFilename(@Param("filename") String filename);
+	public List<PostImage> findPendImageByFilename(@Param("filename") String filename);
 
 	@Query("SELECT i FROM PostImage i WHERE i.filename = :filename and i.status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
-	public Set<PostImage> findActiveImageByFilename(@Param("filename") String file);
+	public List<PostImage> findActiveImageByFilename(@Param("filename") String file);
 }

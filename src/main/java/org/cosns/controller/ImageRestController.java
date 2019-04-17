@@ -3,6 +3,7 @@ package org.cosns.controller;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -32,7 +33,7 @@ public class ImageRestController {
 	@GetMapping(path = "images/{imageFile}", produces = MediaType.IMAGE_JPEG_VALUE)
 	public ResponseEntity<byte[]> getPostImage(@PathVariable("imageFile") String imageFile, HttpSession session, Model model) throws IOException {
 
-		Set<PostImage> postImageSet = imageService.findActivePostImageByFilename(imageFile);
+		List<PostImage> postImageSet = imageService.findActivePostImageByFilename(imageFile);
 		if (postImageSet.iterator().hasNext()) {
 			PostImage postImage = postImageSet.iterator().next();
 

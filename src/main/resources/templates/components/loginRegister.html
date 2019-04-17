@@ -86,8 +86,8 @@
 			<li class="navbar-item"><a href="/w" ng-show="shared.user">Write</a></li>
 		</ul>
 
-		<div ng-hide="shared.user">
-			<form class="navbar-form pull-right" ng-submit="login()">
+		<div ng-hide="shared.user" class="nav pull-right">
+			<form class="navbar-form" ng-submit="login()">
 				<input class="span2" type="text" ng-model="login.email" name="email" placeholder="Email"> <input class="span2" type="password" ng-model="login.password" name="password" placeholder="Password">
 				<button type="submit" class="btn">Sign in</button>
 				<a href="#myModal" role="button" class="btn" ng-click="showRegister=true">Register</a>

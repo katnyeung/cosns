@@ -1,16 +1,14 @@
 package org.cosns.web.result;
 
-import org.cosns.repository.PostReaction;
-
 public class PostReactionResult extends DefaultResult {
-	PostReaction postReaction;
+	String type;
 
-	public PostReaction getPostReaction() {
-		return postReaction;
+	public String getType() {
+		return type;
 	}
 
-	public void setPostReaction(PostReaction postReaction) {
-		this.postReaction = postReaction;
+	public void setType(String type) {
+		this.type = type;
 	}
 
 }

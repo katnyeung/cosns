@@ -46,12 +46,12 @@
 <header th:fragment="headerBody">
 	<div class="navbar navbar-fixed-top">
 		<div class="navbar-inner">
-			<div class="container">
+			<div class="container-fluid">
 				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
 					<span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
 				</button>
 				<a class="brand" href="/">COSNS</a>
-				<div class="nav-collapse collapse">
+				<div  class="nav-collapse in collapse" style="height:auto">
 
 					<div th:include="components/loginRegister :: loginRegisterBody"></div>
 
@@ -61,7 +61,7 @@
 	</div>
 	<div ng-controller="messageController">
 		<div id="postMessage" ng-show="shared.dialogMessage" class="alert modal">
-			<span class="row offset2">{{shared.dialogMessage}} <a href="#" class="close" ng-click="shared.dialogMessage = null">X</a></span>
+			<span class="row offset2">{{shared.dialogMessage}} <a href="#" class="close" ng-click="shared.dialogMessage = null; $event.preventDefault();">X</a></span>
 		</div>
 	</div>
 

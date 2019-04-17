@@ -16,13 +16,15 @@ public class ConstantsUtil {
 	public static final String POST_PEND = "P";
 	public static final String POST_ACTIVE = "A";
 	public static final String POST_DELETED = "D";
-	
+
 	public static final String EVENT_PEND = "P";
 	public static final String EVENT_ACTIVE = "A";
 	public static final String EVENT_DELETED = "D";
-	
+
 	public static final String POST_REACTION_ACTIVE = "A";
 	public static final String POST_REACTION_CANCEL = "D";
+	public static final String POST_REACTION_TYPE_INCREASE = "incr";
+	public static final String POST_REACTION_TYPE_DECREASE = "decr";
 
 	public static final String ERROR_MESSAGE_LOGIN_FAIL = "Either email not found or password incorrect";
 	public static final String ERROR_MESSAGE_LOGIN_REQUIRED = "Please Login";
@@ -34,7 +36,7 @@ public class ConstantsUtil {
 	public static final String REDIS_HASHTAG_PREFIX = "hashtag";
 	public static final String REDIS_USER_UNIQUENAME_PREFIX = "user";
 	public static final String REDIS_POST_UNIQUENAME_PREFIX = "post";
-	
+
 	public static final String ERROR_MESSAGE_USER_NOT_FOUND = "User not found";
 	public static final String ERROR_MESSAGE_USER_ALREADY_FOLLOWED = "User already followed";
 

@@ -62,7 +62,7 @@ public class PostService {
 
 		int count = 1;
 		for (String file : postDTO.getFileList()) {
-			Set<PostImage> imageSet = imageService.findPendPostImageByFilename(file);
+			List<PostImage> imageSet = imageService.findPendPostImageByFilename(file);
 			for (PostImage image : imageSet) {
 				image.setStatus(ConstantsUtil.IMAGE_ACTIVE);
 				image.setPost(post);
@@ -81,27 +81,31 @@ public class PostService {
 		return post;
 	}
 
-	public Set<Post> findRandomPosts() {
-		return postDAO.findRandomPost().stream().map(u -> setLikeRetweetCount(u)).collect(Collectors.toSet());
+	private List<Post> setLikeRetweetCount(List<Post> postList){
+		return postList.stream().map(u -> setLikeRetweetCount(u)).collect(Collectors.toList());
+	}
+	
+	public List<Post> findRandomPosts() {
+		return setLikeRetweetCount(postDAO.findRandomPost());
 	}
 
-	public Set<Post> findTimelinePosts(User user) {
-		return postDAO.findTimelinePosts(user.getUserId());
+	public List<Post> findTimelinePosts(User user) {
+		return setLikeRetweetCount(postDAO.findTimelinePosts(user.getUserId()));
 	}
 
-	public Set<Post> getUserPosts(String uniqueName) {
-		return postDAO.findPostByUniqueName(uniqueName);
+	public List<Post> getUserPosts(String uniqueName) {
+		return setLikeRetweetCount(postDAO.findPostByUniqueName(uniqueName));
 	}
 
-	public Set<Post> getUserPosts(Long userId) {
-		return postDAO.findPostByUserId(userId);
+	public List<Post> getUserPosts(Long userId) {
+		return setLikeRetweetCount(postDAO.findPostByUserId(userId));
 	}
 
 	public Optional<Post> getPost(Long postId) {
 		return postDAO.findById(postId);
 	}
 
-	public Set<Post> searchPosts(String query) {
+	public List<Post> searchPosts(String query) {
 
 		Map<Long, Integer> hitBox = new HashMap<>();
 
@@ -164,6 +168,8 @@ public class PostService {
 				return reaction;
 
 			} else {
+				redisService.incrLike(post.getPostId());
+
 				LikeReaction reaction = new LikeReaction();
 				reaction.setPost(post);
 				reaction.setUser(user);
@@ -181,7 +187,7 @@ public class PostService {
 	public Post retweetPost(Long postId, User user) {
 
 		// find if this user already retweeted this post
-		Set<Post> postRetweeted = postDAO.findRetweetedPost(postId, user.getUserId());
+		List<Post> postRetweeted = postDAO.findRetweetedPost(postId, user.getUserId());
 
 		if (postRetweeted.iterator().hasNext()) {
 			return null;
@@ -201,6 +207,7 @@ public class PostService {
 					retweetPost.setUser(user);
 
 					redisService.incrRetweet(post.getPostId());
+
 					retweetPost = (RetweetPost) postDAO.save(retweetPost);
 
 					return retweetPost;

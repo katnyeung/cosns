@@ -65,7 +65,7 @@ public class User extends Auditable<String> {
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	private Set<Post> posts;
+	private List<Post> posts;
 
 	@ManyToMany
 	@JoinTable(name = "followers", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "followerId"))
@@ -118,11 +118,11 @@ public class User extends Auditable<String> {
 		this.status = status;
 	}
 
-	public Set<Post> getPosts() {
+	public List<Post> getPosts() {
 		return posts;
 	}
 
-	public void setPosts(Set<Post> posts) {
+	public void setPosts(List<Post> posts) {
 		this.posts = posts;
 	}
 
