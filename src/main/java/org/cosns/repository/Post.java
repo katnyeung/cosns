@@ -73,20 +73,15 @@ public abstract class Post extends Auditable<String> {
 	private Set<PostReaction> postReaction;
 
 	@Transient
+	int likeCount;
+
+	@Transient
+	int retweetCount;
+
 	public String getType() {
 		DiscriminatorValue val = this.getClass().getAnnotation(DiscriminatorValue.class);
 
 		return val == null ? null : val.value();
-	}
-
-	@Transient
-	public String getLikeCount() {
-		return redisService.getLikeCount(this.getPostId());
-	}
-
-	@Transient
-	public String getRetweetCount() {
-		return redisService.getRetweetCount(this.getPostId());
 	}
 
 	public Long getPostId() {
@@ -151,6 +146,22 @@ public abstract class Post extends Auditable<String> {
 
 	public void setReleaseDate(Date releaseDate) {
 		this.releaseDate = releaseDate;
+	}
+
+	public int getLikeCount() {
+		return likeCount;
+	}
+
+	public void setLikeCount(int likeCount) {
+		this.likeCount = likeCount;
+	}
+
+	public int getRetweetCount() {
+		return retweetCount;
+	}
+
+	public void setRetweetCount(int retweetCount) {
+		this.retweetCount = retweetCount;
 	}
 
 }

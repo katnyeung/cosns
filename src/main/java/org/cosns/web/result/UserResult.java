@@ -1,7 +1,5 @@
 package org.cosns.web.result;
 
-import java.util.List;
-
 import org.cosns.repository.User;
 
 public class UserResult extends DefaultResult {

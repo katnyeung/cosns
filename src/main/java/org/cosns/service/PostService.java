@@ -74,8 +74,15 @@ public class PostService {
 		return post;
 	}
 
+	private Post setLikeRetweetCount(Post post) {
+		Long postId = post.getPostId();
+		post.setLikeCount(redisService.getLikeCount(postId));
+		post.setRetweetCount(redisService.getRetweetCount(postId));
+		return post;
+	}
+
 	public Set<Post> findRandomPosts() {
-		return postDAO.findRandomPost();
+		return postDAO.findRandomPost().stream().map(u -> setLikeRetweetCount(u)).collect(Collectors.toSet());
 	}
 
 	public Set<Post> findTimelinePosts(User user) {
@@ -186,8 +193,8 @@ public class PostService {
 				Post post = postOptional.get();
 				// cannot retweet by original poster
 				if (post.getUser().getUserId() != user.getUserId()) {
-					
-					//how about if user want to cancel the retweet? delete retweet, other function
+
+					// how about if user want to cancel the retweet? delete retweet, other function
 					RetweetPost retweetPost = new RetweetPost();
 					retweetPost.setPost(post);
 					retweetPost.setStatus(ConstantsUtil.POST_ACTIVE);
