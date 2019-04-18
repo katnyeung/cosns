@@ -73,10 +73,16 @@ public abstract class Post extends Auditable<String> {
 	private Set<PostReaction> postReaction;
 
 	@Transient
-	int likeCount;
+	Long likeCount;
 
 	@Transient
-	int retweetCount;
+	Long retweetCount;
+
+	@Transient
+	boolean isLiked;
+
+	@Transient
+	boolean isRetweeted;
 
 	public String getType() {
 		DiscriminatorValue val = this.getClass().getAnnotation(DiscriminatorValue.class);
@@ -148,20 +154,36 @@ public abstract class Post extends Auditable<String> {
 		this.releaseDate = releaseDate;
 	}
 
-	public int getLikeCount() {
+	public Long getLikeCount() {
 		return likeCount;
 	}
 
-	public void setLikeCount(int likeCount) {
+	public void setLikeCount(Long likeCount) {
 		this.likeCount = likeCount;
 	}
 
-	public int getRetweetCount() {
+	public Long getRetweetCount() {
 		return retweetCount;
 	}
 
-	public void setRetweetCount(int retweetCount) {
+	public void setRetweetCount(Long retweetCount) {
 		this.retweetCount = retweetCount;
+	}
+
+	public boolean isLiked() {
+		return isLiked;
+	}
+
+	public void setLiked(boolean liked) {
+		this.isLiked = liked;
+	}
+
+	public boolean isRetweeted() {
+		return isRetweeted;
+	}
+
+	public void setRetweeted(boolean retweeted) {
+		this.isRetweeted = retweeted;
 	}
 
 }

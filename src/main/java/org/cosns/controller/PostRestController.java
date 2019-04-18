@@ -96,7 +96,14 @@ public class PostRestController {
 	public DefaultResult getPost(@RequestBody SearchPostDTO searchPost, HttpSession session) {
 		PostListResult plr = new PostListResult();
 
-		List<Post> postList = postService.searchPosts(searchPost.getKeyword());
+		User user = (User) session.getAttribute("user");
+		List<Post> postList = null;
+
+		if (user != null) {
+			postList = postService.searchPosts(searchPost.getKeyword(), user);
+		} else {
+			postList = postService.searchPosts(searchPost.getKeyword());
+		}
 
 		plr.setPostList(postList);
 
@@ -104,10 +111,17 @@ public class PostRestController {
 	}
 
 	@GetMapping(path = "/getRandomPosts")
-	public DefaultResult getPost() {
+	public DefaultResult getPost(HttpSession session) {
 		PostListResult plr = new PostListResult();
 
-		List<Post> postList = postService.findRandomPosts();
+		User user = (User) session.getAttribute("user");
+		List<Post> postList = null;
+
+		if (user != null) {
+			postList = postService.findRandomPosts(user.getUserId());
+		} else {
+			postList = postService.findRandomPosts();
+		}
 
 		plr.setPostList(postList);
 		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
@@ -123,7 +137,7 @@ public class PostRestController {
 
 		if (user != null) {
 
-			List<Post> postList = postService.findTimelinePosts(user);
+			List<Post> postList = postService.findTimelinePosts(user.getUserId());
 			plr.setPostList(postList);
 			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {

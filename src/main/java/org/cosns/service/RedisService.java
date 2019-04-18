@@ -35,46 +35,35 @@ public class RedisService {
 		return stringRedisTemplate.opsForValue().get(key);
 	}
 
-	public void incrLike(Long postId) {
-		logger.info("incr : " + ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like");
-		stringRedisTemplate.opsForValue().increment(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like", 1);
+	public void incrLike(Long postId, Long userId) {
+		stringRedisTemplate.opsForSet().add(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like", "" + userId);
 	}
 
-	public void incrRetweet(Long postId) {
-
-		stringRedisTemplate.opsForValue().increment(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", 1);
+	public void incrRetweet(Long postId, Long userId) {
+		stringRedisTemplate.opsForSet().add(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", "" + userId);
 	}
 
-	public void decrLike(Long postId) {
-		logger.info("decr : " + ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like");
-		stringRedisTemplate.opsForValue().decrement(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like", 1);
+	public void decrLike(Long postId, Long userId) {
+		stringRedisTemplate.opsForSet().remove(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like", "" + userId);
 	}
 
-	public void decrRetweet(Long postId) {
-		stringRedisTemplate.opsForValue().decrement(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", 1);
+	public void decrRetweet(Long postId, Long userId) {
+		stringRedisTemplate.opsForSet().remove(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", "" + userId);
 	}
 
-	public int getLikeCount(Long postId) {
-
-		String likeCountString = stringRedisTemplate.opsForValue().get(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like");
-
-		if (likeCountString == null) {
-			stringRedisTemplate.opsForValue().set(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like", "0");
-			likeCountString = "0";
-			logger.info("setting like for postId : 0");
-		}
-
-		return Integer.parseInt(likeCountString);
+	public Long getLikeCount(Long postId) {
+		return stringRedisTemplate.opsForSet().size(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like");
 	}
 
-	public int getRetweetCount(Long postId) {
-		String retweetCountString = stringRedisTemplate.opsForValue().get(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet");
+	public Long getRetweetCount(Long postId) {
+		return stringRedisTemplate.opsForSet().size(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet");
+	}
 
-		if (retweetCountString == null) {
-			stringRedisTemplate.opsForValue().set(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", "0");
-			retweetCountString = "0";
-		}
+	public boolean isLiked(Long postId, Long userId) {
+		return stringRedisTemplate.opsForSet().isMember(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like", "" + userId);
+	}
 
-		return Integer.parseInt(retweetCountString);
+	public boolean isRetweeted(Long postId, Long userId) {
+		return stringRedisTemplate.opsForSet().isMember(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", "" + userId);
 	}
 }

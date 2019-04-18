@@ -81,24 +81,35 @@ public class PostService {
 		return post;
 	}
 
-	private List<Post> setLikeRetweetCount(List<Post> postList){
-		return postList.stream().map(u -> setLikeRetweetCount(u)).collect(Collectors.toList());
+	private Post setLikedRetweeted(Post post, Long userId) {
+		Long postId = post.getPostId();
+		post.setLiked(redisService.isLiked(postId, userId));
+		post.setRetweeted(redisService.isRetweeted(postId, userId));
+		return post;
 	}
-	
+
+	private List<Post> setLikeRetweetCount(List<Post> postList) {
+		return postList.stream().map(p -> setLikeRetweetCount(p)).collect(Collectors.toList());
+	}
+
+	private List<Post> setLikeRetweetedAndCount(List<Post> postList, Long userId) {
+		return postList.stream().map(p -> setLikeRetweetCount(p)).map(p -> setLikedRetweeted(p, userId)).collect(Collectors.toList());
+	}
+
+	public List<Post> findRandomPosts(Long userId) {
+		return setLikeRetweetedAndCount(postDAO.findRandomPost(), userId);
+	}
+
 	public List<Post> findRandomPosts() {
 		return setLikeRetweetCount(postDAO.findRandomPost());
 	}
 
-	public List<Post> findTimelinePosts(User user) {
-		return setLikeRetweetCount(postDAO.findTimelinePosts(user.getUserId()));
-	}
-
-	public List<Post> getUserPosts(String uniqueName) {
-		return setLikeRetweetCount(postDAO.findPostByUniqueName(uniqueName));
+	public List<Post> findTimelinePosts(Long userId) {
+		return setLikeRetweetedAndCount(postDAO.findTimelinePosts(userId), userId);
 	}
 
 	public List<Post> getUserPosts(Long userId) {
-		return setLikeRetweetCount(postDAO.findPostByUserId(userId));
+		return setLikeRetweetedAndCount(postDAO.findPostByUserId(userId), userId);
 	}
 
 	public Optional<Post> getPost(Long postId) {
@@ -106,6 +117,10 @@ public class PostService {
 	}
 
 	public List<Post> searchPosts(String query) {
+		return searchPosts(query, null);
+	}
+
+	public List<Post> searchPosts(String query, User user) {
 
 		Map<Long, Integer> hitBox = new HashMap<>();
 
@@ -125,8 +140,13 @@ public class PostService {
 		}
 
 		logger.info(hitBox.toString());
+
 		if (hitBox.size() > 0) {
-			return postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet());
+			if (user != null) {
+				return setLikeRetweetedAndCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet()), user.getUserId());
+			} else {
+				return setLikeRetweetCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet()));
+			}
 		} else {
 			return null;
 		}
@@ -156,10 +176,10 @@ public class PostService {
 
 				PostReaction reaction = optPR.get();
 				if (reaction.getStatus().equals(ConstantsUtil.POST_REACTION_ACTIVE)) {
-					redisService.decrLike(post.getPostId());
+					redisService.decrLike(post.getPostId(), user.getUserId());
 					reaction.setStatus(ConstantsUtil.POST_REACTION_CANCEL);
 				} else {
-					redisService.incrLike(post.getPostId());
+					redisService.incrLike(post.getPostId(), user.getUserId());
 					reaction.setStatus(ConstantsUtil.POST_REACTION_ACTIVE);
 				}
 
@@ -168,7 +188,7 @@ public class PostService {
 				return reaction;
 
 			} else {
-				redisService.incrLike(post.getPostId());
+				redisService.incrLike(post.getPostId(), user.getUserId());
 
 				LikeReaction reaction = new LikeReaction();
 				reaction.setPost(post);
@@ -206,7 +226,7 @@ public class PostService {
 					retweetPost.setStatus(ConstantsUtil.POST_ACTIVE);
 					retweetPost.setUser(user);
 
-					redisService.incrRetweet(post.getPostId());
+					redisService.incrRetweet(post.getPostId(), user.getUserId());
 
 					retweetPost = (RetweetPost) postDAO.save(retweetPost);
 

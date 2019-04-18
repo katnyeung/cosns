@@ -17,8 +17,10 @@
 					if (response.data.status === 'success') {
 						if (response.data.type === 'incr') {
 							post.likeCount++;
+							post.liked = true;
 						} else if (response.data.type === 'decr') {
 							post.likeCount--;
+							post.liked = false;
 						}
 					}
 					return response;
@@ -39,9 +41,8 @@
 					}
 				}).then(function(response) {
 					if (response.data.status === 'success') {
-						if (response.data.type === 'incr') {
-							post.likeCount++;
-						}
+						post.retweetCount++;
+						post.retweeted = true;
 					}
 					return response;
 				});
@@ -66,20 +67,23 @@
 
 	<div ng-repeat="post in postList" class="span4">
 		<div>
-			#{{post.postId}} <a href="/u/{{post.user.userId}}">{{post.user.email}}</a> &nbsp; <a href="/p/{{post.postId}}">{{post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a>
+			#{{post.postId}} <a href="/u/{{post.user.userId}}">{{post.user.email}}</a>
+			&nbsp; <a href="/p/{{post.postId}}">{{post.createdate |
+				date:'MM/dd/yyyy hh:mm:ss'}}</a>
 		</div>
-
 
 		<div ng-show="post.type == 'retweet'" class="well">
 			{{postContent = post.post;""}}
 			<div>
-				Retweet <a href="/u/{{postContent.user.userId}}">{{postContent.user.email}}</a> &nbsp; <a href="/p/{{postContent.postId}}">{{postContent.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a>
+				Retweet <a href="/u/{{postContent.user.userId}}">{{postContent.user.email}}</a>
+				&nbsp; <a href="/p/{{postContent.postId}}">{{postContent.createdate
+					| date:'MM/dd/yyyy hh:mm:ss'}}</a>
 			</div>
 			<div>
 				<div th:include="components/post :: viewPostBody"></div>
 			</div>
-
 		</div>
+
 		<div ng-show="post.type !='retweet'">
 			{{postContent = post;""}}
 
@@ -97,7 +101,21 @@
 		</div>
 	</div>
 	<div class="container">
-
-		<a href="#" class="btn" ng-click="likePost(postContent); $event.preventDefault();">Like {{postContent.likeCount}}</a> <a href="#" class="btn" ng-click="retweetPost(postContent); $event.preventDefault();">Retweet {{postContent.retweetCount}}</a>
+		<div ng-show="shared.user">
+			<a href="#" class="btn"
+				ng-click="likePost(postContent); $event.preventDefault();"> <span
+				ng-show="postContent.liked">Unlike</span> <span
+				ng-show="!postContent.liked">Like</span> <span ng-show="postContent.likeCount > 0">{{postContent.likeCount}}</span>
+			</a> <span
+				ng-show="!postContent.retweeted && shared.user.userId != postContent.user.userId">
+				<a href="#" class="btn"
+				ng-click="retweetPost(postContent); $event.preventDefault();">
+					Retweet <span ng-show="postContent.retweetCount > 0">{{postContent.retweetCount}}</span> </a>
+			</span>
+			<span ng-show="postContent.retweeted">
+			Retweet <span ng-show="postContent.retweetCount > 0">{{postContent.retweetCount}}</span></span>
+		</div>
+		<div ng-show="!shared.user">Like <span ng-show="postContent.likeCount > 0">{{postContent.likeCount}}</span>
+			Retweet <span ng-show="postContent.retweetCount > 0">{{postContent.retweetCount}}</span></div>
 	</div>
 </body>
