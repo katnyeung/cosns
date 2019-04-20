@@ -2,7 +2,8 @@
 cosns
 
 This is a personal project with name COS & SNS.
-The goal for the project.
+
+# goal
 
 - Create a small circle twitter like portal to share photo between user 
 - Calendar function to share event information
