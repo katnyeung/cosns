@@ -4,6 +4,7 @@
 			var service = {};
 
 			service.likePost = function(post) {
+				console.log(post);
 				return $http({
 					url : "/post/likePost",
 					method : "POST",
@@ -63,59 +64,87 @@
 	</script>
 </header>
 
-<body th:fragment="viewPosts">
+<body th:fragment="viewPosts(section)">
 
-	<div ng-repeat="post in postList" class="span4">
-		<div>
-			#{{post.postId}} <a href="/u/{{post.user.userId}}">{{post.user.email}}</a>
-			&nbsp; <a href="/p/{{post.postId}}">{{post.createdate |
-				date:'MM/dd/yyyy hh:mm:ss'}}</a>
-		</div>
-
-		<div ng-show="post.type == 'retweet'" class="well">
-			{{postContent = post.post;""}}
-			<div>
-				Retweet <a href="/u/{{postContent.user.userId}}">{{postContent.user.email}}</a>
-				&nbsp; <a href="/p/{{postContent.postId}}">{{postContent.createdate
-					| date:'MM/dd/yyyy hh:mm:ss'}}</a>
+	<div ng-show="post.retweetedBy">
+		<div class="row shadow-sm ">
+			<div class="col">
+				<span style="font-size: 12px">/Retweet By</span>
+				<span ng-repeat="retweetedByPost in post.retweetedBy">
+					<a href="/u/{{retweetedByPost.user.uniqueName ? retweetedByPost.user.uniqueName : retweetedByPost.user.userId}}" style="font-size: 14px">{{retweetedByPost.user.uniqueName ? retweetedByPost.user.uniqueName : retweetedByPost.user.email}}</a>
+				</span>
 			</div>
-			<div>
-				<div th:include="components/post :: viewPostBody"></div>
+
+			<div class="col-ml-auto" style="font-size: 10px">
+				<a href="/p/{{post.postId}}">{{post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a> &nbsp;
 			</div>
 		</div>
+	</div>
 
-		<div ng-show="post.type !='retweet'">
-			{{postContent = post;""}}
-
-			<div th:include="components/post :: viewPostBody"></div>
+	<div class="row">
+		<div class="col">
+			{{post.postId}} <a href="/u/{{post.user.uniqueName ? post.user.uniqueName : post.user.userId}}" style="font-size: 14px">{{post.user.uniqueName ? post.user.uniqueName : post.user.email}}</a>
 		</div>
+
+		<div class="col-ml-auto" style="font-size: 10px">
+			<a href="/p/{{post.postId}}">{{post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a> &nbsp;
+		</div>
+	</div>
+	<div th:include="components/post :: viewPostBody(${section})"></div>
 	</div>
 
 </body>
 
-<body th:fragment="viewPostBody">
-	<pre>{{postContent.message}}</pre>
-	<div class="container">
-		<div ng-repeat="image in postContent.postImages">
-			<img class="span2" src="/images/{{image.filename}}" />
+<body th:fragment="viewPostBody(section)">
+	<div ng-show="shared.user" class='navbar-form'>
+		<div class="row">
+			<div class="col-mr-1">
+				<a href="#" class="btn" ng-click="likePost(post, post.postId); $event.preventDefault();"> <span ng-show="post.liked">Unlike</span> <span ng-show="!post.liked">Like</span> <span ng-show="post.likeCount > 0">{{post.likeCount}}</span>
+				</a>
+			</div>
+			<div ng-show="!post.retweeted && shared.user.userId != post.user.userId">
+				<a href="#" class="btn" ng-click="retweetPost(post); $event.preventDefault();"> Retweet <span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span></a> <span ng-show="post.retweeted"> Retweet <span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span></span>
+			</div>
 		</div>
 	</div>
-	<div class="container">
-		<div ng-show="shared.user">
-			<a href="#" class="btn"
-				ng-click="likePost(postContent); $event.preventDefault();"> <span
-				ng-show="postContent.liked">Unlike</span> <span
-				ng-show="!postContent.liked">Like</span> <span ng-show="postContent.likeCount > 0">{{postContent.likeCount}}</span>
-			</a> <span
-				ng-show="!postContent.retweeted && shared.user.userId != postContent.user.userId">
-				<a href="#" class="btn"
-				ng-click="retweetPost(postContent); $event.preventDefault();">
-					Retweet <span ng-show="postContent.retweetCount > 0">{{postContent.retweetCount}}</span> </a>
-			</span>
-			<span ng-show="postContent.retweeted">
-			Retweet <span ng-show="postContent.retweetCount > 0">{{postContent.retweetCount}}</span></span>
-		</div>
-		<div ng-show="!shared.user">Like <span ng-show="postContent.likeCount > 0">{{postContent.likeCount}}</span>
-			Retweet <span ng-show="postContent.retweetCount > 0">{{postContent.retweetCount}}</span></div>
+	<div ng-show="!shared.user">
+		Like <span ng-show="post.likeCount > 0">{{post.likeCount}}</span> Retweet <span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span>
 	</div>
+
+	<div>
+		<th:block th:switch="${section}">
+			<div th:case="'detail'">
+				<div th:attr="ng-repeat='image in post.postImages'">
+					<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+				</div>
+			</div>
+			<div th:case="'thumbnail'">
+				<a href="/p/{{post.postId}}">
+					<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
+						<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+					</div>
+					<div class="row ml-1">
+						<div class="col-md-4 m-0 p-1" th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
+							<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+						</div>
+					</div>
+				</a>
+			</div>
+			<div th:case="'thumbnail-mid'">
+				<a href="/p/{{post.postId}}">
+					<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
+						<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+					</div>
+					<div class="row ml-1">
+						<div class="col-md-5 m-0 p-1" th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
+							<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+						</div>
+					</div>
+				</a>
+			</div>
+		</th:block>
+
+	</div>
+
+	<pre>{{post.message}}</pre>
 </body>

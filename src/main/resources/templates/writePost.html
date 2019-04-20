@@ -21,7 +21,7 @@
 	<script>
 		var main = angular.module('application', [ 'flow', 'angular-sortable-view' ])
 
-		main.controller('writePostController', function($scope, $http, $timeout, $window , messageService) {
+		main.controller('writePostController', function($scope, $http, $timeout, $window, messageService) {
 			$scope.obj = {};
 
 			$scope.releaseDate = new Date('[[${releaseDate}]]');
@@ -34,9 +34,9 @@
 				}
 				return true;
 			}
-			
+
 			$scope.submit = function() {
-				
+
 				$scope.posting = true;
 
 				if ($scope.postMessage) {
@@ -48,7 +48,6 @@
 							fileList.push(msg.filePath);
 						}
 					});
-
 
 					$http({
 						url : "/post/writePost",
@@ -62,14 +61,14 @@
 							'fileList' : fileList
 						}
 					}).then(function(response) {
-						
+
 						if (response.data.status == 'success') {
 							$scope.message("Post Success");
 
 							$timeout(function() {
 								$window.location.href = '/u';
 							}, 1000);
-							
+
 						} else {
 							$scope.message("Something error, please contact system adminsitrator");
 						}
@@ -90,42 +89,50 @@
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div ng-controller="writePostController" class="container">
+	
+		<h3>Write Post</h3>
 		<form ng-submit="submit()">
-			<div class="hero-unit">
-				<div class="row">
-					<textarea ng-model="postMessage" rows="10" class="form-control" style="min-width: 100%" placeholder="(message)"></textarea>
-				</div>
-				<div class="row">
-					<h4>Release Date</h4>
-					<input type="date" ng-model="releaseDate" placeholder="Release Date" />
-				</div>
-				<div class="row">
-					<h4>Images</h4>
-					<div flow-init="{target: '/post/uploadImage', testChunks:false,  chunkSize:10000000}" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message" flow-name="obj.flow">
-						<div class="alert" flow-drop flow-btn flow-drag-enter="style={border:'4px solid green'}" flow-drag-leave="style={}" ng-style="style">Click or Drop image here</div>
+			<div class="form-group">
+				<textarea ng-model="postMessage" rows="10" class="form-control" style="min-width: 100%" placeholder="(message)"></textarea>
+			</div>
 
-						<table sv-root sv-part="$flow.files">
-							<tr ng-repeat="file in $flow.files" sv-element="opts" class="well grid">
-								<td><div class="btn" sv-handle>{{$index+1}}</div></td>
-								<td></td>
-								<td><img flow-img="file" style="max-height: 300px; width: auto" />
-									<div class="progress" style="width: auto" ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
-										<div style="width: {{file.progress()* 100}}%" class="bar">
-											<span>{{(file.progress() * 100).toFixed(0)}}%</span>
-										</div>
-									</div></td>
-								<td><a href="#" class="btn btn-danger" ng-click="file.cancel()"> Remove </a></td>
+			<div class="form-group">
+				<h4>Release Date</h4>
+				<input type="date" ng-model="releaseDate" placeholder="Release Date" />
+			</div>
 
-							</tr>
-						</table>
+			<div class="form-group">
+				<h4>Images</h4>
+				<div flow-init="{target: '/post/uploadImage', testChunks:false,  chunkSize:10000000}" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message" flow-name="obj.flow">
+					<div flow-drop flow-btn flow-drag-enter="style={border:'4px solid green'}" flow-drag-leave="style={}" ng-style="style" class="btn btn-danger">Click or Drop image here</div>
+					<div class="mt-2"></div>
+					<div sv-root sv-part="$flow.files" class="row">
+						<div ng-repeat="file in $flow.files" sv-element="opts" class="card col-md-3">
+							<div class="btn" sv-handle>{{$index+1}}</div>
 
+							<img flow-img="file" class="img-fluid rounded" />
+							<div class="progress" style="width: auto" ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
+								<div style="width: {{file.progress()* 100" class="bar">
+									<span>{{(file.progress() * 100).toFixed(0)}}%</span>
+								</div>
+							</div>
+							<div></div>
+							<a href="#" class="btn btn-info " ng-click="file.cancel()"> Remove </a>
+						<div class="mt-2"></div>
+						</div>
 					</div>
+
 				</div>
 			</div>
-			<div class="modal-footer row">
-				<button type="submit" class="btn btn-primary">Post</button>
-			</div>
+
+			<button type="submit" class="btn btn-primary">Post</button>
 		</form>
 	</div>
+	<hr>
+
+	<footer>
+		<p>&copy; Company 2013</p>
+	</footer>
+
 </body>
 </html>

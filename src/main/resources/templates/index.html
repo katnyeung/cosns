@@ -1,6 +1,9 @@
+
 <!doctype html>
 <html lang="en">
 <head>
+
+
 
 <script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
@@ -29,7 +32,7 @@
 		});
 		main.controller('viewPostController', function($scope, postService, messageService) {
 			$scope.shared = messageService.getShared();
-			
+
 			var handleResponse = function(response, type) {
 				if (response.data.status == 'success') {
 					$scope.message(type + " success");
@@ -57,24 +60,27 @@
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
-
+			
 		});
 	</script>
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
 
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
-
-	<div class="container">
-		<div ng-controller="searchController" class="hero-unit">
+	<div ng-controller="messageController"></div>
+	
+	<div class="container pt-5">
+		<div ng-controller="searchController">
 			<!-- Main hero unit for a primary marketing message or call to action -->
 			Search <input type="text" ng-mode="keyword" />
 			<button type="button" ng-click="search()">Search</button>
 
 		</div>
 
-		<div ng-controller="viewPostController" class="row-fluid">
-			<div th:include="components/post :: viewPosts" th:remove="tag"></div>
+		<div ng-controller="viewPostController" class="row">
+			<div ng-repeat="post in postList" class="card col-md-3 m-1">
+				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
+			</div>
 		</div>
 
 	</div>
@@ -83,8 +89,6 @@
 	<footer>
 		<p>&copy; Company 2013</p>
 	</footer>
-
-
 
 </body>
 </html>

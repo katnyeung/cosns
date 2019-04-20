@@ -41,6 +41,7 @@
 
 		main.controller('viewUserController', function($scope, $http, messageService) {
 			$scope.shared = messageService.getShared();
+			
 			$scope.followedList = {};
 			$scope.isFollowed = false;
 
@@ -96,8 +97,8 @@
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div class="container" ng-controller="viewUserController">
-		<div class="hero-unit">
-			<img src="/pimages/{{profileImage}}" /><br />
+		<div class="container well">
+			<img src="/pimages/{{profileImage}}" class="col-3"/><br />
 			{{user.uniqueName}} ( {{user.email}} )
 			<pre>{{user.message}}</pre>
 			<br /> Following
@@ -109,11 +110,17 @@
 			<button type="button"
 				th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>
 		</div>
-		<div ng-controller="viewPostController" class="row offset1">
-			<div th:include="components/post :: viewPosts" th:remove="tag"></div>
+		<div ng-controller="viewPostController" class="container">
+			<div ng-repeat="post in postList" class="card col-md-9 m-1">
+				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
+			</div>
 		</div>
 	</div>
+	<hr>
 
+	<footer>
+		<p>&copy; Company 2013</p>
+	</footer>
 
 </body>
 </html>

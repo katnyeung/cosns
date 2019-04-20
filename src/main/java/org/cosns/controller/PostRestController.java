@@ -2,12 +2,9 @@ package org.cosns.controller;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
@@ -78,17 +75,19 @@ public class PostRestController {
 
 	@GetMapping(path = "/getPost/{postId}")
 	public DefaultResult getPost(@PathVariable("postId") Long postId, HttpSession session) {
-		Optional<Post> post = postService.getPost(postId);
-
 		PostListResult plr = new PostListResult();
 
-		if (post.isPresent()) {
-			plr.setPostList(Stream.of(post.get()).collect(Collectors.toList()));
-			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		User user = (User) session.getAttribute("user");
+		List<Post> postList = null;
+
+		if (user != null) {
+			postList = postService.getPost(postId, user.getUserId());
 		} else {
-			plr.setRemarks("Post not found");
-			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			postList = postService.getPost(postId);
 		}
+
+		plr.setPostList(postList);
+		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		return plr;
 	}
 
@@ -106,6 +105,7 @@ public class PostRestController {
 		}
 
 		plr.setPostList(postList);
+		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
 		return plr;
 	}
@@ -149,14 +149,21 @@ public class PostRestController {
 	}
 
 	@GetMapping(path = "/getUserPosts/{userId}")
-	public DefaultResult getUserPost(@PathVariable("userId") Long userId) {
+	public DefaultResult getUserPost(@PathVariable("userId") Long userId, HttpSession session) {
 		PostListResult plr = new PostListResult();
 
-		List<Post> postList = postService.getUserPosts(userId);
+		User user = (User) session.getAttribute("user");
+		List<Post> postList = null;
+
+		if (user != null) {
+			postList = postService.getUserPosts(userId, user.getUserId());
+
+		} else {
+			postList = postService.getUserPosts(userId);
+		}
 
 		plr.setPostList(postList);
 		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
-
 		return plr;
 	}
 

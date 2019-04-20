@@ -29,7 +29,8 @@ public abstract class Image extends Auditable<String> {
 	private Long imageId;
 
 	private int seq;
-
+	
+	@JsonIgnore
 	@Lob
 	@NotNull
 	private String storedPath;
@@ -37,7 +38,8 @@ public abstract class Image extends Auditable<String> {
 	@NotNull
 	@Size(max = 255)
 	private String filename;
-
+	
+	@JsonIgnore
 	private double size;
 
 	@JsonIgnore

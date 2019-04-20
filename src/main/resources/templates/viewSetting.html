@@ -12,6 +12,8 @@
 		var main = angular.module('application', [ 'flow' ]);
 
 		main.controller('settingController', function($scope, $http, messageService) {
+			$scope.shared = messageService.getShared();
+
 			$scope.obj = {};
 
 			$http({
@@ -22,11 +24,13 @@
 				}
 			}).then(function(response) {
 				if (response.data.status == 'success') {
-					if(response.data.user.profileImage[0]) {
+					if (response.data.user.profileImage[0]) {
 						$scope.profileImage = response.data.user.profileImage[0].filename;
 					}
-					
+
 					$scope.uniqueName = response.data.user.uniqueName;
+					$scope.checkName = response.data.user.uniqueName;
+
 					$scope.profileMessage = response.data.user.message;
 				} else {
 					$scope.message("Load User Failed");
@@ -34,29 +38,27 @@
 			});
 
 			$scope.checkUniqueName = function() {
-				$http({
-					url : "/user/checkUniqueName/",
-					method : "GET",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						uniqueName : $scope.uniqueName
-					}
-				}).then(function(response) {
-					if (response.data.status == 'success') {
-						$scope.uniqueUserNameFlag = true;
-						$scope.uniqueNameMessage = "OK";
-					} else {
-						$scope.uniqueUserNameFlag = false;
-						$scope.uniqueNameMessage = "someone using this name already";
-					}
-				});
-
+				if ($scope.uniqueName != $scope.checkName) {
+					$http({
+						url : "/user/checkUniqueName/",
+						method : "POST",
+						headers : {
+							'Content-Type' : 'application/json'
+						},
+						data : {
+							uniqueName : $scope.uniqueName
+						}
+					}).then(function(response) {
+						if (response.data.status == 'success') {
+							$scope.uniqueNameMessage = "OK";
+						} else {
+							$scope.uniqueNameMessage = "someone using this name already";
+						}
+					});
+				}
 			}
 
 			$scope.submit = function() {
-
 				var image;
 
 				angular.forEach($scope.obj.flow.files, function(value, key) {
@@ -80,13 +82,13 @@
 					}
 				}).then(function(response) {
 					if (response.data.status == 'success') {
-						$scope.message("Success");
+						$scope.message(response.data.remarks);
 					} else {
-						$scope.message("Failed");
+						$scope.message(response.data.remarks);
 					}
 				});
 			}
-			
+
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
@@ -98,7 +100,12 @@
 
 	<div class="container" ng-controller="settingController">
 		<form ng-submit="submit()">
-			<div class="hero-unit row">Settings</div>
+			<h3>Settings</h3>
+			<div class="row">
+				<div class="col-md-4 form-inline p-2">
+					<input type="password" ng-model="password" name="password" placeholder="Password" class="form-control" /> <input type="submit" id="update" value="update" class="btn btn-primary form-control" />
+				</div>
+			</div>
 			<div class="row">
 
 				<table class="table">
@@ -116,12 +123,12 @@
 									</div>
 									<div ng-repeat="file in $flow.files">
 										<div class="progress" style="width: auto" ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
-											<div class="bar" style="width: {{file.progress()* 100}}%">
+											<div class="bar" style="width: {{file.progress()* 100">
 												<span>{{(file.progress() * 100).toFixed(0)}}%</span>
 											</div>
 										</div>
 									</div>
-									<button type="button" class="btn btn-info" flow-btn>select image</button>
+									<button type="button" class="btn btn-info " flow-btn>select image</button>
 								</div>
 
 							</div>
@@ -129,10 +136,11 @@
 					</tr>
 					<tr>
 						<td>Assign Unique Name :</td>
-						<td><div>
-								<input type="text" ng-model="uniqueName" name="uniqueName" placeholder="(Optional)" /><span ng-model="uniqueNameMessage"></span> <br />
-								<button type="button" ng-click="checkUniqueName()" class="btn btn-info btn-sm">Check</button>
-							</div></td>
+						<td><div class="form-inline">
+								<input type="hidden" ng-mode="checkName" /> @<input type="text" ng-model="uniqueName" name="uniqueName" placeholder="(Optional)" class="form-control" /> <br /> &nbsp;
+								<button type="button" ng-click="checkUniqueName()" class="btn btn-info btn-sm form-control">Check</button>
+
+							</div> <small id="emailHelp" class="form-text text-muted" ng-show="uniqueNameMessage">{{uniqueNameMessage}}</small></td>
 					</tr>
 					<tr>
 						<td>Profile Message :</td>
@@ -142,13 +150,12 @@
 					</tr>
 				</table>
 			</div>
-			<div class="modal-footer">
-				<div class="form-group">
-					<input class="form-control" type="password" ng-model="password" name="password" placeholder="Password" /><br /> <input type="submit" id="update" value="update" class="btn btn-primary btn-lg" />
-				</div>
-			</div>
-			</from>
+		</form>
 	</div>
+	<hr>
 
+	<footer>
+		<p>&copy; Company 2013</p>
+	</footer>
 </body>
 </html>

@@ -1,13 +1,16 @@
 <!-- components/header.html -->
 <header th:fragment="headerLibrary">
 
-	<meta charset="UTF-8">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+	<meta name="generator" content="Jekyll v3.8.5">
 
-	<title>Cosns - together we strong</title>
+	<title>Cosns - play together</title>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
-	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" />
-
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
 </header>
 
 <header th:fragment="headerScript">
@@ -44,30 +47,47 @@
 				}, 3000);
 
 			}, 3000);
+
 		});
 	</script>
 </header>
 
 <header th:fragment="headerBody">
-	<div class="navbar navbar-fixed-top">
-		<div class="navbar-inner">
-			<div class="container-fluid">
-				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-					<span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
-				</button>
-				<a class="brand" href="/">COSNS</a>
-				<div  class="nav-collapse in collapse" style="height:auto">
 
-					<div th:include="components/loginRegister :: loginRegisterBody"></div>
+	<div ng-controller="userController">
+		<nav class="navbar-fixed-top d-flex flex-column flex-md-row align-items-center p-1 px-md-4 mb-3 bg-white border-bottom shadow-sm justify-content-end">
 
-				</div>
+			<a class="navbar-brand mr-3" href="/">Cosns</a>
+			<div th:include="components/loginRegister :: loginRegisterBody" th:remove="tag"></div>
+		</nav>
+
+		<div id="registerModal" ng-show="showRegister" class="container">
+			<div class="card">
+				<h3 class="d-flex justify-content-center">reg</h3>
+				<form ng-submit="register()" name="registerForm">
+					<div class="card-body">
+						<div class="form-group">
+							<label for="email1">Email address</label> <input ng-model="register.email" type="email" class="form-control" id="email1" aria-describedby="emailHelp" placeholder="Enter email">
+						</div>
+						<div class="form-group">
+							<label for="pwd1">Password</label> <input ng-model="register.password" type="password" class="form-control" id="pwd1" placeholder="Password">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputPassword1">Password Again</label> <input ng-model="register.passwordAgain" type="password" class="form-control" id="pwd2" placeholder="Password Again">
+						</div>
+						<input type="submit" id="register" value="register" class="btn btn-primary" />
+					</div>
+
+				</form>
 			</div>
 		</div>
 	</div>
-	<div ng-controller="messageController">
-		<div id="postMessage" ng-show="shared.dialogMessage" class="alert modal">
-			<span class="row offset2">{{shared.dialogMessage}} <a href="#" class="close" ng-click="shared.dialogMessage = null; $event.preventDefault();">X</a></span>
+	
+	<div ng-controller="messageController" id="postMessage" class="container" ng-show="shared.dialogMessage">
+		<div class="row  alert-info rounded">
+			<span> {{shared.dialogMessage}}</span>
 		</div>
 	</div>
+
 
 </header>

@@ -1,9 +1,12 @@
 package org.cosns.repository.extend;
 
+import java.util.List;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import org.cosns.repository.Post;
 
@@ -28,5 +31,4 @@ public class RetweetPost extends Post {
 	public void setPost(Post post) {
 		this.post = post;
 	}
-
 }

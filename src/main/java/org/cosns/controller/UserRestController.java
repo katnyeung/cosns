@@ -15,7 +15,6 @@ import org.cosns.service.PostService;
 import org.cosns.service.RedisService;
 import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
-import org.cosns.util.DefaultException;
 import org.cosns.web.DTO.ImageUploadDTO;
 import org.cosns.web.DTO.RegistNameDTO;
 import org.cosns.web.DTO.UserFormDTO;
@@ -57,24 +56,32 @@ public class UserRestController {
 	String uploadPattern;
 
 	@PostMapping(path = "/login")
-	public DefaultResult login(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
+	public DefaultResult login(@RequestBody UserFormDTO userDTO, HttpSession session) {
 		UserResult ur = new UserResult();
 
-		User user = userService.verifyUser(userDTO);
+		if (userDTO.getPassword() != null && userDTO.getEmail() != null) {
+			User user = userService.verifyUser(userDTO);
 
-		if (user != null) {
-			session.setAttribute("user", user);
-			ur.setUser(user);
-			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			if (user != null) {
+				session.setAttribute("user", user);
+				ur.setUser(user);
+				ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+				ur.setRemarks("Good day, " + user.getEmail());
+			} else {
+				ur.setStatus(ConstantsUtil.RESULT_ERROR);
+				ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_FAIL);
+			}
+
 		} else {
-			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN_FAIL);
+			ur.setStatus(ConstantsUtil.RESULT_ERROR);
+			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_FAIL);
 		}
 
 		return ur;
 	}
 
 	@PostMapping(path = "/checkUniqueName")
-	public DefaultResult registUniqueName(@RequestBody RegistNameDTO registNameDTO, HttpSession session) throws DefaultException {
+	public DefaultResult registUniqueName(@RequestBody RegistNameDTO registNameDTO, HttpSession session) {
 		User loggedUser = (User) session.getAttribute("user");
 
 		UserResult ur = new UserResult();
@@ -86,19 +93,22 @@ public class UserRestController {
 			String value = redisService.getValue(ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX + ":" + registNameDTO.getUniqueName());
 
 			if (value == null) {
+				ur.setRemarks("OK");
 				ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 			} else {
+				ur.setRemarks("Not Available");
 				ur.setStatus(ConstantsUtil.RESULT_ERROR);
 			}
 		} else {
-			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+			ur.setStatus(ConstantsUtil.RESULT_ERROR);
+			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
 		return ur;
 	}
 
 	@PostMapping(path = "/updateSetting")
-	public DefaultResult updateSetting(@RequestBody UserSettingDTO userSettingDTO, HttpSession session) throws DefaultException {
+	public DefaultResult updateSetting(@RequestBody UserSettingDTO userSettingDTO, HttpSession session) {
 		User loggedUser = (User) session.getAttribute("user");
 
 		UserResult ur = new UserResult();
@@ -122,7 +132,8 @@ public class UserRestController {
 				return ur;
 			}
 		} else {
-			throw new DefaultException(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+			ur.setStatus(ConstantsUtil.RESULT_ERROR);
+			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
 		ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
@@ -171,7 +182,7 @@ public class UserRestController {
 	}
 
 	@GetMapping(path = "/logout")
-	public DefaultResult logout(HttpSession session) throws DefaultException {
+	public DefaultResult logout(HttpSession session) {
 		UserResult ur = new UserResult();
 
 		session.setAttribute("user", null);
@@ -182,7 +193,7 @@ public class UserRestController {
 	}
 
 	@PostMapping(path = "/register")
-	public DefaultResult register(@RequestBody UserFormDTO userDTO, HttpSession session) throws DefaultException {
+	public DefaultResult register(@RequestBody UserFormDTO userDTO, HttpSession session) {
 		UserResult ur = new UserResult();
 
 		User user = userService.registerUser(userDTO);
@@ -191,8 +202,10 @@ public class UserRestController {
 			session.setAttribute("user", user);
 			ur.setUser(user);
 			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			ur.setRemarks("Account created, please login");
 		} else {
-			throw new DefaultException("Register Error : user already exist");
+			ur.setStatus(ConstantsUtil.RESULT_ERROR);
+			ur.setRemarks("Already registered, forgot password?");
 		}
 
 		return ur;

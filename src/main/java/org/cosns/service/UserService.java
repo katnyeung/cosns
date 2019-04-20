@@ -55,7 +55,7 @@ public class UserService {
 	public User verifyUser(UserFormDTO userDTO) {
 		Set<User> userList = userDAO.findActiveUserByEmail(userDTO.getEmail());
 		User loggedUser = null;
-
+		
 		for (User user : userList) {
 			if (userDTO.getPassword().equals(user.getPassword())) {
 				loggedUser = user;

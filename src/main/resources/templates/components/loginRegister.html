@@ -3,6 +3,7 @@
 	<script th:inline="javascript">
 		main.controller('userController', function($scope, $http, $timeout, messageService) {
 			$scope.login = function() {
+				$scope.showRegister = false;
 				if ($scope.login.email) {
 					$http({
 						url : "/user/login",
@@ -19,7 +20,7 @@
 						if (response.data.status == 'success') {
 
 							messageService.setUser(response.data.user);
-							$scope.message("Welcome.")
+							$scope.message(response.data.remarks)
 						} else {
 
 							$scope.message(response.data.remarks)
@@ -56,8 +57,13 @@
 								'passwordAgain' : $scope.register.passwordAgain,
 							}
 						}).then(function(response) {
-							$scope.message("Account Create Success");
-							$scope.showRegister = false;
+							if(response.data.status == 'success'){
+								$scope.message(response.data.remarks);
+								$scope.showRegister = false;
+							}else{
+								$scope.message(response.data.remarks);
+							}
+							
 						});
 					} else {
 						$scope.message("please verify your password")
@@ -71,64 +77,30 @@
 			}
 
 			messageService.setUser(/*[[${user}]]*/{});
-			
+
 			$scope.shared = messageService.getShared();
-			console.log($scope.shared);
 		});
 	</script>
 </header>
 <header th:fragment="loginRegisterBody">
+	<nav class=" mr-auto">
+		<a class="p-2 text-dark" href="/c">Calendar</a> 
+		<a class="p-2 text-dark" href="/t" ng-show="shared.user">Timeline</a> 
+		<a class="p-2 text-dark" href="/w" ng-show="shared.user">Write</a>
+	</nav>
 
-	<div ng-controller="userController">
-		<ul class="nav">
-			<li class="navbar-item"><a href="/c">Calendar</a></li>
-			<li class="navbar-item"><a href="/t" ng-show="shared.user">Timeline</a></li>
-			<li class="navbar-item"><a href="/w" ng-show="shared.user">Write</a></li>
-		</ul>
+	<div ng-hide="shared.user" class="ml-auto">
+		<form ng-submit="login()" class="form-inline">
+			<input class="form-control mr-sm-2" type="text" ng-model="login.email" name="email" placeholder="Email"> <input class="form-control mr-sm-2" type="password" ng-model="login.password" name="password" placeholder="Password">
 
-		<div ng-hide="shared.user" class="nav pull-right">
-			<form class="navbar-form" ng-submit="login()">
-				<input class="span2" type="text" ng-model="login.email" name="email" placeholder="Email"> <input class="span2" type="password" ng-model="login.password" name="password" placeholder="Password">
-				<button type="submit" class="btn">Sign in</button>
-				<a href="#myModal" role="button" class="btn" ng-click="showRegister=true">Register</a>
-			</form>
-		</div>
-		<div ng-show="shared.user" class="nav-pills pull-right">
-			<a href="/u/">{{shared.user.email}}</a> &nbsp;<a href="/setting/">Setting</a> <a href="#" ng-click="logout()">Logout</a>
-		</div>
+			<button type="submit" class="btn btn-outline-success my-2 my-sm-0">Sign in</button>
 
-		<div id="registerModal" ng-show="showRegister" class="modal">
-			<div class="modal-header">
-				<button type="button" class="close" ng-click="showRegister=false">&times;</button>
-				<h3>Register</h3>
-			</div>
-			<form ng-submit="register()" name="registerForm">
-				<div class="modal-body">
-					<table>
-						<tr>
+			<a href="#" role="button" class="btn" ng-click="showRegister ? showRegister = false : showRegister = true">Register</a>
+		</form>
+	</div>
 
-							<td>Email :</td>
-							<td><input type="text" ng-model="register.email" name="email" /></td>
-						</tr>
-						<tr>
-							<td>Password :</td>
-							<td><input type="password" ng-model="register.password" name="password" /></td>
-						</tr>
-						<tr>
-							<td>Password Again :</td>
-							<td><input type="password" ng-model="register.passwordAgain" name="passwordAgain" /></td>
-						</tr>
-
-					</table>
-
-
-				</div>
-				<div class="modal-footer">
-					<a href="#" class="btn" ng-click="showRegister=false">Close</a> <input type="submit" id="register" value="register" class="btn btn-primary" />
-				</div>
-			</form>
-		</div>
-
+	<div ng-show="shared.user">
+		<a href="/u/">{{shared.user.uniqueName ? shared.user.uniqueName : shared.user.email}}</a> &nbsp;<a href="/setting/">Setting</a> <a href="#" ng-click="logout()">Logout</a>
 	</div>
 
 </header>

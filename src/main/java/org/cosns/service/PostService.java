@@ -1,5 +1,6 @@
 package org.cosns.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -88,6 +89,43 @@ public class PostService {
 		return post;
 	}
 
+	private List<Post> groupRetweetPost(List<Post> postList) {
+
+		// group by the retweetPost
+		Map<Long, List<Post>> processedMap = new LinkedHashMap<>();
+
+		for (Post post : postList) {
+			if (post instanceof RetweetPost) {
+				RetweetPost retweetedPost = ((RetweetPost) post);
+
+				List<Post> savedList = processedMap.get(retweetedPost.getPost().getPostId());
+				if (savedList != null) {
+					savedList.add(retweetedPost);
+				} else {
+					savedList = new ArrayList<>();
+					savedList.add(retweetedPost);
+				}
+				
+				processedMap.put(retweetedPost.getPost().getPostId(), savedList);
+			}
+		}
+
+		// filter with the photo post only
+		List<Post> returnPost = new ArrayList<>();
+
+		for (Post post : postList) {
+			if (post instanceof PhotoPost) {
+				if (processedMap.get(post.getPostId()) != null) {
+					List<Post> retweetedBy = processedMap.get(post.getPostId());
+					post.setRetweetedBy(retweetedBy);
+				}
+				returnPost.add(post);
+			}
+		}
+
+		return returnPost;
+	}
+
 	private List<Post> setLikeRetweetCount(List<Post> postList) {
 		return postList.stream().map(p -> setLikeRetweetCount(p)).collect(Collectors.toList());
 	}
@@ -105,15 +143,23 @@ public class PostService {
 	}
 
 	public List<Post> findTimelinePosts(Long userId) {
-		return setLikeRetweetedAndCount(postDAO.findTimelinePosts(userId), userId);
+		return groupRetweetPost(setLikeRetweetedAndCount(postDAO.findTimelinePosts(userId), userId));
+	}
+
+	public List<Post> getUserPosts(Long userId, Long loggedUserId) {
+		return groupRetweetPost(setLikeRetweetedAndCount(postDAO.findPostByUserId(userId), loggedUserId));
 	}
 
 	public List<Post> getUserPosts(Long userId) {
-		return setLikeRetweetedAndCount(postDAO.findPostByUserId(userId), userId);
+		return groupRetweetPost(setLikeRetweetCount(postDAO.findPostByUserId(userId)));
 	}
 
-	public Optional<Post> getPost(Long postId) {
-		return postDAO.findById(postId);
+	public List<Post> getPost(Long postId) {
+		return setLikeRetweetCount(postDAO.findPostByPostId(postId));
+	}
+
+	public List<Post> getPost(Long postId, Long userId) {
+		return setLikeRetweetedAndCount(postDAO.findPostByPostId(postId), userId);
 	}
 
 	public List<Post> searchPosts(String query) {

@@ -1,6 +1,7 @@
 package org.cosns.repository;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -25,9 +26,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.cosns.repository.extend.PostImage;
-import org.cosns.service.RedisService;
 import org.cosns.util.Auditable;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -44,10 +43,6 @@ public abstract class Post extends Auditable<String> {
 	private Long postId;
 
 	private Date releaseDate;
-
-	@Transient
-	@Autowired
-	RedisService redisService;
 
 	@Lob
 	@Column(nullable = true)
@@ -69,6 +64,7 @@ public abstract class Post extends Auditable<String> {
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private Set<HashTag> hashtags;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private Set<PostReaction> postReaction;
 
@@ -83,6 +79,9 @@ public abstract class Post extends Auditable<String> {
 
 	@Transient
 	boolean isRetweeted;
+
+	@Transient
+	List<Post> retweetedBy;
 
 	public String getType() {
 		DiscriminatorValue val = this.getClass().getAnnotation(DiscriminatorValue.class);
@@ -184,6 +183,14 @@ public abstract class Post extends Auditable<String> {
 
 	public void setRetweeted(boolean retweeted) {
 		this.isRetweeted = retweeted;
+	}
+
+	public List<Post> getRetweetedBy() {
+		return retweetedBy;
+	}
+
+	public void setRetweetedBy(List<Post> retweetedBy) {
+		this.retweetedBy = retweetedBy;
 	}
 
 }

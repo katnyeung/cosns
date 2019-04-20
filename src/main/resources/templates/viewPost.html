@@ -9,6 +9,7 @@
 
 	main.controller('viewPostController', function($scope, postService, messageService) {
 		$scope.shared = messageService.getShared();
+
 		var handleResponse = function(response, type) {
 			if (response.data.status == 'success') {
 				$scope.message(type + " success");
@@ -44,11 +45,18 @@
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
+	
 	<div class="container">
-		<div class="hero-unit">View Post</div>
-		<div ng-controller="viewPostController" class="row offset1">
-			<div th:include="components/post :: viewPosts" th:remove="tag"></div>
+		<div ng-controller="viewPostController" class="row">
+			<div ng-repeat="post in postList" class="card col-xl">
+				<div th:include="components/post :: viewPosts('detail')" th:remove="tag"></div>
+			</div>
 		</div>
 	</div>
+	<hr>
+
+	<footer>
+		<p>&copy; Company 2013</p>
+	</footer>
 </body>
 </html>
