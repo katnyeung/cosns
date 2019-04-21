@@ -26,6 +26,7 @@ import org.cosns.util.ConstantsUtil;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -69,13 +70,14 @@ public class User extends Auditable<String> {
 
 	@ManyToMany
 	@JoinTable(name = "followers", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "followerId"))
-	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "followerId")
+	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
+	@JsonIdentityReference(alwaysAsId = true)
 	private List<User> followers;
 
 	@JsonIgnore
 	@ManyToMany
 	@JoinTable(name = "followedBy", joinColumns = @JoinColumn(name = "followerId"), inverseJoinColumns = @JoinColumn(name = "userId"))
-	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "followedById")
+	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 	private List<User> followedBy;
 
 	@JsonIgnore
@@ -180,6 +182,11 @@ public class User extends Auditable<String> {
 
 	public void setProfileImage(Set<ProfileImage> profileImage) {
 		this.profileImage = profileImage;
+	}
+
+	@Override
+	public String toString() {
+		return "User [userId=" + userId + ", email=" + email + ", password=" + password + ", status=" + status + ", uniqueName=" + uniqueName + ", message=" + message + ", profileImage=" + profileImage + ", posts=" + posts + ", friendRequest=" + friendRequest + ", postReaction=" + postReaction + "]";
 	}
 
 }

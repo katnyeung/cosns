@@ -110,7 +110,7 @@ public class PostRestController {
 		return plr;
 	}
 
-	@GetMapping(path = "/getRandomPosts")
+	@GetMapping(path = "/getLatestPost")
 	public DefaultResult getPost(HttpSession session) {
 		PostListResult plr = new PostListResult();
 
@@ -118,9 +118,9 @@ public class PostRestController {
 		List<Post> postList = null;
 
 		if (user != null) {
-			postList = postService.findRandomPosts(user.getUserId());
+			postList = postService.findLatestPosts(user.getUserId());
 		} else {
-			postList = postService.findRandomPosts();
+			postList = postService.findLatestPosts();
 		}
 
 		plr.setPostList(postList);

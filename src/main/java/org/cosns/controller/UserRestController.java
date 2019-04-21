@@ -2,6 +2,7 @@ package org.cosns.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -18,9 +19,11 @@ import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.ImageUploadDTO;
 import org.cosns.web.DTO.RegistNameDTO;
 import org.cosns.web.DTO.UserFormDTO;
+import org.cosns.web.DTO.UserIdListDTO;
 import org.cosns.web.DTO.UserSettingDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.UploadImageResult;
+import org.cosns.web.result.UserMapResult;
 import org.cosns.web.result.UserResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -107,6 +110,25 @@ public class UserRestController {
 		return ur;
 	}
 
+	@PostMapping(path = "/getUserList")
+	public DefaultResult getUserList(@RequestBody UserIdListDTO userIdListDTO, HttpSession session) {
+
+		UserMapResult ur = new UserMapResult();
+
+		Map<Long,User> userMap = userService.getUserMapByIdList(userIdListDTO.getUserIdList());
+
+		if (userMap != null) {
+			ur.setUserMap(userMap);
+			ur.setRemarks("OK");
+			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		} else {
+			ur.setRemarks("No user(s) found");
+			ur.setStatus(ConstantsUtil.RESULT_ERROR);
+		}
+
+		return ur;
+	}
+
 	@PostMapping(path = "/updateSetting")
 	public DefaultResult updateSetting(@RequestBody UserSettingDTO userSettingDTO, HttpSession session) {
 		User loggedUser = (User) session.getAttribute("user");
@@ -124,6 +146,9 @@ public class UserRestController {
 					ur.setRemarks("Unique Name already in use");
 					ur.setStatus(ConstantsUtil.RESULT_ERROR);
 					return ur;
+				} else {
+					ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+					session.setAttribute("user", user);
 				}
 
 			} else {
@@ -136,7 +161,6 @@ public class UserRestController {
 			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
-		ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		return ur;
 	}
 
@@ -158,7 +182,7 @@ public class UserRestController {
 
 				String targetPath = uploadFolder + fileName;
 
-				imageService.uploadImage(fromFile, targetPath, 150);
+				imageService.uploadImage(fromFile, targetPath, 200);
 
 				imageService.saveProfileImage(uploadFolder, fileName, fromFile.getSize(), user);
 
@@ -244,6 +268,8 @@ public class UserRestController {
 				if (user != null) {
 					ur.setUser(user);
 					ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+					session.setAttribute("user", user);
 				} else {
 					ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_ADD_FRIEND_FAIL);
 					ur.setStatus(ConstantsUtil.RESULT_ERROR);
@@ -281,6 +307,9 @@ public class UserRestController {
 					if (user != null) {
 						ur.setUser(user);
 						ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+						session.setAttribute("user", user);
+
 					} else {
 						ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_USER_NOT_FOUND);
 						ur.setStatus(ConstantsUtil.RESULT_ERROR);

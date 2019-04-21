@@ -134,12 +134,12 @@ public class PostService {
 		return postList.stream().map(p -> setLikeRetweetCount(p)).map(p -> setLikedRetweeted(p, userId)).collect(Collectors.toList());
 	}
 
-	public List<Post> findRandomPosts(Long userId) {
-		return setLikeRetweetedAndCount(postDAO.findRandomPost(), userId);
+	public List<Post> findLatestPosts(Long userId) {
+		return setLikeRetweetedAndCount(postDAO.findLatestPosts(), userId);
 	}
 
-	public List<Post> findRandomPosts() {
-		return setLikeRetweetCount(postDAO.findRandomPost());
+	public List<Post> findLatestPosts() {
+		return setLikeRetweetCount(postDAO.findLatestPosts());
 	}
 
 	public List<Post> findTimelinePosts(Long userId) {

@@ -1,6 +1,8 @@
 package org.cosns.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -55,7 +57,7 @@ public class UserService {
 	public User verifyUser(UserFormDTO userDTO) {
 		Set<User> userList = userDAO.findActiveUserByEmail(userDTO.getEmail());
 		User loggedUser = null;
-		
+
 		for (User user : userList) {
 			if (userDTO.getPassword().equals(user.getPassword())) {
 				loggedUser = user;
@@ -221,5 +223,19 @@ public class UserService {
 		updateUser(user);
 
 		return user;
+	}
+
+	public Map<Long, User> getUserMapByIdList(List<Long> userIdList) {
+		Map<Long, User> userMap = new HashMap<>();
+		
+		if (userIdList.size() > 0) {
+			Set<User> userSet = userDAO.findActiveUserByIdList(userIdList);
+
+			for (User user : userSet) {
+				userMap.put(user.getUserId(), user);
+			}
+		}
+
+		return userMap;
 	}
 }

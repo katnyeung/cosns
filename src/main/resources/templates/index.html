@@ -53,7 +53,7 @@
 				});
 			}
 
-			postService.loadPosts("getRandomPosts").then(function(response) {
+			postService.loadPosts("getLatestPost").then(function(response) {
 				$scope.postList = response.data.postList;
 			});
 
@@ -76,7 +76,7 @@
 			<button type="button" ng-click="search()">Search</button>
 
 		</div>
-
+		<h3> Latest Post </h3>
 		<div ng-controller="viewPostController" class="row">
 			<div ng-repeat="post in postList" class="card col-md-3 m-1">
 				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
