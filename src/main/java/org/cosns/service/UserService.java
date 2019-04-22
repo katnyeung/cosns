@@ -1,6 +1,8 @@
 package org.cosns.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -55,7 +57,7 @@ public class UserService {
 	public User verifyUser(UserFormDTO userDTO) {
 		Set<User> userList = userDAO.findActiveUserByEmail(userDTO.getEmail());
 		User loggedUser = null;
-		
+
 		for (User user : userList) {
 			if (userDTO.getPassword().equals(user.getPassword())) {
 				loggedUser = user;
@@ -169,8 +171,8 @@ public class UserService {
 		redisService.setValue(prefix + ":" + uniqueName, "" + id);
 	}
 
-	public void updateUser(User user) {
-		userDAO.save(user);
+	public User updateUser(User user) {
+		return userDAO.save(user);
 	}
 
 	@Transactional
@@ -180,7 +182,6 @@ public class UserService {
 		if (userSettingDTO.getUniqueName() != null && !userSettingDTO.getUniqueName().equals(user.getUniqueName())) {
 
 			User checkUser = getUserByUniqueName(userSettingDTO.getUniqueName());
-
 			if (checkUser == null) {
 				if (userSettingDTO.getUniqueName() != null) {
 					user.setUniqueName(userSettingDTO.getUniqueName());
@@ -189,7 +190,6 @@ public class UserService {
 				if (userSettingDTO.getMessage() != null) {
 					user.setMessage(userSettingDTO.getMessage());
 				}
-
 				user.setUniqueName(userSettingDTO.getUniqueName());
 
 				setKeysInRedis(userSettingDTO.getUniqueName(), user.getUserId(), ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX);
@@ -203,7 +203,7 @@ public class UserService {
 		if (userSettingDTO.getImage() != null) {
 			// deactive current image
 			imageService.disableAllProfileImageByUserId(user.getUserId());
-
+			
 			List<ProfileImage> imageSet = imageService.findPendProfileImageByFilename(userSettingDTO.getImage());
 			for (ProfileImage image : imageSet) {
 				image.setStatus(ConstantsUtil.IMAGE_ACTIVE);
@@ -218,8 +218,19 @@ public class UserService {
 			user.setMessage(userSettingDTO.getMessage());
 		}
 
-		updateUser(user);
+		user = updateUser(user);
 
+		logger.info("calling update user end");
 		return user;
+	}
+
+	public Map<Long, User> getFollowerMapByUser(User user) {
+		Map<Long, User> followerMap = new HashMap<>();
+
+		for (User follower : user.getFollowers()) {
+			followerMap.put(follower.getUserId(), follower);
+		}
+
+		return followerMap;
 	}
 }

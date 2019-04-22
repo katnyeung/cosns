@@ -123,7 +123,7 @@
 					<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
 						<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
 					</div>
-					<div class="row ml-1">
+					<div class="row m-0 p-1">
 						<div class="col-md-4 m-0 p-1" th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
 							<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
 						</div>
@@ -135,7 +135,7 @@
 					<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
 						<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
 					</div>
-					<div class="row ml-1">
+					<div class="row m-0 p-1">
 						<div class="col-md-5 m-0 p-1" th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
 							<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
 						</div>

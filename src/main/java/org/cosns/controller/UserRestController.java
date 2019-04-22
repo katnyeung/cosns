@@ -2,6 +2,7 @@ package org.cosns.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -124,6 +125,10 @@ public class UserRestController {
 					ur.setRemarks("Unique Name already in use");
 					ur.setStatus(ConstantsUtil.RESULT_ERROR);
 					return ur;
+				} else {
+					ur.setRemarks("Update Success");
+					ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+					session.setAttribute("user", user);
 				}
 
 			} else {
@@ -136,7 +141,6 @@ public class UserRestController {
 			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
 		}
 
-		ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		return ur;
 	}
 
@@ -158,7 +162,7 @@ public class UserRestController {
 
 				String targetPath = uploadFolder + fileName;
 
-				imageService.uploadImage(fromFile, targetPath, 150);
+				imageService.uploadImage(fromFile, targetPath, 200);
 
 				imageService.saveProfileImage(uploadFolder, fileName, fromFile.getSize(), user);
 
@@ -216,9 +220,12 @@ public class UserRestController {
 		UserResult ur = new UserResult();
 
 		User user = userService.getUserById(userId);
-
+		
 		if (user != null) {
-
+			Map<Long,User> followerMap = userService.getFollowerMapByUser(user);
+			
+			ur.setUserMap(followerMap);
+			
 			ur.setUser(user);
 			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
@@ -244,6 +251,8 @@ public class UserRestController {
 				if (user != null) {
 					ur.setUser(user);
 					ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+					session.setAttribute("user", user);
 				} else {
 					ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_ADD_FRIEND_FAIL);
 					ur.setStatus(ConstantsUtil.RESULT_ERROR);
@@ -281,6 +290,9 @@ public class UserRestController {
 					if (user != null) {
 						ur.setUser(user);
 						ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+						session.setAttribute("user", user);
+
 					} else {
 						ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_USER_NOT_FOUND);
 						ur.setStatus(ConstantsUtil.RESULT_ERROR);

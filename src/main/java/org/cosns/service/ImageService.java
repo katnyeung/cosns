@@ -1,7 +1,6 @@
 package org.cosns.service;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -20,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.mortennobel.imagescaling.AdvancedResizeOp;
 import com.mortennobel.imagescaling.DimensionConstrain;
 import com.mortennobel.imagescaling.ResampleFilters;
 import com.mortennobel.imagescaling.ResampleOp;
@@ -63,19 +63,29 @@ public class ImageService {
 
 		logger.info("file : " + targetFile);
 
+		resizeImage(targetFile, file.getContentType(), size);
+
+		return targetFile;
+	}
+
+	public void resizeImage(File targetFile, String contentType, int size) throws IOException {
+		logger.info("target file : " + targetFile);
+		logger.info("Content Type : " + contentType);
+		logger.info("Size : " + size);
+
 		// resize image
 		BufferedImage in = ImageIO.read(targetFile);
 
-		BufferedImage newImage = new BufferedImage(in.getWidth(), in.getHeight(), BufferedImage.TYPE_INT_ARGB);
-
 		ResampleOp resizeOp = new ResampleOp(DimensionConstrain.createMaxDimension(size, -1));
+		
 		resizeOp.setFilter(ResampleFilters.getLanczos3Filter());
-		BufferedImage scaledImage = resizeOp.filter(newImage, null);
+		resizeOp.setUnsharpenMask(AdvancedResizeOp.UnsharpenMask.Normal);
 
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(scaledImage, file.getContentType(), baos);
+		BufferedImage scaledImage = resizeOp.filter(in, null);
 
-		return targetFile;
+		ImageIO.write(scaledImage, ConstantsUtil.mimeMap.get(contentType), targetFile);
+		logger.info("Write file complete");
+		;
 	}
 
 	public List<ProfileImage> findPendProfileImageByFilename(String file) {

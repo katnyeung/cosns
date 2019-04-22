@@ -24,6 +24,7 @@ import org.cosns.repository.extend.RetweetPost;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.PostFormDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -77,6 +78,9 @@ public class PostService {
 
 	private Post setLikeRetweetCount(Post post) {
 		Long postId = post.getPostId();
+
+		redisService.incrPostView(postId);
+		post.setViewCount(redisService.getPostView(postId));
 		post.setLikeCount(redisService.getLikeCount(postId));
 		post.setRetweetCount(redisService.getRetweetCount(postId));
 		return post;
@@ -84,6 +88,9 @@ public class PostService {
 
 	private Post setLikedRetweeted(Post post, Long userId) {
 		Long postId = post.getPostId();
+
+		redisService.incrPostView(postId);
+		post.setViewCount(redisService.getPostView(postId));
 		post.setLiked(redisService.isLiked(postId, userId));
 		post.setRetweeted(redisService.isRetweeted(postId, userId));
 		return post;
@@ -105,7 +112,7 @@ public class PostService {
 					savedList = new ArrayList<>();
 					savedList.add(retweetedPost);
 				}
-				
+
 				processedMap.put(retweetedPost.getPost().getPostId(), savedList);
 			}
 		}
@@ -134,16 +141,16 @@ public class PostService {
 		return postList.stream().map(p -> setLikeRetweetCount(p)).map(p -> setLikedRetweeted(p, userId)).collect(Collectors.toList());
 	}
 
-	public List<Post> findRandomPosts(Long userId) {
-		return setLikeRetweetedAndCount(postDAO.findRandomPost(), userId);
+	public List<Post> findLatestPosts(Long userId) {
+		return setLikeRetweetedAndCount(postDAO.findLatestPosts(PageRequest.of(0, 20)), userId);
 	}
 
-	public List<Post> findRandomPosts() {
-		return setLikeRetweetCount(postDAO.findRandomPost());
+	public List<Post> findLatestPosts() {
+		return setLikeRetweetCount(postDAO.findLatestPosts(PageRequest.of(0, 20)));
 	}
 
-	public List<Post> findTimelinePosts(Long userId) {
-		return groupRetweetPost(setLikeRetweetedAndCount(postDAO.findTimelinePosts(userId), userId));
+	public List<Post> findTimelinePosts(Long userId, int startFrom) {
+		return groupRetweetPost(setLikeRetweetedAndCount(postDAO.findTimelinePosts(userId,PageRequest.of(startFrom, 5)), userId));
 	}
 
 	public List<Post> getUserPosts(Long userId, Long loggedUserId) {
@@ -285,7 +292,14 @@ public class PostService {
 				return null;
 			}
 		}
+	}
 
+	public void incrPostView(Long postId) {
+		redisService.incrPostView(postId);
+	}
+
+	public Long getPostView(Long postId) {
+		return redisService.getPostView(postId);
 	}
 
 }

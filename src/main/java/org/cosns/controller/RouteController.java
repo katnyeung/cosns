@@ -79,6 +79,8 @@ public class RouteController {
 
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
+		}else {
+			return "redirect:/";
 		}
 
 		return "viewTimeline";

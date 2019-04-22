@@ -24,7 +24,13 @@
 		main.controller('writePostController', function($scope, $http, $timeout, $window, messageService) {
 			$scope.obj = {};
 
-			$scope.releaseDate = new Date('[[${releaseDate}]]');
+			var releaseDateString = '[[${releaseDate}]]';
+
+			if (releaseDateString === '') {
+				$scope.releaseDate = new Date();
+			} else {
+				$scope.releaseDate = new Date(releaseDateString);
+			}
 
 			$scope.validate = function(file) {
 				console.log(file.size);
@@ -89,9 +95,13 @@
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div ng-controller="writePostController" class="container">
-	
+
 		<h3>Write Post</h3>
 		<form ng-submit="submit()">
+			<div class="m-1 pb-3 pt-2">
+				<button type="submit" class="btn btn-primary">Post</button>
+			</div>
+
 			<div class="form-group">
 				<textarea ng-model="postMessage" rows="10" class="form-control" style="min-width: 100%" placeholder="(message)"></textarea>
 			</div>
@@ -118,14 +128,13 @@
 							</div>
 							<div></div>
 							<a href="#" class="btn btn-info " ng-click="file.cancel()"> Remove </a>
-						<div class="mt-2"></div>
+							<div class="mt-2"></div>
 						</div>
 					</div>
 
 				</div>
 			</div>
 
-			<button type="submit" class="btn btn-primary">Post</button>
 		</form>
 	</div>
 	<hr>

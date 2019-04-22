@@ -29,22 +29,32 @@
 					handleResponse(response, 'retweet');
 				});
 			}
-
-			postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]").then(function(response) {
-				$scope.postList = response.data.postList;
-			});
+			
+			$scope.loadPost = function() {
+				postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]").then(function(response) {
+					$scope.postList = response.data.postList;
+				});
+			};
+			$scope.loadPost();
 
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
+
+			$scope.$watch('shared.user', function() {
+				$scope.loadPost();
+			});
 		});
 
 		main.controller('viewUserController', function($scope, $http, messageService) {
 			$scope.shared = messageService.getShared();
 			
 			$scope.followedList = {};
+			$scope.userList = {};
 			$scope.isFollowed = false;
 
+			console.log($scope.shared);
+			
 			if ($scope.shared.user) {
 				$scope.followedList = $scope.shared.user.followers;
 			}
@@ -58,13 +68,14 @@
 			}).then(function(response) {
 
 				$scope.user = response.data.user;
+				$scope.userMap = response.data.userMap;
 				
 				if (response.data.user.profileImage[0]) {
 					$scope.profileImage = response.data.user.profileImage[0].filename;
 				}
 
 				angular.forEach($scope.followedList, function(followedUser) {
-					if (followedUser.userId === response.data.user.userId) {
+					if (followedUser == response.data.user.userId) {
 						$scope.isFollowed = true;
 					}
 				});
@@ -79,6 +90,7 @@
 					}
 				}).then(function(response) {
 					if (response.data.status == 'success') {
+						$scope.isFollowed = true;
 						$scope.message(response.data.remarks);
 					} else {
 						$scope.message(response.data.remarks);
@@ -103,9 +115,7 @@
 			<pre>{{user.message}}</pre>
 			<br /> Following
 			<ul>
-				<li ng-repeat="followedUser in followedList"><a
-					href="/u/{{followedUser.uniqueName ? followedUser.uniqueName : followedUser.userId}}">{{followedUser.uniqueName
-						? followedUser.uniqueName : followedUser.userId}}</a></li>
+				<li ng-repeat="followerId in user.followers"><a href="/u/{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].userId}}">{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].email}}</a></li>
 			</ul>
 			<button type="button"
 				th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>

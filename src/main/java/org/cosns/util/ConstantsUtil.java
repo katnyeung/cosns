@@ -1,5 +1,9 @@
 package org.cosns.util;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class ConstantsUtil {
 	public final static String USER_STATUS_ACTIVE = "A";
 	public final static String USER_STATUS_PEND = "P";
@@ -39,5 +43,15 @@ public class ConstantsUtil {
 
 	public static final String ERROR_MESSAGE_USER_NOT_FOUND = "User not found";
 	public static final String ERROR_MESSAGE_USER_ALREADY_FOLLOWED = "User already followed";
+
+	public static final String REDIS_POST_VIEW_PREFIX = "postview";
+	
+	public static final Map<String, String> mimeMap;
+	static {
+		Map<String, String> aMap = new HashMap<>();
+		aMap.put("image/jpeg", "jpg");
+		aMap.put("image/png", "png");
+		mimeMap = Collections.unmodifiableMap(aMap);
+	}
 
 }

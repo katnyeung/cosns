@@ -110,7 +110,7 @@ public class PostRestController {
 		return plr;
 	}
 
-	@GetMapping(path = "/getRandomPosts")
+	@GetMapping(path = "/getLatestPost")
 	public DefaultResult getPost(HttpSession session) {
 		PostListResult plr = new PostListResult();
 
@@ -118,9 +118,9 @@ public class PostRestController {
 		List<Post> postList = null;
 
 		if (user != null) {
-			postList = postService.findRandomPosts(user.getUserId());
+			postList = postService.findLatestPosts(user.getUserId());
 		} else {
-			postList = postService.findRandomPosts();
+			postList = postService.findLatestPosts();
 		}
 
 		plr.setPostList(postList);
@@ -129,15 +129,15 @@ public class PostRestController {
 		return plr;
 	}
 
-	@GetMapping(path = "/getTimelinePosts")
-	public DefaultResult getTimelinePosts(HttpSession session) {
+	@GetMapping(path = "/getTimelinePosts/{startFrom}")
+	public DefaultResult getTimelinePosts(@PathVariable("startFrom") int startFrom, HttpSession session) {
 		PostListResult plr = new PostListResult();
 
 		User user = (User) session.getAttribute("user");
 
 		if (user != null) {
 
-			List<Post> postList = postService.findTimelinePosts(user.getUserId());
+			List<Post> postList = postService.findTimelinePosts(user.getUserId(), startFrom);
 			plr.setPostList(postList);
 			plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
