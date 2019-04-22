@@ -30,13 +30,20 @@
 			});
 		}
 
-		postService.loadPosts("getPost/[[${postId}]]").then(function(response) {
-			$scope.postList = response.data.postList;
-		});
+		$scope.loadPost = function() {
+			postService.loadPosts("getPost/[[${postId}]]").then(function(response) {
+				$scope.postList = response.data.postList;
+			});
+		};
+		$scope.loadPost();
 
 		$scope.message = function(message) {
 			messageService.setMessage(message);
 		}
+
+		$scope.$watch('shared.user', function() {
+			$scope.loadPost();
+		});
 	});
 </script>
 </head>
@@ -45,7 +52,7 @@
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
-	
+
 	<div class="container">
 		<div ng-controller="viewPostController" class="row">
 			<div ng-repeat="post in postList" class="card col-xl">

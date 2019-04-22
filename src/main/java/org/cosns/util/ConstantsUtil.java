@@ -44,6 +44,8 @@ public class ConstantsUtil {
 	public static final String ERROR_MESSAGE_USER_NOT_FOUND = "User not found";
 	public static final String ERROR_MESSAGE_USER_ALREADY_FOLLOWED = "User already followed";
 
+	public static final String REDIS_POST_VIEW_PREFIX = "postview";
+	
 	public static final Map<String, String> mimeMap;
 	static {
 		Map<String, String> aMap = new HashMap<>();

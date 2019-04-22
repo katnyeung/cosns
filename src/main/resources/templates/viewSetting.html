@@ -82,6 +82,7 @@
 					}
 				}).then(function(response) {
 					if (response.data.status == 'success') {
+						$scope.password = null;
 						$scope.message(response.data.remarks);
 					} else {
 						$scope.message(response.data.remarks);

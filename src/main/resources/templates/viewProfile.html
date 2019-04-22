@@ -29,14 +29,21 @@
 					handleResponse(response, 'retweet');
 				});
 			}
-
-			postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]").then(function(response) {
-				$scope.postList = response.data.postList;
-			});
+			
+			$scope.loadPost = function() {
+				postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]").then(function(response) {
+					$scope.postList = response.data.postList;
+				});
+			};
+			$scope.loadPost();
 
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
+
+			$scope.$watch('shared.user', function() {
+				$scope.loadPost();
+			});
 		});
 
 		main.controller('viewUserController', function($scope, $http, messageService) {
@@ -61,26 +68,14 @@
 			}).then(function(response) {
 
 				$scope.user = response.data.user;
-				
-				$http({
-					url : "/user/getUserList",
-					method : "POST",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						userIdList : response.data.user.followers
-					}
-				}).then(function(ulResponse){
-					$scope.userMap = ulResponse.data.userMap;
-				});
+				$scope.userMap = response.data.userMap;
 				
 				if (response.data.user.profileImage[0]) {
 					$scope.profileImage = response.data.user.profileImage[0].filename;
 				}
 
 				angular.forEach($scope.followedList, function(followedUser) {
-					if (followedUser.userId === response.data.user.userId) {
+					if (followedUser == response.data.user.userId) {
 						$scope.isFollowed = true;
 					}
 				});

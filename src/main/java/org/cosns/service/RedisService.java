@@ -66,4 +66,18 @@ public class RedisService {
 	public boolean isRetweeted(Long postId, Long userId) {
 		return stringRedisTemplate.opsForSet().isMember(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", "" + userId);
 	}
+
+	public void incrPostView(Long postId) {
+		stringRedisTemplate.opsForValue().increment(ConstantsUtil.REDIS_POST_VIEW_PREFIX + ":" + postId);
+	}
+
+	public Long getPostView(Long postId) {
+		String viewCountString = stringRedisTemplate.opsForValue().get(ConstantsUtil.REDIS_POST_VIEW_PREFIX + ":" + postId);
+		if (viewCountString == null) {
+			return (long) 0;
+		} else {
+			return Long.parseLong(viewCountString);
+		}
+
+	}
 }

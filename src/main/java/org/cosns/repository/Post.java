@@ -69,6 +69,9 @@ public abstract class Post extends Auditable<String> {
 	private Set<PostReaction> postReaction;
 
 	@Transient
+	Long viewCount;
+	
+	@Transient
 	Long likeCount;
 
 	@Transient
@@ -191,6 +194,14 @@ public abstract class Post extends Auditable<String> {
 
 	public void setRetweetedBy(List<Post> retweetedBy) {
 		this.retweetedBy = retweetedBy;
+	}
+
+	public Long getViewCount() {
+		return viewCount;
+	}
+
+	public void setViewCount(Long viewCount) {
+		this.viewCount = viewCount;
 	}
 
 }

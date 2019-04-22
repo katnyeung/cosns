@@ -98,6 +98,10 @@
 
 		<h3>Write Post</h3>
 		<form ng-submit="submit()">
+			<div class="m-1 pb-3 pt-2">
+				<button type="submit" class="btn btn-primary">Post</button>
+			</div>
+
 			<div class="form-group">
 				<textarea ng-model="postMessage" rows="10" class="form-control" style="min-width: 100%" placeholder="(message)"></textarea>
 			</div>
@@ -131,7 +135,6 @@
 				</div>
 			</div>
 
-			<button type="submit" class="btn btn-primary">Post</button>
 		</form>
 	</div>
 	<hr>

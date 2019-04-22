@@ -10,7 +10,7 @@
 </head>
 <body ng-app="application">
 	<script>
-		var main = angular.module('application', []);
+		var main = angular.module('application', [ 'infinite-scroll' ]);
 
 		main.controller('searchController', function($scope, $http) {
 
@@ -53,14 +53,21 @@
 				});
 			}
 
-			postService.loadPosts("getLatestPost").then(function(response) {
-				$scope.postList = response.data.postList;
-			});
+			$scope.loadPost = function() {
+				postService.loadPosts("getLatestPost").then(function(response) {
+					$scope.postList = response.data.postList;
+				});
+			};
+			$scope.loadPost();
 
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
-			
+
+			$scope.$watch('shared.user', function() {
+				$scope.loadPost();
+			});
+
 		});
 	</script>
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
@@ -68,7 +75,7 @@
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 	<div ng-controller="messageController"></div>
-	
+
 	<div class="container pt-5">
 		<div ng-controller="searchController">
 			<!-- Main hero unit for a primary marketing message or call to action -->
@@ -76,7 +83,7 @@
 			<button type="button" ng-click="search()">Search</button>
 
 		</div>
-		<h3> Latest Post </h3>
+		<h3>Latest 20 Post</h3>
 		<div ng-controller="viewPostController" class="row">
 			<div ng-repeat="post in postList" class="card col-md-3 m-1">
 				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
