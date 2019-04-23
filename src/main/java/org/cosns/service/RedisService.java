@@ -67,17 +67,39 @@ public class RedisService {
 		return stringRedisTemplate.opsForSet().isMember(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", "" + userId);
 	}
 
-	public void incrPostView(Long postId) {
-		stringRedisTemplate.opsForValue().increment(ConstantsUtil.REDIS_POST_VIEW_PREFIX + ":" + postId);
+	public void incrTotalPostView(Long postId) {
+		stringRedisTemplate.opsForValue().increment(ConstantsUtil.REDIS_POST_VIEW_TOTAL_PREFIX + ":" + postId);
 	}
 
-	public Long getPostView(Long postId) {
-		String viewCountString = stringRedisTemplate.opsForValue().get(ConstantsUtil.REDIS_POST_VIEW_PREFIX + ":" + postId);
+	public Long getTotalPostView(Long postId) {
+		String viewCountString = stringRedisTemplate.opsForValue().get(ConstantsUtil.REDIS_POST_VIEW_TOTAL_PREFIX + ":" + postId);
 		if (viewCountString == null) {
 			return (long) 0;
 		} else {
 			return Long.parseLong(viewCountString);
 		}
+	}
 
+	public void incrTodayPostView(Long postId) {
+		logger.info("increasing viewcount : " + postId);
+		stringRedisTemplate.opsForValue().increment(ConstantsUtil.REDIS_POST_VIEW_TODAY_PREFIX + ":" + postId);
+	}
+
+	public void resetTodayPostView(Long postId) {
+		stringRedisTemplate.opsForValue().set(ConstantsUtil.REDIS_POST_VIEW_TODAY_PREFIX + ":" + postId, "0");
+		// need to sync in day end
+	}
+
+	public Long getTodayPostView(Long postId) {
+		String viewCountString = stringRedisTemplate.opsForValue().get(ConstantsUtil.REDIS_POST_VIEW_TODAY_PREFIX + ":" + postId);
+		if (viewCountString == null) {
+			return (long) 0;
+		} else {
+			return Long.parseLong(viewCountString);
+		}
+	}
+
+	public void deleteKey(String key) {
+		stringRedisTemplate.delete(key);
 	}
 }

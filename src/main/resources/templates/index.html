@@ -58,7 +58,11 @@
 
 			$scope.loadPost = function() {
 				postService.loadPosts("getLatestPost").then(function(response) {
-					$scope.postList = response.data.postList;
+					if (response.data.postList.length > 0) {
+						$scope.postList = response.data.postList;
+					} else {
+						$scope.postList = {};
+					}
 				});
 			};
 			$scope.loadPost();
@@ -67,8 +71,10 @@
 				messageService.setMessage(message);
 			}
 
-			$scope.$watch('shared.user', function() {
-				$scope.loadPost();
+			$scope.$watch('shared.user', function(newValue, oldValue) {
+				if (newValue != oldValue) {
+					$scope.loadPost();
+				}
 			});
 
 		});
@@ -85,14 +91,12 @@
 
 			<div class="col form-inline">
 				<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
-				<button class="form-control mr-sm-2" type="button"
-					ng-click="search()">Search</button>
+				<button class="form-control mr-sm-2" type="button" ng-click="search()">Search</button>
 			</div>
 			<div ng-show="postList" class="col">
 				<h3>Search Result</h3>
 				<div ng-repeat="post in postList" class="card col-md-3 m-1">
-					<div th:include="components/post :: viewPosts('thumbnail')"
-						th:remove="tag"></div>
+					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
 			</div>
 		</div>
@@ -100,8 +104,7 @@
 		<div ng-controller="viewPostController" class="row">
 
 			<div ng-repeat="post in postList" class="card col-md-3 m-1">
-				<div th:include="components/post :: viewPosts('thumbnail')"
-					th:remove="tag"></div>
+				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 			</div>
 		</div>
 

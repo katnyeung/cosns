@@ -68,8 +68,10 @@ public abstract class Post extends Auditable<String> {
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private Set<PostReaction> postReaction;
 
+	Long totalViewCount;
+	
 	@Transient
-	Long viewCount;
+	Long todayViewCount;
 	
 	@Transient
 	Long likeCount;
@@ -196,12 +198,20 @@ public abstract class Post extends Auditable<String> {
 		this.retweetedBy = retweetedBy;
 	}
 
-	public Long getViewCount() {
-		return viewCount;
+	public Long getTotalViewCount() {
+		return totalViewCount;
 	}
 
-	public void setViewCount(Long viewCount) {
-		this.viewCount = viewCount;
+	public void setTotalViewCount(Long totalViewCount) {
+		this.totalViewCount = totalViewCount;
+	}
+
+	public Long getTodayViewCount() {
+		return todayViewCount;
+	}
+
+	public void setTodayViewCount(Long todayViewCount) {
+		this.todayViewCount = todayViewCount;
 	}
 
 }

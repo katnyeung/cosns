@@ -45,8 +45,12 @@ public class ConstantsUtil {
 	public static final String ERROR_MESSAGE_USER_NOT_FOUND = "User not found";
 	public static final String ERROR_MESSAGE_USER_ALREADY_FOLLOWED = "User already followed";
 
-	public static final String REDIS_POST_VIEW_PREFIX = "postview";
+	public static final String REDIS_POST_VIEW_TOTAL_PREFIX = "postview_total";
+	public static final String REDIS_POST_VIEW_TODAY_PREFIX = "postview_today";
+	
 	public static final String REDIS_POST_TAG_PREFIX = "posttag";
+	
+	public static final int USER_DATE_AVAILABLE_TO_ASSIGN_UNIQUE_NAME = 20;
 	
 	public static final Map<String, String> mimeMap;
 	static {

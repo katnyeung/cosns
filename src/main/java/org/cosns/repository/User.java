@@ -1,5 +1,6 @@
 package org.cosns.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -87,6 +88,9 @@ public class User extends Auditable<String> {
 	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private Set<PostReaction> postReaction;
+
+	@JsonIgnore
+	private Date lastUpdateUniqueNameDate;
 
 	public Long getUserId() {
 		return userId;
@@ -184,9 +188,12 @@ public class User extends Auditable<String> {
 		this.profileImage = profileImage;
 	}
 
-	@Override
-	public String toString() {
-		return "User [userId=" + userId + ", email=" + email + ", password=" + password + ", status=" + status + ", uniqueName=" + uniqueName + ", message=" + message + ", profileImage=" + profileImage + ", posts=" + posts + ", friendRequest=" + friendRequest + ", postReaction=" + postReaction + "]";
+	public Date getLastUpdateUniqueNameDate() {
+		return lastUpdateUniqueNameDate;
+	}
+
+	public void setLastUpdateUniqueNameDate(Date lastUpdateUniqueNameDate) {
+		this.lastUpdateUniqueNameDate = lastUpdateUniqueNameDate;
 	}
 
 }

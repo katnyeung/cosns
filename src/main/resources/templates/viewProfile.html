@@ -29,10 +29,14 @@
 					handleResponse(response, 'retweet');
 				});
 			}
-			
+
 			$scope.loadPost = function() {
 				postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]").then(function(response) {
-					$scope.postList = response.data.postList;
+					if (response.data.postList.length > 0) {
+						$scope.postList = response.data.postList;
+					} else {
+						$scope.postList = {};
+					}
 				});
 			};
 			$scope.loadPost();
@@ -41,20 +45,22 @@
 				messageService.setMessage(message);
 			}
 
-			$scope.$watch('shared.user', function() {
-				$scope.loadPost();
+			$scope.$watch('shared.user', function(newValue, oldValue) {
+				if (newValue != oldValue) {
+					$scope.loadPost();
+				}
 			});
 		});
 
 		main.controller('viewUserController', function($scope, $http, messageService) {
 			$scope.shared = messageService.getShared();
-			
+
 			$scope.followedList = {};
 			$scope.userList = {};
 			$scope.isFollowed = false;
 
 			console.log($scope.shared);
-			
+
 			if ($scope.shared.user) {
 				$scope.followedList = $scope.shared.user.followers;
 			}
@@ -69,7 +75,7 @@
 
 				$scope.user = response.data.user;
 				$scope.userMap = response.data.userMap;
-				
+
 				if (response.data.user.profileImage[0]) {
 					$scope.profileImage = response.data.user.profileImage[0].filename;
 				}
@@ -110,15 +116,13 @@
 
 	<div class="container" ng-controller="viewUserController">
 		<div class="container well">
-			<img src="/pimages/{{profileImage}}" class="col-3"/><br />
-			{{user.uniqueName}} ( {{user.email}} )
+			<img src="/pimages/{{profileImage}}" class="col-3" /><br /> {{user.uniqueName}} ( {{user.email}} )
 			<pre>{{user.message}}</pre>
 			<br /> Following
 			<ul>
 				<li ng-repeat="followerId in user.followers"><a href="/u/{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].userId}}">{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].email}}</a></li>
 			</ul>
-			<button type="button"
-				th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>
+			<button type="button" th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>
 		</div>
 		<div ng-controller="viewPostController" class="container">
 			<div ng-repeat="post in postList" class="card col-md-9 m-1">

@@ -1,5 +1,6 @@
 package org.cosns.service;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,39 +172,60 @@ public class UserService {
 		redisService.setValue(prefix + ":" + uniqueName, "" + id);
 	}
 
+	public void deleteKeysInRedis(String uniqueName, String prefix) {
+		redisService.deleteKey(prefix + ":" + uniqueName);
+	}
+
 	public User updateUser(User user) {
 		return userDAO.save(user);
 	}
 
 	@Transactional
-	public User updateSetting(User user, UserSettingDTO userSettingDTO) {
+	public Object updateSetting(User user, UserSettingDTO userSettingDTO) {
 
 		// check uniqueName
 		if (userSettingDTO.getUniqueName() != null && !userSettingDTO.getUniqueName().equals(user.getUniqueName())) {
+			Calendar now = Calendar.getInstance();
+			now.add(Calendar.DATE, ConstantsUtil.USER_DATE_AVAILABLE_TO_ASSIGN_UNIQUE_NAME);
 
-			User checkUser = getUserByUniqueName(userSettingDTO.getUniqueName());
-			if (checkUser == null) {
-				if (userSettingDTO.getUniqueName() != null) {
-					user.setUniqueName(userSettingDTO.getUniqueName());
-				}
-
-				if (userSettingDTO.getMessage() != null) {
-					user.setMessage(userSettingDTO.getMessage());
-				}
-				user.setUniqueName(userSettingDTO.getUniqueName());
-
-				setKeysInRedis(userSettingDTO.getUniqueName(), user.getUserId(), ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX);
-
+			if (user.getLastUpdateUniqueNameDate() != null && user.getLastUpdateUniqueNameDate().compareTo(now.getTime()) < 0) {
+				return ConstantsUtil.USER_DATE_AVAILABLE_TO_ASSIGN_UNIQUE_NAME + " days before next uniqueName change";
 			} else {
-				return null;
+				User checkUser = getUserByUniqueName(userSettingDTO.getUniqueName());
+				if (checkUser == null) {
+
+					if (userSettingDTO.getUniqueName() != null) {
+						String oldUniqueName = user.getUniqueName();
+
+						if (oldUniqueName != null) {
+							logger.info("update setting : delete old uniqueName : " + oldUniqueName);
+							deleteKeysInRedis(oldUniqueName, ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX);
+						}
+						logger.info("update setting : setting new uniqueName : " + oldUniqueName);
+						
+						user.setUniqueName(userSettingDTO.getUniqueName());
+					}
+
+					if (userSettingDTO.getMessage() != null) {
+						user.setMessage(userSettingDTO.getMessage());
+					}
+
+					setKeysInRedis(userSettingDTO.getUniqueName(), user.getUserId(), ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX);
+
+					user.setLastUpdateUniqueNameDate(Calendar.getInstance().getTime());
+
+				} else {
+					return "Unique Name already in use";
+				}
 			}
+
 		}
 
 		// profileImage
 		if (userSettingDTO.getImage() != null) {
 			// deactive current image
 			imageService.disableAllProfileImageByUserId(user.getUserId());
-			
+
 			List<ProfileImage> imageSet = imageService.findPendProfileImageByFilename(userSettingDTO.getImage());
 			for (ProfileImage image : imageSet) {
 				image.setStatus(ConstantsUtil.IMAGE_ACTIVE);
@@ -220,7 +242,6 @@ public class UserService {
 
 		user = updateUser(user);
 
-		logger.info("calling update user end");
 		return user;
 	}
 

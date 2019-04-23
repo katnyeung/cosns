@@ -119,16 +119,22 @@ public class UserRestController {
 
 			if (user.getPassword().equals(userSettingDTO.getPassword())) {
 
-				user = userService.updateSetting(user, userSettingDTO);
+				Object returnValue = userService.updateSetting(user, userSettingDTO);
 
-				if (user == null) {
-					ur.setRemarks("Unique Name already in use");
-					ur.setStatus(ConstantsUtil.RESULT_ERROR);
-					return ur;
-				} else {
+				if (returnValue instanceof User) {
+
 					ur.setRemarks("Update Success");
 					ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
-					session.setAttribute("user", user);
+					ur.setUser((User) returnValue);
+
+					session.setAttribute("user", (User) returnValue);
+
+				} else if (returnValue instanceof String) {
+
+					ur.setRemarks((String) returnValue);
+					ur.setStatus(ConstantsUtil.RESULT_ERROR);
+
+					return ur;
 				}
 
 			} else {
@@ -220,12 +226,12 @@ public class UserRestController {
 		UserResult ur = new UserResult();
 
 		User user = userService.getUserById(userId);
-		
+
 		if (user != null) {
-			Map<Long,User> followerMap = userService.getFollowerMapByUser(user);
-			
+			Map<Long, User> followerMap = userService.getFollowerMapByUser(user);
+
 			ur.setUserMap(followerMap);
-			
+
 			ur.setUser(user);
 			ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {

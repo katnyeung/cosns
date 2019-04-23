@@ -32,7 +32,11 @@
 
 		$scope.loadPost = function() {
 			postService.loadPosts("getPost/[[${postId}]]").then(function(response) {
-				$scope.postList = response.data.postList;
+				if (response.data.postList.length > 0) {
+					$scope.postList = response.data.postList;
+				} else {
+					$scope.postList = {};
+				}
 			});
 		};
 		$scope.loadPost();
@@ -41,8 +45,10 @@
 			messageService.setMessage(message);
 		}
 
-		$scope.$watch('shared.user', function() {
-			$scope.loadPost();
+		$scope.$watch('shared.user', function(newValue, oldValue) {
+			if (newValue != oldValue) {
+				$scope.loadPost();
+			}
 		});
 	});
 </script>

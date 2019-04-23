@@ -1,6 +1,7 @@
 package org.cosns.service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -17,6 +18,7 @@ import org.cosns.dao.PostReactionDAO;
 import org.cosns.repository.Post;
 import org.cosns.repository.PostReaction;
 import org.cosns.repository.User;
+import org.cosns.repository.extend.DateCountReaction;
 import org.cosns.repository.extend.LikeReaction;
 import org.cosns.repository.extend.PhotoPost;
 import org.cosns.repository.extend.PostImage;
@@ -79,8 +81,10 @@ public class PostService {
 	private Post setLikeRetweetCount(Post post) {
 		Long postId = post.getPostId();
 
-		redisService.incrPostView(postId);
-		post.setViewCount(redisService.getPostView(postId));
+		post = setAndIncreaseCount(post);
+
+		post.setTotalViewCount(redisService.getTotalPostView(postId));
+		post.setTodayViewCount(redisService.getTodayPostView(postId));
 		post.setLikeCount(redisService.getLikeCount(postId));
 		post.setRetweetCount(redisService.getRetweetCount(postId));
 		return post;
@@ -89,10 +93,19 @@ public class PostService {
 	private Post setLikedRetweeted(Post post, Long userId) {
 		Long postId = post.getPostId();
 
-		redisService.incrPostView(postId);
-		post.setViewCount(redisService.getPostView(postId));
+		post.setTotalViewCount(redisService.getTotalPostView(postId));
+		post.setTodayViewCount(redisService.getTodayPostView(postId));
 		post.setLiked(redisService.isLiked(postId, userId));
 		post.setRetweeted(redisService.isRetweeted(postId, userId));
+		return post;
+	}
+
+	private Post setAndIncreaseCount(Post post) {
+		Long postId = post.getPostId();
+
+		redisService.incrTotalPostView(postId);
+		redisService.incrTodayPostView(postId);
+
 		return post;
 	}
 
@@ -179,7 +192,12 @@ public class PostService {
 
 		Set<String> keyList = hashTagService.queryKeySet(ConstantsUtil.REDIS_POST_TAG_PREFIX, query);
 		logger.info("searched key set : " + keyList);
+
+		hashTagService.incrHashTagSearchCount(keyList);
+
 		for (String key : keyList) {
+			// set hit rate
+
 			Set<String> postItemSet = hashTagService.getMembers(key);
 			for (String postItemString : postItemSet) {
 
@@ -207,6 +225,7 @@ public class PostService {
 		logger.info(hitBox.toString());
 
 		if (hitBox.size() > 0) {
+
 			if (user != null) {
 				return setLikeRetweetedAndCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet()), user.getUserId());
 			} else {
@@ -306,12 +325,58 @@ public class PostService {
 		}
 	}
 
-	public void incrPostView(Long postId) {
-		redisService.incrPostView(postId);
+	public void incrTotalPostView(Long postId) {
+		redisService.incrTotalPostView(postId);
 	}
 
-	public Long getPostView(Long postId) {
-		return redisService.getPostView(postId);
+	public Long getTotalPostView(Long postId) {
+		return redisService.getTotalPostView(postId);
+	}
+
+	public void syncPostCountToDB() {
+		Set<String> keySet = redisService.findKeys(ConstantsUtil.REDIS_POST_VIEW_TOTAL_PREFIX + ":*");
+
+		for (String key : keySet) {
+
+			String[] keyArray = key.split(":");
+
+			if (keyArray.length > 1) {
+
+				Long postId = Long.parseLong(keyArray[1]);
+
+				Long totalPostView = redisService.getTotalPostView(postId);
+				Long todayPostView = redisService.getTodayPostView(postId);
+
+				logger.info("Got postId #" + postId + " : today " + todayPostView + ", total " + totalPostView);
+
+				List<Post> postList = postDAO.findPostByPostId(postId);
+
+				if (postList.iterator().hasNext()) {
+					Post post = postList.iterator().next();
+
+					post.setTotalViewCount(totalPostView);
+
+					DateCountReaction dcr = new DateCountReaction();
+					dcr.setPost(post);
+					dcr.setYear(Calendar.getInstance().get(Calendar.YEAR));
+					dcr.setMonth(Calendar.getInstance().get(Calendar.MONTH) + 1);
+					dcr.setDay(Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+					dcr.setViewCount(todayPostView);
+					dcr.setStatus(ConstantsUtil.POST_REACTION_ACTIVE);
+
+					postReactionDAO.save(dcr);
+
+					postDAO.save(post);
+
+					redisService.resetTodayPostView(postId);
+
+					logger.info("saved to DB");
+				}
+
+			}
+
+		}
+
 	}
 
 }

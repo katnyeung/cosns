@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class HashTag extends Auditable<String> {
 
 	@Id
@@ -29,6 +29,8 @@ public class HashTag extends Auditable<String> {
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	@JoinColumn(name = "post_id", referencedColumnName = "postId")
 	private Post post;
+
+	private int totalCount = 0;
 
 	public Long getHashId() {
 		return hashId;
@@ -53,5 +55,13 @@ public class HashTag extends Auditable<String> {
 	public void setPost(Post post) {
 		this.post = post;
 	}
-	
+
+	public int getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(int totalCount) {
+		this.totalCount = totalCount;
+	}
+
 }

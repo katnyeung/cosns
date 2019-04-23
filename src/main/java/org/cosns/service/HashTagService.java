@@ -1,6 +1,8 @@
 package org.cosns.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -11,6 +13,7 @@ import org.cosns.repository.HashTag;
 import org.cosns.repository.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class HashTagService {
@@ -63,4 +66,27 @@ public class HashTagService {
 	public Set<String> getMembers(String key) {
 		return redisService.getSetItems(key);
 	}
+
+	public void incrHitRate(List<String> keyContentList) {
+		hashTagDAO.updateHitRateByKeys(keyContentList);
+	}
+
+	@Transactional
+	public void incrHashTagSearchCount(Set<String> keySet) {
+		List<String> keyContentList = new ArrayList<String>();
+
+		for (String key : keySet) {
+			String[] keyArray = key.split(":");
+
+			if (keyArray.length > 1) {
+				String keyContent = keyArray[1];
+				keyContentList.add(keyContent);
+			}
+		}
+
+		if (keyContentList.size() > 0) {
+			incrHitRate(keyContentList);
+		}
+	}
+
 }
