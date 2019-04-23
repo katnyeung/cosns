@@ -75,17 +75,19 @@ public class ImageService {
 
 		// resize image
 		BufferedImage in = ImageIO.read(targetFile);
-
-		ResampleOp resizeOp = new ResampleOp(DimensionConstrain.createMaxDimension(size, -1));
 		
-		resizeOp.setFilter(ResampleFilters.getLanczos3Filter());
-		resizeOp.setUnsharpenMask(AdvancedResizeOp.UnsharpenMask.Normal);
+		if (in.getWidth() > size || in.getHeight() > size) {
+			ResampleOp resizeOp = new ResampleOp(DimensionConstrain.createMaxDimension(size, -1));
 
-		BufferedImage scaledImage = resizeOp.filter(in, null);
+			resizeOp.setFilter(ResampleFilters.getLanczos3Filter());
+			resizeOp.setUnsharpenMask(AdvancedResizeOp.UnsharpenMask.Normal);
 
-		ImageIO.write(scaledImage, ConstantsUtil.mimeMap.get(contentType), targetFile);
-		logger.info("Write file complete");
-		;
+			BufferedImage scaledImage = resizeOp.filter(in, null);
+
+			ImageIO.write(scaledImage, ConstantsUtil.mimeMap.get(contentType), targetFile);
+			logger.info("Write file complete");
+		}
+
 	}
 
 	public List<ProfileImage> findPendProfileImageByFilename(String file) {

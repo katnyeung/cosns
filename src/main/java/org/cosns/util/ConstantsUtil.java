@@ -36,7 +36,8 @@ public class ConstantsUtil {
 
 	public static final String PHOTO_POST_PREFIX = "photo";
 	public static final String SELLING_POST_PREFIX = "sell";
-
+	public static final String ALL_POST_PREFIX = "all";
+	
 	public static final String REDIS_HASHTAG_PREFIX = "hashtag";
 	public static final String REDIS_USER_UNIQUENAME_PREFIX = "user";
 	public static final String REDIS_POST_UNIQUENAME_PREFIX = "post";
@@ -45,6 +46,7 @@ public class ConstantsUtil {
 	public static final String ERROR_MESSAGE_USER_ALREADY_FOLLOWED = "User already followed";
 
 	public static final String REDIS_POST_VIEW_PREFIX = "postview";
+	public static final String REDIS_POST_TAG_PREFIX = "posttag";
 	
 	public static final Map<String, String> mimeMap;
 	static {

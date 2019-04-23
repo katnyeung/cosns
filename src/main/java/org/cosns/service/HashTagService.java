@@ -50,14 +50,14 @@ public class HashTagService {
 		}
 	}
 
-	public void saveHashToRedis(Post post, Set<String> hashTagSet, String prefix) {
+	public void saveHashToRedis(Post post, Set<String> hashTagSet, String postTagPrefix, String postTypePrefix) {
 		for (String hashTag : hashTagSet) {
-			redisService.addSetItem(hashTag, prefix + ":" + post.getPostId());
+			redisService.addSetItem(postTagPrefix + ":" + hashTag.toLowerCase(), postTypePrefix + ":" + post.getPostId());
 		}
 	}
 
-	public Set<String> queryKeySet(String query) {
-		return redisService.findKeys("*" + query + "*");
+	public Set<String> queryKeySet(String postTagPrefix, String query) {
+		return redisService.findKeys(postTagPrefix + ":*" + query + "*");
 	}
 
 	public Set<String> getMembers(String key) {

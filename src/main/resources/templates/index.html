@@ -15,21 +15,24 @@
 		main.controller('searchController', function($scope, $http) {
 
 			$scope.search = function() {
-				$http({
-					url : "/post/searchPosts",
-					method : "POST",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						keyword : $scope.keyword
-					}
-				}).then(function(response) {
-					$scope.postList = response.data.postList;
-				});
+				console.log($scope.keyword);
+				if ($scope.keyword) {
+					$http({
+						url : "/post/searchPosts",
+						method : "POST",
+						headers : {
+							'Content-Type' : 'application/json'
+						},
+						data : {
+							keyword : $scope.keyword
+						}
+					}).then(function(response) {
+						$scope.postList = response.data.postList;
+					});
+				}
 			}
-
 		});
+
 		main.controller('viewPostController', function($scope, postService, messageService) {
 			$scope.shared = messageService.getShared();
 
@@ -76,17 +79,29 @@
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 	<div ng-controller="messageController"></div>
 
-	<div class="container pt-5">
-		<div ng-controller="searchController">
-			<!-- Main hero unit for a primary marketing message or call to action -->
-			Search <input type="text" ng-mode="keyword" />
-			<button type="button" ng-click="search()">Search</button>
+	<div class="container">
+		<h3 class="row">Search</h3>
+		<div ng-controller="searchController" class="row">
 
+			<div class="col form-inline">
+				<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
+				<button class="form-control mr-sm-2" type="button"
+					ng-click="search()">Search</button>
+			</div>
+			<div ng-show="postList" class="col">
+				<h3>Search Result</h3>
+				<div ng-repeat="post in postList" class="card col-md-3 m-1">
+					<div th:include="components/post :: viewPosts('thumbnail')"
+						th:remove="tag"></div>
+				</div>
+			</div>
 		</div>
-		<h3>Latest 20 Post</h3>
+		<h3 class="row">Latest 20 Post</h3>
 		<div ng-controller="viewPostController" class="row">
+
 			<div ng-repeat="post in postList" class="card col-md-3 m-1">
-				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
+				<div th:include="components/post :: viewPosts('thumbnail')"
+					th:remove="tag"></div>
 			</div>
 		</div>
 

@@ -150,7 +150,7 @@ public class PostService {
 	}
 
 	public List<Post> findTimelinePosts(Long userId, int startFrom) {
-		return groupRetweetPost(setLikeRetweetedAndCount(postDAO.findTimelinePosts(userId,PageRequest.of(startFrom, 5)), userId));
+		return groupRetweetPost(setLikeRetweetedAndCount(postDAO.findTimelinePosts(userId, PageRequest.of(startFrom, 5)), userId));
 	}
 
 	public List<Post> getUserPosts(Long userId, Long loggedUserId) {
@@ -169,26 +169,38 @@ public class PostService {
 		return setLikeRetweetedAndCount(postDAO.findPostByPostId(postId), userId);
 	}
 
-	public List<Post> searchPosts(String query) {
-		return searchPosts(query, null);
+	public List<Post> searchPosts(String query, String postType) {
+		return searchPosts(query, postType, null);
 	}
 
-	public List<Post> searchPosts(String query, User user) {
+	public List<Post> searchPosts(String query, String postType, User user) {
 
 		Map<Long, Integer> hitBox = new HashMap<>();
 
-		Set<String> keyList = hashTagService.queryKeySet(query);
-
+		Set<String> keyList = hashTagService.queryKeySet(ConstantsUtil.REDIS_POST_TAG_PREFIX, query);
+		logger.info("searched key set : " + keyList);
 		for (String key : keyList) {
-			Set<String> postIdSet = hashTagService.getMembers(key);
-			for (String postIdString : postIdSet) {
-				Long postId = Long.parseLong(postIdString);
-				Integer count = hitBox.get(postId);
-				if (count == null) {
-					hitBox.put(postId, 0);
-				} else {
-					hitBox.put(postId, count + 1);
+			Set<String> postItemSet = hashTagService.getMembers(key);
+			for (String postItemString : postItemSet) {
+
+				String[] postIdArray = postItemString.split(":");
+
+				if (postIdArray.length > 1) {
+					String postTypeItem = postIdArray[0];
+					String postIdString = postIdArray[1];
+
+					logger.info("search for : " + postType);
+					if (postTypeItem.equals(postType) || postType.equals("all")) {
+						Long postId = Long.parseLong(postIdString);
+						Integer count = hitBox.get(postId);
+						if (count == null) {
+							hitBox.put(postId, 0);
+						} else {
+							hitBox.put(postId, count + 1);
+						}
+					}
 				}
+
 			}
 		}
 
