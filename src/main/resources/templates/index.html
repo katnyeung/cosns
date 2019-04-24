@@ -12,7 +12,7 @@
 	<script>
 		var main = angular.module('application', [ 'infinite-scroll' ]);
 
-		main.controller('searchController', function($scope, $http) {
+		main.controller('searchController', function($scope, $http, messageService) {
 
 			$scope.search = function() {
 				console.log($scope.keyword);
@@ -27,10 +27,20 @@
 							keyword : $scope.keyword
 						}
 					}).then(function(response) {
-						$scope.postList = response.data.postList;
+						if (response.data.postList) {
+							$scope.message("found " + response.data.postList.length + " records");
+							$scope.postList = response.data.postList;
+						} else {
+							$scope.message("no records found");
+						}
+
 					});
 				}
 			}
+			$scope.message = function(message) {
+				messageService.setMessage(message);
+			}
+
 		});
 
 		main.controller('viewPostController', function($scope, postService, messageService) {
@@ -83,20 +93,23 @@
 
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
-	<div ng-controller="messageController"></div>
 
 	<div class="container">
-		<h3 class="row">Search</h3>
 		<div ng-controller="searchController" class="row">
 
-			<div class="col form-inline">
-				<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
-				<button class="form-control mr-sm-2" type="button" ng-click="search()">Search</button>
+			<div class="form-inline">
+				<h3>Search</h3>
+				&nbsp;
+				<form ng-submit="search()">
+					<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
+					<button class="form-control mr-sm-2" type="submit">Search</button>
+				</form>
 			</div>
-			<div ng-show="postList" class="col">
+			<div ng-show="postList" class="container-fluid">
 				<h3>Search Result</h3>
 				<div ng-repeat="post in postList" class="card col-md-3 m-1">
-					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
+					<div th:include="components/post :: viewPosts('thumbnail')"
+						th:remove="tag"></div>
 				</div>
 			</div>
 		</div>
@@ -104,7 +117,8 @@
 		<div ng-controller="viewPostController" class="row">
 
 			<div ng-repeat="post in postList" class="card col-md-3 m-1">
-				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
+				<div th:include="components/post :: viewPosts('thumbnail')"
+					th:remove="tag"></div>
 			</div>
 		</div>
 

@@ -33,25 +33,27 @@ public class ConstantsUtil {
 	public static final String ERROR_MESSAGE_LOGIN_FAIL = "Either email not found or password incorrect";
 	public static final String ERROR_MESSAGE_LOGIN_REQUIRED = "Please Login";
 	public static final String ERROR_MESSAGE_ADD_FRIEND_FAIL = "NO SUCH FRIEND";
-
-	public static final String PHOTO_POST_PREFIX = "photo";
-	public static final String SELLING_POST_PREFIX = "sell";
-	public static final String ALL_POST_PREFIX = "all";
-	
-	public static final String REDIS_HASHTAG_PREFIX = "hashtag";
-	public static final String REDIS_USER_UNIQUENAME_PREFIX = "user";
-	public static final String REDIS_POST_UNIQUENAME_PREFIX = "post";
-
 	public static final String ERROR_MESSAGE_USER_NOT_FOUND = "User not found";
 	public static final String ERROR_MESSAGE_USER_ALREADY_FOLLOWED = "User already followed";
 
-	public static final String REDIS_POST_VIEW_TOTAL_PREFIX = "postview_total";
-	public static final String REDIS_POST_VIEW_TODAY_PREFIX = "postview_today";
-	
-	public static final String REDIS_POST_TAG_PREFIX = "posttag";
-	
+	public static final String REDIS_POST_TAG_GROUP = "posttag";
+	public static final String REDIS_POST_TAG_TYPE_PHOTO = "photo";
+	public static final String REDIS_POST_TAG_TYPE_SELLING = "sell";
+	public static final String REDIS_POST_TAG_TYPE_ALL = "all";
+
+	public static final String REDIS_POST_GROUP = "post";
+	public static final String REDIS_POST_TYPE_LIKE = "like";
+	public static final String REDIS_POST_TYPE_RETWEET = "retweet";
+
+	public static final String REDIS_USER_GROUP = "user";
+	public static final String REDIS_USER_TYPE_ID = "id";
+
+	public static final String REDIS_POST_VIEW_GROUP = "postview";
+	public static final String REDIS_POST_VIEW_TYPE_TOTAL = "total";
+	public static final String REDIS_POST_VIEW_TYPE_TODAY = "today";
+
 	public static final int USER_DATE_AVAILABLE_TO_ASSIGN_UNIQUE_NAME = 20;
-	
+
 	public static final Map<String, String> mimeMap;
 	static {
 		Map<String, String> aMap = new HashMap<>();

@@ -190,7 +190,7 @@ public class PostService {
 
 		Map<Long, Integer> hitBox = new HashMap<>();
 
-		Set<String> keyList = hashTagService.queryKeySet(ConstantsUtil.REDIS_POST_TAG_PREFIX, query);
+		Set<String> keyList = hashTagService.queryKeySet(ConstantsUtil.REDIS_POST_TAG_GROUP, query);
 		logger.info("searched key set : " + keyList);
 
 		hashTagService.incrHashTagSearchCount(keyList);
@@ -334,7 +334,7 @@ public class PostService {
 	}
 
 	public void syncPostCountToDB() {
-		Set<String> keySet = redisService.findKeys(ConstantsUtil.REDIS_POST_VIEW_TOTAL_PREFIX + ":*");
+		Set<String> keySet = redisService.findKeys(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":*");
 
 		for (String key : keySet) {
 
@@ -372,11 +372,8 @@ public class PostService {
 
 					logger.info("saved to DB");
 				}
-
 			}
-
 		}
 
 	}
-
 }

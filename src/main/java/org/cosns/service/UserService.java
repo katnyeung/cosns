@@ -168,8 +168,8 @@ public class UserService {
 		}
 	}
 
-	public void setKeysInRedis(String uniqueName, Long id, String prefix) {
-		redisService.setValue(prefix + ":" + uniqueName, "" + id);
+	public void setKeysInRedis(String prefix, String uniqueName, String type, Long id) {
+		redisService.setValue(prefix + ":" + uniqueName, type, id);
 	}
 
 	public void deleteKeysInRedis(String uniqueName, String prefix) {
@@ -199,10 +199,10 @@ public class UserService {
 
 						if (oldUniqueName != null) {
 							logger.info("update setting : delete old uniqueName : " + oldUniqueName);
-							deleteKeysInRedis(oldUniqueName, ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX);
+							deleteKeysInRedis(oldUniqueName, ConstantsUtil.REDIS_USER_GROUP);
 						}
 						logger.info("update setting : setting new uniqueName : " + oldUniqueName);
-						
+
 						user.setUniqueName(userSettingDTO.getUniqueName());
 					}
 
@@ -210,7 +210,7 @@ public class UserService {
 						user.setMessage(userSettingDTO.getMessage());
 					}
 
-					setKeysInRedis(userSettingDTO.getUniqueName(), user.getUserId(), ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX);
+					setKeysInRedis(ConstantsUtil.REDIS_USER_GROUP, userSettingDTO.getUniqueName(), ConstantsUtil.REDIS_USER_TYPE_ID, user.getUserId());
 
 					user.setLastUpdateUniqueNameDate(Calendar.getInstance().getTime());
 

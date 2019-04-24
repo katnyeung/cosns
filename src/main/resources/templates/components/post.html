@@ -67,7 +67,7 @@
 <body th:fragment="viewPosts(section)">
 
 	<div ng-show="post.retweetedBy">
-		<div class="row shadow-sm ">
+		<div class="row shadow-sm">
 			<div class="col">
 				<span style="font-size: 12px">/Retweet By</span>
 				<span ng-repeat="retweetedByPost in post.retweetedBy">
@@ -91,7 +91,6 @@
 		</div>
 	</div>
 	<div th:include="components/post :: viewPostBody(${section})"></div>
-	</div>
 
 </body>
 

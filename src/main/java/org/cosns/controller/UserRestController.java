@@ -91,7 +91,7 @@ public class UserRestController {
 
 			// User user = userService.getUserByUniqueName(registNameDTO.getUniqueName());
 
-			String value = redisService.getValue(ConstantsUtil.REDIS_USER_UNIQUENAME_PREFIX + ":" + registNameDTO.getUniqueName());
+			String value = (String) redisService.getValue(ConstantsUtil.REDIS_USER_GROUP + ":" + registNameDTO.getUniqueName(), ConstantsUtil.REDIS_USER_TYPE_ID);
 
 			if (value == null) {
 				ur.setRemarks("OK");
