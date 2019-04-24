@@ -59,7 +59,7 @@ public abstract class Post extends Auditable<String> {
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	@OrderBy("seq ASC")
-	private Set<PostImage> postImages;
+	private List<PostImage> postImages;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private Set<HashTag> hashtags;
@@ -69,10 +69,10 @@ public abstract class Post extends Auditable<String> {
 	private Set<PostReaction> postReaction;
 
 	Long totalViewCount;
-	
+
 	@Transient
 	Long todayViewCount;
-	
+
 	@Transient
 	Long likeCount;
 
@@ -84,6 +84,9 @@ public abstract class Post extends Auditable<String> {
 
 	@Transient
 	boolean isRetweeted;
+
+	@Transient
+	boolean isRemoved = false;
 
 	@Transient
 	List<Post> retweetedBy;
@@ -126,11 +129,11 @@ public abstract class Post extends Auditable<String> {
 		this.user = user;
 	}
 
-	public Set<PostImage> getPostImages() {
+	public List<PostImage> getPostImages() {
 		return postImages;
 	}
 
-	public void setPostImages(Set<PostImage> postImages) {
+	public void setPostImages(List<PostImage> postImages) {
 		this.postImages = postImages;
 	}
 
@@ -212,6 +215,14 @@ public abstract class Post extends Auditable<String> {
 
 	public void setTodayViewCount(Long todayViewCount) {
 		this.todayViewCount = todayViewCount;
+	}
+
+	public boolean isRemoved() {
+		return isRemoved;
+	}
+
+	public void setRemoved(boolean isRemoved) {
+		this.isRemoved = isRemoved;
 	}
 
 }

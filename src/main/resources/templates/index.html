@@ -65,6 +65,15 @@
 					handleResponse(response, 'retweet');
 				});
 			}
+			
+			$scope.removePost = function(postId) {
+				if(confirm("Remove this post?")){
+					postService.removePost(postId).then(function(response) {
+						handleResponse(response, 'remove');
+					});
+				}
+
+			}
 
 			$scope.loadPost = function() {
 				postService.loadPosts("getLatestPost").then(function(response) {
@@ -95,7 +104,7 @@
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div class="container">
-		<div ng-controller="searchController" class="row">
+		<div ng-controller="searchController" class="row m-5">
 
 			<div class="form-inline">
 				<h3>Search</h3>
@@ -105,18 +114,18 @@
 					<button class="form-control mr-sm-2" type="submit">Search</button>
 				</form>
 			</div>
-			<div ng-show="postList" class="container-fluid">
+			<div ng-show="postList" class="row-m5">
 				<h3>Search Result</h3>
-				<div ng-repeat="post in postList" class="card col-md-3 m-1">
+				<div ng-repeat="post in postList | filter: {removed : false}" class="card col-md-3 m-1">
 					<div th:include="components/post :: viewPosts('thumbnail')"
 						th:remove="tag"></div>
 				</div>
 			</div>
 		</div>
-		<h3 class="row">Latest 20 Post</h3>
-		<div ng-controller="viewPostController" class="row">
+		<h3 class="row m-5">Latest 20 Post</h3>
+		<div ng-controller="viewPostController" class="row m-5">
 
-			<div ng-repeat="post in postList" class="card col-md-3 m-1">
+			<div ng-repeat="post in postList | filter: {removed : false}" class="card col-md-3 m-1">
 				<div th:include="components/post :: viewPosts('thumbnail')"
 					th:remove="tag"></div>
 			</div>

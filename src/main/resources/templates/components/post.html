@@ -4,7 +4,7 @@
 			var service = {};
 
 			service.likePost = function(post) {
-				console.log(post);
+
 				return $http({
 					url : "/post/likePost",
 					method : "POST",
@@ -30,7 +30,6 @@
 
 			service.retweetPost = function(post) {
 
-				post.retweetCount++;
 				return $http({
 					url : "/post/retweetPost",
 					method : "POST",
@@ -49,6 +48,25 @@
 				});
 			};
 
+			service.removePost = function(post) {
+
+				return $http({
+					url : "/post/removePost",
+					method : "POST",
+					headers : {
+						'Content-Type' : 'application/json'
+					},
+					data : {
+						postId : post.postId
+					}
+				}).then(function(response) {
+					if (response.data.status === 'success') {
+
+						post.removed = true;
+					}
+					return response;
+				});
+			};
 			service.loadPosts = function(functionName) {
 				return $http({
 					url : "/post/" + functionName,
@@ -69,14 +87,12 @@
 	<div ng-show="post.retweetedBy">
 		<div class="row shadow-sm">
 			<div class="col">
-				<span style="font-size: 12px">/Retweet By</span>
-				<span ng-repeat="retweetedByPost in post.retweetedBy">
-					<a href="/u/{{retweetedByPost.user.uniqueName ? retweetedByPost.user.uniqueName : retweetedByPost.user.userId}}" style="font-size: 14px">{{retweetedByPost.user.uniqueName ? retweetedByPost.user.uniqueName : retweetedByPost.user.email}}</a>
+				<span style="font-size: 12px">/Retweet By</span> <span ng-repeat="retweetedByPost in post.retweetedBy"> <a href="/u/{{retweetedByPost.user.uniqueName ? retweetedByPost.user.uniqueName : retweetedByPost.user.userId}}" style="font-size: 14px">{{retweetedByPost.user.uniqueName ? retweetedByPost.user.uniqueName : retweetedByPost.user.email}}</a>
 				</span>
 			</div>
 
 			<div class="col-ml-auto" style="font-size: 10px">
-				<a href="/p/{{post.postId}}">{{post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a> &nbsp;
+				<a href="/p/{{post.postId}}">{{post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp;
 			</div>
 		</div>
 	</div>
@@ -87,7 +103,8 @@
 		</div>
 
 		<div class="col-ml-auto" style="font-size: 10px">
-			<a href="/p/{{post.postId}}">{{post.createdate | date:'MM/dd/yyyy hh:mm:ss'}}</a> &nbsp;
+			<a href="/p/{{post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp; 
+	<a href="#" ng-show="shared.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()">X</a>
 		</div>
 	</div>
 	<div th:include="components/post :: viewPostBody(${section})"></div>
@@ -98,7 +115,7 @@
 	<div ng-show="shared.user" class='navbar-form'>
 		<div class="row">
 			<div class="col-mr-1">
-				<a href="#" class="btn" ng-click="likePost(post, post.postId); $event.preventDefault();"> <span ng-show="post.liked">Unlike</span> <span ng-show="!post.liked">Like</span> <span ng-show="post.likeCount > 0">{{post.likeCount}}</span>
+				<a href="#" class="btn" ng-click="likePost(post); $event.preventDefault();"> <span ng-show="post.liked">Unlike</span> <span ng-show="!post.liked">Like</span> <span ng-show="post.likeCount > 0">{{post.likeCount}}</span>
 				</a>
 			</div>
 			<div ng-show="!post.retweeted && shared.user.userId != post.user.userId">

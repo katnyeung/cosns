@@ -27,16 +27,12 @@ public class RedisService {
 		return stringRedisTemplate.opsForSet().members(key);
 	}
 
-	public Object getHashItems(String key, String type) {
+	public Object getHashValue(String key, String type) {
 		return stringRedisTemplate.opsForHash().get(key, type);
 	}
 
-	public void setValue(String key, String type, Object value) {
+	public void setHashValue(String key, String type, String value) {
 		stringRedisTemplate.opsForHash().put(key, type, value);
-	}
-
-	public Object getValue(String key, String type) {
-		return stringRedisTemplate.opsForHash().get(key, type);
 	}
 
 	public void incrLike(Long postId, Long userId) {
@@ -76,11 +72,11 @@ public class RedisService {
 	}
 
 	public Long getTotalPostView(Long postId) {
-		Long viewCount = (Long) stringRedisTemplate.opsForHash().get(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TOTAL);
-		if (viewCount == null) {
+		String viewCountString = (String) stringRedisTemplate.opsForHash().get(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TOTAL);
+		if (viewCountString == null) {
 			return (long) 0;
 		} else {
-			return viewCount;
+			return Long.parseLong(viewCountString);
 		}
 	}
 
@@ -90,11 +86,11 @@ public class RedisService {
 	}
 
 	public Long getTodayPostView(Long postId) {
-		Long viewCount = (Long) stringRedisTemplate.opsForHash().get(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY);
-		if (viewCount == null) {
+		String viewCountString = (String) stringRedisTemplate.opsForHash().get(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY);
+		if (viewCountString == null) {
 			return (long) 0;
 		} else {
-			return viewCount;
+			return Long.parseLong(viewCountString);
 		}
 	}
 

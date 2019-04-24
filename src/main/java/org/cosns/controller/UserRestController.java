@@ -91,7 +91,7 @@ public class UserRestController {
 
 			// User user = userService.getUserByUniqueName(registNameDTO.getUniqueName());
 
-			String value = (String) redisService.getValue(ConstantsUtil.REDIS_USER_GROUP + ":" + registNameDTO.getUniqueName(), ConstantsUtil.REDIS_USER_TYPE_ID);
+			String value = (String) redisService.getHashValue(ConstantsUtil.REDIS_USER_GROUP + ":" + registNameDTO.getUniqueName(), ConstantsUtil.REDIS_USER_TYPE_ID);
 
 			if (value == null) {
 				ur.setRemarks("OK");
@@ -307,7 +307,51 @@ public class UserRestController {
 				} else {
 					ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_USER_ALREADY_FOLLOWED);
 					ur.setStatus(ConstantsUtil.RESULT_ERROR);
-					;
+				}
+
+			} else {
+				ur.setRemarks("Friend request exist");
+				ur.setStatus(ConstantsUtil.RESULT_ERROR);
+			}
+
+		} else {
+			ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+			ur.setStatus(ConstantsUtil.RESULT_ERROR);
+		}
+
+		return ur;
+	}
+
+	@GetMapping(path = "/unfollow/{targetUserId}")
+	public DefaultResult unfollow(@PathVariable("targetUserId") Long targetUserId, HttpSession session) {
+		UserResult ur = new UserResult();
+
+		User user = (User) session.getAttribute("user");
+
+		if (user != null) {
+
+			User userInDB = userService.getUserById(user.getUserId());
+
+			if (userInDB != null) {
+
+				if (isFollowed(userInDB, targetUserId)) {
+
+					user = userService.unfollow(userInDB, targetUserId);
+
+					if (user != null) {
+						ur.setUser(user);
+						ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+						session.setAttribute("user", user);
+
+					} else {
+						ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_USER_NOT_FOUND);
+						ur.setStatus(ConstantsUtil.RESULT_ERROR);
+					}
+
+				} else {
+					ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_USER_ALREADY_FOLLOWED);
+					ur.setStatus(ConstantsUtil.RESULT_ERROR);
 				}
 
 			} else {

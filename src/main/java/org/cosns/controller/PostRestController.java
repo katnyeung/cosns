@@ -281,4 +281,27 @@ public class PostRestController {
 		return prr;
 	}
 
+	@PostMapping(path = "/removePost")
+	public DefaultResult removePost(@RequestBody PostReactionDTO postReactionDTO, HttpSession session) {
+		PostReactionResult prr = new PostReactionResult();
+		User user = (User) session.getAttribute("user");
+
+		if (user != null) {
+			Post post = postService.removePost(postReactionDTO.getPostId(), user);
+			
+			if (post != null) {
+				prr.setType(ConstantsUtil.POST_REACTION_CANCEL);
+				prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			} else {
+				prr.setStatus(ConstantsUtil.RESULT_ERROR);
+				prr.setRemarks("Remove Failed");
+			}
+
+		} else {
+			prr.setStatus(ConstantsUtil.RESULT_ERROR);
+			prr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+		}
+
+		return prr;
+	}
 }

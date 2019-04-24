@@ -6,7 +6,9 @@ import javax.servlet.http.HttpSession;
 
 import org.cosns.repository.User;
 import org.cosns.service.ImageService;
+import org.cosns.service.RedisService;
 import org.cosns.service.UserService;
+import org.cosns.util.ConstantsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class RouteController {
 	Logger logger = Logger.getLogger(this.getClass().getName());
+
+	@Autowired
+	RedisService redisService;
 
 	@Autowired
 	UserService userService;
@@ -79,7 +84,7 @@ public class RouteController {
 
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
-		}else {
+		} else {
 			return "redirect:/";
 		}
 
@@ -119,8 +124,16 @@ public class RouteController {
 			if (loggedUser != null) {
 				model.addAttribute("user", loggedUser);
 			}
+			String userIdString = (String) redisService.getHashValue(ConstantsUtil.REDIS_USER_GROUP, ConstantsUtil.REDIS_USER_TYPE_ID);
 
-			User targetUser = userService.getUserByUniqueName(username);
+			User targetUser = null;
+
+			if (userIdString != null) {
+				Long userId = Long.parseLong(userIdString);
+				targetUser = userService.getUserById(userId);
+			} else {
+				targetUser = userService.getUserByUniqueName(username);
+			}
 
 			if (targetUser != null) {
 				model.addAttribute("targetUser", targetUser);

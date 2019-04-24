@@ -46,6 +46,7 @@
 			}
 
 			$scope.$watch('shared.user', function(newValue, oldValue) {
+				console.log(newValue);
 				if (newValue != oldValue) {
 					$scope.loadPost();
 				}
@@ -104,6 +105,23 @@
 				});
 			}
 
+			$scope.unfollow = function(userId) {
+				$http({
+					url : "/user/unfollow/" + userId,
+					method : "GET",
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				}).then(function(response) {
+					if (response.data.status == 'success') {
+						$scope.isFollowed = false;
+						messageService.setUser(response.data.user);
+						$scope.message(response.data.remarks);
+					} else {
+						$scope.message(response.data.remarks);
+					}
+				});
+			}
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
@@ -116,13 +134,15 @@
 
 	<div class="container" ng-controller="viewUserController">
 		<div class="container well">
-			<img src="/pimages/{{profileImage}}" class="col-3" /><br /> {{user.uniqueName}} ( {{user.email}} )
+			<img src="/pimages/{{profileImage}}" class="rounded img-fluid " /><br /> {{user.uniqueName}} ( {{user.email}} )
 			<pre>{{user.message}}</pre>
 			<br /> Following
 			<ul>
 				<li ng-repeat="followerId in user.followers"><a href="/u/{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].userId}}">{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].email}}</a></li>
 			</ul>
 			<button type="button" th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>
+			<button type="button" th:attr="ng-click='unfollow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && isFollowed'">Unfollow</button>
+
 		</div>
 		<div ng-controller="viewPostController" class="container">
 			<div ng-repeat="post in postList" class="card col-md-9 m-1">

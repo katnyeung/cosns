@@ -2,6 +2,7 @@ package org.cosns.service;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -52,13 +53,41 @@ public class PostService {
 	@Autowired
 	StringRedisTemplate stringRedisTemplate;
 
+	public Post removePost(Long postId, User user) {
+		logger.info("Remove Post By User : " + user.getUserId());
+
+		List<Post> postList = this.getPost(postId);
+
+		if (postList.iterator().hasNext()) {
+			
+			Post post = postList.iterator().next();
+			
+			logger.info("removing post : " + post.getPostId());
+			if (post.getUser().getUserId() != user.getUserId()) {
+				// final check
+				return null;
+			}
+
+			List<PostImage> imageList = post.getPostImages();
+			for (PostImage pi : imageList) {
+				pi.setStatus(ConstantsUtil.IMAGE_DELETED);
+			}
+
+			post.setStatus(ConstantsUtil.POST_DELETED);
+			post = postDAO.save(post);
+
+			return post;
+		}
+		return null;
+	}
+
 	public Post writePost(PostFormDTO postDTO, User user) {
 		logger.info("Writing Post By User : " + user.getUserId());
 
 		// create post
 		PhotoPost post = new PhotoPost();
 		post.setMessage(postDTO.getPostMessage());
-		post.setReleaseDate(postDTO.getReleaseDate());
+		post.setReleaseDate(removeTime(postDTO.getReleaseDate()));
 		post.setStatus(ConstantsUtil.POST_ACTIVE);
 		post.setUser(user);
 
@@ -76,6 +105,16 @@ public class PostService {
 		}
 
 		return post;
+	}
+
+	public Date removeTime(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
 	}
 
 	private Post setLikeRetweetCount(Post post) {
@@ -374,6 +413,5 @@ public class PostService {
 				}
 			}
 		}
-
 	}
 }

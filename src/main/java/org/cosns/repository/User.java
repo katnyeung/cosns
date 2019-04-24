@@ -196,4 +196,9 @@ public class User extends Auditable<String> {
 		this.lastUpdateUniqueNameDate = lastUpdateUniqueNameDate;
 	}
 
+	@Override
+	public String toString() {
+		return "User [userId=" + userId + ", email=" + email + ", password=" + password + ", status=" + status + ", uniqueName=" + uniqueName + ", message=" + message + ", profileImage=" + profileImage + ", posts=" + posts + ", followers=" + followers + ", followedBy=" + followedBy + ", friendRequest=" + friendRequest + ", postReaction=" + postReaction + ", lastUpdateUniqueNameDate=" + lastUpdateUniqueNameDate + "]";
+	}
+
 }

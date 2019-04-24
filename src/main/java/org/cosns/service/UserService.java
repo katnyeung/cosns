@@ -140,7 +140,7 @@ public class UserService {
 
 	@Transactional
 	public User follow(User userInDB, Long targetUserId) {
-		logger.info(" adding friend form " + userInDB.getUserId() + " to targetUser : " + targetUserId);
+		logger.info(" adding follow form " + userInDB.getUserId() + " to targetUser : " + targetUserId);
 		Set<User> targetUserSet = userDAO.findActiveUserById(targetUserId);
 
 		if (targetUserSet.iterator().hasNext()) {
@@ -168,8 +168,34 @@ public class UserService {
 		}
 	}
 
+	@Transactional
+	public User unfollow(User userInDB, Long targetUserId) {
+		logger.info(" removing follow form " + userInDB.getUserId() + " to targetUser : " + targetUserId);
+		Set<User> targetUserSet = userDAO.findActiveUserById(targetUserId);
+
+		if (targetUserSet.iterator().hasNext()) {
+			User targetUser = targetUserSet.iterator().next();
+
+			logger.info("found target user: " + targetUser.getEmail());
+
+			userDAO.deleteFollower(userInDB.getUserId(), targetUser.getUserId());
+
+			userDAO.deleteFollowedBy(userInDB.getUserId(), targetUser.getUserId());
+
+			Set<User> userList = userDAO.findActiveUserById(userInDB.getUserId());
+
+			if (userList.iterator().hasNext()) {
+				userInDB = userList.iterator().next();
+			}
+			
+			return userInDB;
+		} else {
+			return null;
+		}
+	}
+
 	public void setKeysInRedis(String prefix, String uniqueName, String type, Long id) {
-		redisService.setValue(prefix + ":" + uniqueName, type, id);
+		redisService.setHashValue(prefix + ":" + uniqueName, type, "" + id);
 	}
 
 	public void deleteKeysInRedis(String uniqueName, String prefix) {
