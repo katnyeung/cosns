@@ -27,79 +27,83 @@ public class RedisService {
 		return stringRedisTemplate.opsForSet().members(key);
 	}
 
-	public void setValue(String key, String value) {
-		stringRedisTemplate.opsForValue().set(key, value);
+	public Object getHashItems(String key, String type) {
+		return stringRedisTemplate.opsForHash().get(key, type);
 	}
 
-	public String getValue(String key) {
-		return stringRedisTemplate.opsForValue().get(key);
+	public void setValue(String key, String type, Object value) {
+		stringRedisTemplate.opsForHash().put(key, type, value);
+	}
+
+	public Object getValue(String key, String type) {
+		return stringRedisTemplate.opsForHash().get(key, type);
 	}
 
 	public void incrLike(Long postId, Long userId) {
-		stringRedisTemplate.opsForSet().add(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like", "" + userId);
+		stringRedisTemplate.opsForSet().add(ConstantsUtil.REDIS_POST_GROUP + ":" + postId + ":" + ConstantsUtil.REDIS_POST_TYPE_LIKE, "" + userId);
 	}
 
 	public void incrRetweet(Long postId, Long userId) {
-		stringRedisTemplate.opsForSet().add(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", "" + userId);
+		stringRedisTemplate.opsForSet().add(ConstantsUtil.REDIS_POST_GROUP + ":" + postId + ":" + ConstantsUtil.REDIS_POST_TYPE_RETWEET, "" + userId);
 	}
 
 	public void decrLike(Long postId, Long userId) {
-		stringRedisTemplate.opsForSet().remove(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like", "" + userId);
+		stringRedisTemplate.opsForSet().remove(ConstantsUtil.REDIS_POST_GROUP + ":" + postId + ":" + ConstantsUtil.REDIS_POST_TYPE_LIKE, "" + userId);
 	}
 
 	public void decrRetweet(Long postId, Long userId) {
-		stringRedisTemplate.opsForSet().remove(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", "" + userId);
+		stringRedisTemplate.opsForSet().remove(ConstantsUtil.REDIS_POST_GROUP + ":" + postId + ":" + ConstantsUtil.REDIS_POST_TYPE_RETWEET, "" + userId);
 	}
 
 	public Long getLikeCount(Long postId) {
-		return stringRedisTemplate.opsForSet().size(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like");
+		return stringRedisTemplate.opsForSet().size(ConstantsUtil.REDIS_POST_GROUP + ":" + postId + ":" + ConstantsUtil.REDIS_POST_TYPE_LIKE);
 	}
 
 	public Long getRetweetCount(Long postId) {
-		return stringRedisTemplate.opsForSet().size(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet");
+		return stringRedisTemplate.opsForSet().size(ConstantsUtil.REDIS_POST_GROUP + ":" + postId + ":" + ConstantsUtil.REDIS_POST_TYPE_RETWEET);
 	}
 
 	public boolean isLiked(Long postId, Long userId) {
-		return stringRedisTemplate.opsForSet().isMember(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":like", "" + userId);
+		return stringRedisTemplate.opsForSet().isMember(ConstantsUtil.REDIS_POST_GROUP + ":" + postId + ":" + ConstantsUtil.REDIS_POST_TYPE_LIKE, "" + userId);
 	}
 
 	public boolean isRetweeted(Long postId, Long userId) {
-		return stringRedisTemplate.opsForSet().isMember(ConstantsUtil.REDIS_POST_UNIQUENAME_PREFIX + ":" + postId + ":retweet", "" + userId);
+		return stringRedisTemplate.opsForSet().isMember(ConstantsUtil.REDIS_POST_GROUP + ":" + postId + ":" + ConstantsUtil.REDIS_POST_TYPE_RETWEET, "" + userId);
 	}
 
 	public void incrTotalPostView(Long postId) {
-		stringRedisTemplate.opsForValue().increment(ConstantsUtil.REDIS_POST_VIEW_TOTAL_PREFIX + ":" + postId);
+		stringRedisTemplate.opsForHash().increment(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY, (long) 1);
 	}
 
 	public Long getTotalPostView(Long postId) {
-		String viewCountString = stringRedisTemplate.opsForValue().get(ConstantsUtil.REDIS_POST_VIEW_TOTAL_PREFIX + ":" + postId);
-		if (viewCountString == null) {
+		Long viewCount = (Long) stringRedisTemplate.opsForHash().get(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TOTAL);
+		if (viewCount == null) {
 			return (long) 0;
 		} else {
-			return Long.parseLong(viewCountString);
+			return viewCount;
 		}
 	}
 
 	public void incrTodayPostView(Long postId) {
 		logger.info("increasing viewcount : " + postId);
-		stringRedisTemplate.opsForValue().increment(ConstantsUtil.REDIS_POST_VIEW_TODAY_PREFIX + ":" + postId);
-	}
-
-	public void resetTodayPostView(Long postId) {
-		stringRedisTemplate.opsForValue().set(ConstantsUtil.REDIS_POST_VIEW_TODAY_PREFIX + ":" + postId, "0");
-		// need to sync in day end
+		stringRedisTemplate.opsForHash().increment(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY, (long) 1);
 	}
 
 	public Long getTodayPostView(Long postId) {
-		String viewCountString = stringRedisTemplate.opsForValue().get(ConstantsUtil.REDIS_POST_VIEW_TODAY_PREFIX + ":" + postId);
-		if (viewCountString == null) {
+		Long viewCount = (Long) stringRedisTemplate.opsForHash().get(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY);
+		if (viewCount == null) {
 			return (long) 0;
 		} else {
-			return Long.parseLong(viewCountString);
+			return viewCount;
 		}
+	}
+
+	public void resetTodayPostView(Long postId) {
+		stringRedisTemplate.opsForHash().put(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY, (long) 0);
 	}
 
 	public void deleteKey(String key) {
 		stringRedisTemplate.delete(key);
 	}
+
 }

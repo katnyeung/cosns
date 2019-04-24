@@ -99,9 +99,9 @@ public class PostRestController {
 		List<Post> postList = null;
 
 		if (user != null) {
-			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.ALL_POST_PREFIX, user);
+			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_POST_TAG_TYPE_ALL, user);
 		} else {
-			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.ALL_POST_PREFIX);
+			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_POST_TAG_TYPE_ALL);
 		}
 
 		plr.setPostList(postList);
@@ -224,7 +224,7 @@ public class PostRestController {
 
 			hashTagService.saveHash(post, hashTagSet);
 
-			hashTagService.saveHashToRedis(post, hashTagSet, ConstantsUtil.REDIS_POST_TAG_PREFIX, ConstantsUtil.PHOTO_POST_PREFIX);
+			hashTagService.saveHashToRedis(post, hashTagSet, ConstantsUtil.REDIS_POST_TAG_GROUP, ConstantsUtil.REDIS_POST_TAG_TYPE_PHOTO);
 
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
