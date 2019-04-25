@@ -13,7 +13,9 @@
 		var main = angular.module('application', [ 'infinite-scroll' ]);
 
 		main.controller('searchController', function($scope, $http, messageService) {
-
+			
+			$scope.keyword = /*[[${hashTag}]*/{};
+			
 			$scope.search = function() {
 				console.log($scope.keyword);
 				if ($scope.keyword) {

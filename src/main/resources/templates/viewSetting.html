@@ -13,8 +13,8 @@
 
 		main.controller('settingController', function($scope, $http, messageService) {
 			$scope.shared = messageService.getShared();
-
 			$scope.obj = {};
+			$scope.checkedUniqueName = false;
 
 			$http({
 				url : "/user/getUser/[[${targetUser?.userId}]]",
@@ -31,63 +31,89 @@
 					$scope.uniqueName = response.data.user.uniqueName;
 					$scope.checkName = response.data.user.uniqueName;
 
+					$scope.displayName = response.data.user.displayName;
+
 					$scope.profileMessage = response.data.user.message;
 				} else {
 					$scope.message("Load User Failed");
 				}
 			});
 
-			$scope.checkUniqueName = function() {
+			$scope.checkUniqueName = function(checkOn) {
 				if ($scope.uniqueName != $scope.checkName) {
+					if (/^[a-zA-Z0-9_]+$/.test($scope.uniqueName)) {
+						$http({
+							url : "/user/checkUniqueName/",
+							method : "POST",
+							headers : {
+								'Content-Type' : 'application/json'
+							},
+							data : {
+								uniqueName : $scope.uniqueName
+							}
+						}).then(function(response) {
+							if (response.data.status == 'success') {
+								$scope.checkedUniqueName = true;
+								$scope.uniqueNameMessage = "OK";
+
+								if (checkOn == 'submit') {
+									$scope.submit();
+								}
+							} else {
+								$scope.uniqueNameMessage = "someone using this name already";
+							}
+						});
+					} else {
+						$scope.uniqueNameMessage = "Unique ID only avaiable on english and number with underscroll (A to Z, 0 to 9 and _)"
+					}
+
+				} else {
+					$scope.checkedUniqueName = true;
+
+					if (checkOn == 'submit') {
+						$scope.submit();
+					}
+				}
+
+			}
+
+			$scope.submit = function() {
+
+				if (!$scope.checkedUniqueName) {
+					$scope.checkUniqueName('submit');
+				} else {
+					var image;
+
+					angular.forEach($scope.obj.flow.files, function(value, key) {
+						var msg = JSON.parse(value.msg);
+						if (msg.status === 'success') {
+							image = msg.filePath;
+						}
+					});
+
 					$http({
-						url : "/user/checkUniqueName/",
+						url : "/user/updateSetting/",
 						method : "POST",
 						headers : {
 							'Content-Type' : 'application/json'
 						},
 						data : {
-							uniqueName : $scope.uniqueName
+							password : $scope.password,
+							uniqueName : $scope.uniqueName,
+							displayName : $scope.displayName,
+							message : $scope.profileMessage,
+							image : image
 						}
 					}).then(function(response) {
 						if (response.data.status == 'success') {
-							$scope.uniqueNameMessage = "OK";
+							$scope.password = null;
+							$scope.message(response.data.remarks);
 						} else {
-							$scope.uniqueNameMessage = "someone using this name already";
+							$scope.message(response.data.remarks);
 						}
+						$scope.checkedUniqueName = false;
 					});
 				}
-			}
-
-			$scope.submit = function() {
-				var image;
-
-				angular.forEach($scope.obj.flow.files, function(value, key) {
-					var msg = JSON.parse(value.msg);
-					if (msg.status === 'success') {
-						image = msg.filePath;
-					}
-				});
-
-				$http({
-					url : "/user/updateSetting/",
-					method : "POST",
-					headers : {
-						'Content-Type' : 'application/json'
-					},
-					data : {
-						password : $scope.password,
-						uniqueName : $scope.uniqueName,
-						message : $scope.profileMessage,
-						image : image
-					}
-				}).then(function(response) {
-					if (response.data.status == 'success') {
-						$scope.password = null;
-						$scope.message(response.data.remarks);
-					} else {
-						$scope.message(response.data.remarks);
-					}
-				});
 			}
 
 			$scope.message = function(message) {
@@ -104,7 +130,10 @@
 			<h3>Settings</h3>
 			<div class="row">
 				<div class="col-md-4 form-inline p-2">
-					<input type="password" ng-model="password" name="password" placeholder="Password" class="form-control" /> <input type="submit" id="update" value="update" class="btn btn-primary form-control" />
+					<input type="password" ng-model="password" name="password"
+						placeholder="Password" class="form-control" /> <input
+						type="submit" id="update" value="update"
+						class="btn btn-primary form-control" />
 				</div>
 			</div>
 			<div class="row">
@@ -113,40 +142,65 @@
 					<tr>
 						<td class="span3">Profile Image :</td>
 						<td>
-							<div flow-init="{target: '/user/uploadProfileImage', testChunks:false, singleFile:true, chunkSize : 10000000}" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)" flow-name="obj.flow">
+							<div
+								flow-init="{target: '/user/uploadProfileImage', testChunks:false, singleFile:true, chunkSize : 10000000}"
+								flow-files-submitted="$flow.upload()"
+								flow-file-success="$file.msg = $message"
+								flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)"
+								flow-name="obj.flow">
 
 								<div class="span2">
 									<div class="thumbnail" ng-show="!$flow.files.length">
-										<img ng-src="{{profileImage ? '/pimages/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" style="width: 150px; height: 150px" flow-btn /> <span style="color: #CFCFCF">(Optional)</span>
+										<img
+											ng-src="{{profileImage ? '/pimages/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}"
+											style="width: 150px; height: 150px" flow-btn /> <span
+											style="color: #CFCFCF">(Optional)</span>
 									</div>
 									<div class="thumbnail" ng-show="$flow.files.length">
-										<img flow-img="$flow.files[0]" style="width: 150px; height: 150px" flow-btn />
+										<img flow-img="$flow.files[0]"
+											style="width: 150px; height: 150px" flow-btn />
 									</div>
 									<div ng-repeat="file in $flow.files">
-										<div class="progress" style="width: auto" ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
+										<div class="progress" style="width: auto"
+											ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
 											<div class="bar" style="width: {{file.progress()* 100">
 												<span>{{(file.progress() * 100).toFixed(0)}}%</span>
 											</div>
 										</div>
 									</div>
-									<button type="button" class="btn btn-info " flow-btn>select image</button>
+									<button type="button" class="btn btn-info " flow-btn>select
+										image</button>
 								</div>
 
 							</div>
 						</td>
 					</tr>
 					<tr>
-						<td>Assign Unique Name :</td>
+						<td>Assign Unique ID :</td>
 						<td><div class="form-inline">
-								<input type="hidden" ng-mode="checkName" /> @<input type="text" ng-model="uniqueName" name="uniqueName" placeholder="(Optional)" class="form-control" /> <br /> &nbsp;
-								<button type="button" ng-click="checkUniqueName()" class="btn btn-info btn-sm form-control">Check</button>
+								<input type="hidden" ng-mode="checkName" /> @<input type="text"
+									ng-model="uniqueName" name="uniqueName"
+									placeholder="(Optional)" class="form-control" /> <br />
+								&nbsp;
+								<button type="button" ng-click="checkUniqueName('inline')"
+									class="btn btn-info btn-sm form-control">Check</button>
 
-							</div> <small id="emailHelp" class="form-text text-muted" ng-show="uniqueNameMessage">{{uniqueNameMessage}}</small></td>
+							</div> <small id="emailHelp" class="form-text text-muted warning"
+							ng-show="uniqueNameMessage">{{uniqueNameMessage}}</small></td>
+					</tr>
+					<tr>
+						<td>Display Name :</td>
+						<td><div class="form-inline">
+								<input type="text" ng-model="displayName" name="displayName"
+									placeholder="(Optional)" class="form-control" />
+							</div></td>
 					</tr>
 					<tr>
 						<td>Profile Message :</td>
 						<td><div>
-								<textarea ng-model="profileMessage" name="message" rows="10" class="form-control" style="min-width: 100%" placeholder="(Optional)"></textarea>
+								<textarea ng-model="profileMessage" name="message" rows="10"
+									class="form-control" style="min-width: 100%"
+									placeholder="(Optional)"></textarea>
 							</div></td>
 					</tr>
 				</table>

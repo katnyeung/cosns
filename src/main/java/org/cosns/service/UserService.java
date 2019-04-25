@@ -147,19 +147,11 @@ public class UserService {
 			User targetUser = targetUserSet.iterator().next();
 
 			logger.info("found target user: " + targetUser.getEmail());
-			List<User> followerList = userInDB.getFollowers();
-			followerList.add(targetUser);
 
-			userInDB.setFollowers(followerList);
-
-			List<User> followedByList = targetUser.getFollowedBy();
-
-			followedByList.add(userInDB);
-
-			targetUser.setFollowedBy(followedByList);
+			userInDB.getFollowers().add(targetUser);
+			targetUser.getFollowedBy().add(userInDB);
 
 			userDAO.save(targetUser);
-
 			userDAO.save(userInDB);
 
 			return userInDB;
@@ -178,16 +170,12 @@ public class UserService {
 
 			logger.info("found target user: " + targetUser.getEmail());
 
-			userDAO.deleteFollower(userInDB.getUserId(), targetUser.getUserId());
+			userInDB.getFollowers().remove(targetUser);
+			targetUser.getFollowedBy().remove(userInDB);
 
-			userDAO.deleteFollowedBy(userInDB.getUserId(), targetUser.getUserId());
+			userDAO.save(userInDB);
+			userDAO.save(targetUser);
 
-			Set<User> userList = userDAO.findActiveUserById(userInDB.getUserId());
-
-			if (userList.iterator().hasNext()) {
-				userInDB = userList.iterator().next();
-			}
-			
 			return userInDB;
 		} else {
 			return null;
@@ -264,6 +252,10 @@ public class UserService {
 		// message
 		if (userSettingDTO.getMessage() != null) {
 			user.setMessage(userSettingDTO.getMessage());
+		}
+
+		if (userSettingDTO.getDisplayName() != null) {
+			user.setDisplayName(userSettingDTO.getDisplayName());
 		}
 
 		user = updateUser(user);

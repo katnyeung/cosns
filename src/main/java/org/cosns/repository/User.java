@@ -57,6 +57,9 @@ public class User extends Auditable<String> {
 	@Column(nullable = true)
 	private String uniqueName;
 
+	@Column(nullable = true)
+	private String displayName;
+
 	@Lob
 	@Column(nullable = true)
 	private String message;
@@ -196,9 +199,12 @@ public class User extends Auditable<String> {
 		this.lastUpdateUniqueNameDate = lastUpdateUniqueNameDate;
 	}
 
-	@Override
-	public String toString() {
-		return "User [userId=" + userId + ", email=" + email + ", password=" + password + ", status=" + status + ", uniqueName=" + uniqueName + ", message=" + message + ", profileImage=" + profileImage + ", posts=" + posts + ", followers=" + followers + ", followedBy=" + followedBy + ", friendRequest=" + friendRequest + ", postReaction=" + postReaction + ", lastUpdateUniqueNameDate=" + lastUpdateUniqueNameDate + "]";
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 }

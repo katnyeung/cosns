@@ -7,6 +7,8 @@ public class UserSettingDTO {
 
 	String uniqueName;
 
+	String displayName;
+
 	String message;
 
 	public String getPassword() {
@@ -39,6 +41,14 @@ public class UserSettingDTO {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 }

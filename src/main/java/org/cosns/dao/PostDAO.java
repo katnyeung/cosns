@@ -25,7 +25,7 @@ public interface PostDAO extends PagingAndSortingRepository<Post, Long> {
 	@Query("SELECT p FROM Post p INNER JOIN p.user u WHERE u.userId = :userId AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")
 	public List<Post> findPostByUserId(@Param("userId") Long userId);
 
-	@Query("SELECT p FROM Post p WHERE p.postId IN :postIdSet")
+	@Query("SELECT p FROM Post p WHERE p.postId IN :postIdSet AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ")
 	public List<Post> findPostByPostIdSet(@Param("postIdSet") Set<Long> postIdSet);
 
 	@Query("SELECT p FROM Post p WHERE p.postId = :postId")

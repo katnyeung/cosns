@@ -15,7 +15,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public class Auditable<U> {
-	
+
+	@JsonIgnore
 	@CreatedDate
 	@Column(name = "createdate")
 	private Date createdate;

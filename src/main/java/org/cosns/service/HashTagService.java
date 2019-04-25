@@ -26,7 +26,7 @@ public class HashTagService {
 	private RedisService redisService;
 
 	public Set<String> parseHash(Post post) {
-		Pattern pattern = Pattern.compile("#(\\w+)");
+		Pattern pattern = Pattern.compile("#([^#^\\n]*)");
 		String message = post.getMessage();
 		Matcher matcher = pattern.matcher(message);
 
@@ -46,7 +46,7 @@ public class HashTagService {
 		for (String hashTag : hashTagSet) {
 			HashTag hashObject = new HashTag();
 
-			hashObject.setHashTag(hashTag);
+			hashObject.setHashTag(hashTag.trim());
 			hashObject.setPost(post);
 
 			hashTagDAO.save(hashObject);
@@ -55,7 +55,7 @@ public class HashTagService {
 
 	public void saveHashToRedis(Post post, Set<String> hashTagSet, String postTagPrefix, String postTypePrefix) {
 		for (String hashTag : hashTagSet) {
-			redisService.addSetItem(postTagPrefix + ":" + hashTag.toLowerCase(), postTypePrefix + ":" + post.getPostId());
+			redisService.addSetItem(postTagPrefix + ":" + hashTag.toLowerCase().trim(), postTypePrefix + ":" + post.getPostId());
 		}
 	}
 

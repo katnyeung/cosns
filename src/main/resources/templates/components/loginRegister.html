@@ -100,7 +100,7 @@
 	</div>
 
 	<div ng-show="shared.user">
-		<a href="/u/">{{shared.user.uniqueName ? shared.user.uniqueName : shared.user.email}}</a> &nbsp;<a href="/setting/">Setting</a> <a href="#" ng-click="logout(); $event.preventDefault();">Logout</a>
+		<a href="/u/">{{shared.user.displayName ? shared.user.displayName : shared.user.uniqueName}}</a> &nbsp;<a href="/setting/">Setting</a> <a href="#" ng-click="logout(); $event.preventDefault();">Logout</a>
 	</div>
 
 </header>

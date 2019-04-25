@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class HashTag extends Auditable<String> {
-
+	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long hashId;
@@ -29,7 +29,8 @@ public class HashTag extends Auditable<String> {
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	@JoinColumn(name = "post_id", referencedColumnName = "postId")
 	private Post post;
-
+	
+	@JsonIgnore
 	private int totalCount = 0;
 
 	public Long getHashId() {

@@ -216,7 +216,7 @@ public class PostRestController {
 		User user = (User) session.getAttribute("user");
 
 		if (user != null) {
-			Post post = postService.writePost(postDTO, user);
+			Post post = postService.writePhotoPost(postDTO, user);
 
 			Set<String> hashTagSet = hashTagService.parseHash(post);
 

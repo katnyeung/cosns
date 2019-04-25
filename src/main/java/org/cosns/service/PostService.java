@@ -81,7 +81,7 @@ public class PostService {
 		return null;
 	}
 
-	public Post writePost(PostFormDTO postDTO, User user) {
+	public Post writePhotoPost(PostFormDTO postDTO, User user) {
 		logger.info("Writing Post By User : " + user.getUserId());
 
 		// create post

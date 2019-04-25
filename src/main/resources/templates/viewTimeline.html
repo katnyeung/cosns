@@ -10,7 +10,7 @@
 	main.controller('viewPostController', function($scope, $http, $window, postService, messageService) {
 		$scope.shared = messageService.getShared();
 		$scope.currentPage = 0;
-		
+
 		var handleResponse = function(response, type) {
 			if (response.data.status == 'success') {
 				$scope.message(type + " success");
@@ -31,11 +31,24 @@
 			});
 		}
 
+		$scope.removePost = function(postId) {
+			if (confirm("Remove this post?")) {
+				postService.removePost(postId).then(function(response) {
+					handleResponse(response, 'remove');
+				});
+			}
+		}
+		
 		$scope.loadPost = function(page) {
 			postService.loadPosts("getTimelinePosts/" + page).then(function(response) {
-				if(response.data.postList.length > 0){
+				if (response.data.postList.length > 0) {
 					$scope.postList = response.data.postList;
-				}else{
+
+					for (var i = 0; i < $scope.postList.length; i++) {
+						$scope.release.push($scope.postList[i]);
+
+					}
+				} else {
 					$scope.postList = {};
 				}
 			});
@@ -43,28 +56,23 @@
 
 		$scope.release = [];
 		$scope.postList = [];
-		
+
 		$scope.message = function(message) {
 			messageService.setMessage(message);
 		}
 
-		$scope.$watch('shared.user', function(newValue,oldValue) {
-			if(newValue != oldValue){
-				if(!newValue){
+		$scope.$watch('shared.user', function(newValue, oldValue) {
+			if (newValue != oldValue) {
+				if (!newValue) {
 					$window.location.href = '/';
 				}
 				$scope.currentPage = 0;
 				$scope.loadMore();
 			}
 		});
-		
+
 		$scope.loadMore = function() {
 			$scope.loadPost($scope.currentPage++);
-			
-			for(var i = 0 ; i < $scope.postList.length ; i++){
-				$scope.release.push($scope.postList[i]);
-					
-			}
 		};
 		$scope.loadMore();
 	});
@@ -84,7 +92,8 @@
 		<div ng-controller="viewPostController" class="row">
 			<div infinite-scroll='loadMore()' infinite-scroll-distance='0'>
 				<div ng-repeat="post in release" class="card col-md-9 m-1">
-					<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
+					<div th:include="components/post :: viewPosts('thumbnail-mid')"
+						th:remove="tag"></div>
 				</div>
 			</div>
 		</div>

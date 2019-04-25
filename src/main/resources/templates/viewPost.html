@@ -29,7 +29,15 @@
 				handleResponse(response, 'retweet');
 			});
 		}
-
+		
+		$scope.removePost = function(postId) {
+			if(confirm("Remove this post?")){
+				postService.removePost(postId).then(function(response) {
+					handleResponse(response, 'remove');
+				});
+			}
+		}
+		
 		$scope.loadPost = function() {
 			postService.loadPosts("getPost/[[${postId}]]").then(function(response) {
 				if (response.data.postList.length > 0) {

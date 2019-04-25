@@ -104,6 +104,19 @@ public class RouteController {
 		return "viewPost";
 	}
 
+	@GetMapping(path = "h/{hashTag}")
+	public String viewHashTag(@PathVariable("hashTag") String hashTag, HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
+
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		}
+
+		model.addAttribute("hashTag", hashTag);
+
+		return "viewTag";
+	}
+
 	@GetMapping(path = "u")
 	public String viewProfile(HttpSession session, Model model) {
 		User loggedUser = (User) session.getAttribute("user");
