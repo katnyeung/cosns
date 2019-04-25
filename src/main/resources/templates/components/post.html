@@ -1,7 +1,10 @@
 <header th:fragment="viewPostScript">
 	<script>
 		main.factory('postService', function($http) {
-			var service = {};
+			var service = {
+				postList = {},
+				messageService = null
+			};
 
 			service.likePost = function(post) {
 
@@ -16,6 +19,9 @@
 					}
 				}).then(function(response) {
 					if (response.data.status === 'success') {
+
+						messageService.setMessage(response.data.remarks);
+						
 						if (response.data.type === 'incr') {
 							post.likeCount++;
 							post.liked = true;
@@ -43,6 +49,8 @@
 					if (response.data.status === 'success') {
 						post.retweetCount++;
 						post.retweeted = true;
+						
+						messageService.setMessage(response.data.remarks);
 					}
 					return response;
 				});
@@ -61,8 +69,9 @@
 					}
 				}).then(function(response) {
 					if (response.data.status === 'success') {
-
 						post.removed = true;
+
+						messageService.setMessage(response.data.remarks);
 					}
 					return response;
 				});
@@ -74,8 +83,23 @@
 					headers : {
 						'Content-Type' : 'application/json'
 					}
+				}).then(function(response) {
+					if(response.data.status === 'success'){
+						if (response.data.postList.length > 0) {
+							postList = response.data.postList;
+						} else {
+							postList = {};
+						}
+
+						messageService.setMessage(response.data.remarks);
+					}
+					return response;
 				});
 			};
+			
+			server.setMessageService = function(messageService) {
+				messageService = messageService;
+			}
 
 			return service;
 		});
@@ -103,8 +127,7 @@
 		</div>
 
 		<div class="col-ml-auto" style="font-size: 10px">
-			<a href="/p/{{post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp; 
-	<a href="#" ng-show="shared.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()">X</a>
+			<a href="/p/{{post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp; <a href="#" ng-show="shared.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()">X</a>
 		</div>
 	</div>
 	<div th:include="components/post :: viewPostBody(${section})"></div>

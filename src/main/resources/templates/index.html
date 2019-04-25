@@ -12,8 +12,10 @@
 	<script>
 		var main = angular.module('application', [ 'infinite-scroll' ]);
 
-		main.controller('searchController', function($scope, $http, messageService) {
+		main.controller('searchController', function($scope, $http, postService, messageService) {
 
+			$scope.shared = messageService.getShared();
+			
 			$scope.search = function() {
 				console.log($scope.keyword);
 				if ($scope.keyword) {
@@ -37,15 +39,6 @@
 					});
 				}
 			}
-			$scope.message = function(message) {
-				messageService.setMessage(message);
-			}
-
-		});
-
-		main.controller('viewPostController', function($scope, postService, messageService) {
-			$scope.shared = messageService.getShared();
-
 			var handleResponse = function(response, type) {
 				if (response.data.status == 'success') {
 					$scope.message(type + " success");
@@ -65,29 +58,33 @@
 					handleResponse(response, 'retweet');
 				});
 			}
-			
+
 			$scope.removePost = function(postId) {
-				if(confirm("Remove this post?")){
+				if (confirm("Remove this post?")) {
 					postService.removePost(postId).then(function(response) {
 						handleResponse(response, 'remove');
 					});
 				}
 			}
-
-			$scope.loadPost = function() {
-				postService.loadPosts("getLatestPost").then(function(response) {
-					if (response.data.postList.length > 0) {
-						$scope.postList = response.data.postList;
-					} else {
-						$scope.postList = {};
-					}
-				});
-			};
-			$scope.loadPost();
-
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
+
+		});
+
+		main.controller('viewPostController', function($scope, postService, messageService) {
+			$scope.postList = postService.postList;
+			
+			postService.setMessageService(messageService);
+			
+			$scope.likePost = function(postId){ postService.likePost(postId); }
+			$scope.retweetPost = function(postId){ postService.retweetPost(postId); }
+			$scope.removePost = function(postId){ postService.removePost(postId); }
+			$scope.loadPost = function() { postService.loadPosts("getLatestPosst"); }
+
+			$scope.loadPost();
+			
+			$scope.shared = messageService.getShared();
 
 			$scope.$watch('shared.user', function(newValue, oldValue) {
 				if (newValue != oldValue) {
@@ -116,8 +113,7 @@
 			<div ng-show="postList" class="row-m5">
 				<h3>Search Result</h3>
 				<div ng-repeat="post in postList | filter: {removed : false}" class="card col-md-3 m-1">
-					<div th:include="components/post :: viewPosts('thumbnail')"
-						th:remove="tag"></div>
+					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
 			</div>
 		</div>
@@ -125,8 +121,7 @@
 		<div ng-controller="viewPostController" class="row m-5">
 
 			<div ng-repeat="post in postList | filter: {removed : false}" class="card col-md-3 m-1">
-				<div th:include="components/post :: viewPosts('thumbnail')"
-					th:remove="tag"></div>
+				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 			</div>
 		</div>
 
