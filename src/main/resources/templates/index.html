@@ -69,26 +69,36 @@
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
-
 		});
 
 		main.controller('viewPostController', function($scope, postService, messageService) {
-			$scope.postList = postService.postList;
-			
-			postService.setMessageService(messageService);
-			
-			$scope.likePost = function(postId){ postService.likePost(postId); }
-			$scope.retweetPost = function(postId){ postService.retweetPost(postId); }
-			$scope.removePost = function(postId){ postService.removePost(postId); }
-			$scope.loadPost = function() { postService.loadPosts("getLatestPosst"); }
 
-			$scope.loadPost();
-			
+			postService.setMessageService(messageService);
+
+			$scope.likePost = function(postId) {
+				postService.likePost(postId);
+			}
+			$scope.retweetPost = function(postId) {
+				postService.retweetPost(postId);
+			}
+			$scope.removePost = function(postId) {
+				postService.removePost(postId);
+			}
+			$scope.loadPost = function(handler) {
+				postService.loadPosts("getLatestPost", handler);
+			}
+
+			var handler = function(postList) {
+				$scope.postList = postList;
+			}
+
+			$scope.loadPost(handler);
+
 			$scope.shared = messageService.getShared();
 
 			$scope.$watch('shared.user', function(newValue, oldValue) {
 				if (newValue != oldValue) {
-					$scope.loadPost();
+					$scope.loadPost(handler);
 				}
 			});
 
@@ -112,16 +122,20 @@
 			</div>
 			<div ng-show="postList" class="row-m5">
 				<h3>Search Result</h3>
-				<div ng-repeat="post in postList | filter: {removed : false}" class="card col-md-3 m-1">
-					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
+				<div ng-repeat="post in postList | filter: {removed : false}"
+					class="card col-md-3 m-1">
+					<div th:include="components/post :: viewPosts('thumbnail')"
+						th:remove="tag"></div>
 				</div>
 			</div>
 		</div>
 		<h3 class="row m-5">Latest 20 Post</h3>
 		<div ng-controller="viewPostController" class="row m-5">
 
-			<div ng-repeat="post in postList | filter: {removed : false}" class="card col-md-3 m-1">
-				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
+			<div ng-repeat="post in postList | filter: {removed : false}"
+				class="card col-md-3 m-1">
+				<div th:include="components/post :: viewPosts('thumbnail')"
+					th:remove="tag"></div>
 			</div>
 		</div>
 
