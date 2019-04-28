@@ -39,7 +39,7 @@
 				info.jsEvent.preventDefault();
 
 				console.log(info.jsEvent);
-				$("#dialogCalendar .message").html(info.event.title + "<br/> <a href ='" + info.event.url + "'>" + info.event.url + "</a>");
+				$("#dialogCalendar .message").html("<a href='/ht/" + info.event.title + "'>" + info.event.title + "</a><br/> <a href ='" + info.event.url + "'>" + info.event.url + "</a>");
 				$('#dialogCalendar').dialog({
 					title : info.event.start,
 					position : {

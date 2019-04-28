@@ -5,60 +5,39 @@
 <script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
 <script>
-	var main = angular.module('application', [ 'infinite-scroll' ]);
+	var main = angular.module('application', [ 'infinite-scroll', 'ngSanitize' ]);
 
 	main.controller('viewPostController', function($scope, $http, $window, postService, messageService) {
-		$scope.shared = messageService.getShared();
+		postService.setMessageService(messageService);
 		$scope.currentPage = 0;
-
-		var handleResponse = function(response, type) {
-			if (response.data.status == 'success') {
-				$scope.message(type + " success");
-			} else {
-				$scope.message(type + " failed : " + response.data.remarks);
-			}
-		}
-
-		$scope.likePost = function(postId) {
-			postService.likePost(postId).then(function(response) {
-				//handleResponse(response, 'like');
-			});
-		}
-
-		$scope.retweetPost = function(postId) {
-			postService.retweetPost(postId).then(function(response) {
-				handleResponse(response, 'retweet');
-			});
-		}
-
-		$scope.removePost = function(postId) {
-			if (confirm("Remove this post?")) {
-				postService.removePost(postId).then(function(response) {
-					handleResponse(response, 'remove');
-				});
-			}
-		}
-		
-		$scope.loadPost = function(page) {
-			postService.loadPosts("getTimelinePosts/" + page).then(function(response) {
-				if (response.data.postList.length > 0) {
-					$scope.postList = response.data.postList;
-
-					for (var i = 0; i < $scope.postList.length; i++) {
-						$scope.release.push($scope.postList[i]);
-
-					}
-				} else {
-					$scope.postList = {};
-				}
-			});
-		};
-
+		$scope.shared = messageService.getShared();
 		$scope.release = [];
 		$scope.postList = [];
 
-		$scope.message = function(message) {
-			messageService.setMessage(message);
+		$scope.likePost = function(postId) {
+			postService.likePost(postId);
+		}
+		$scope.retweetPost = function(postId) {
+			postService.retweetPost(postId);
+		}
+		$scope.removePost = function(postId) {
+			postService.removePost(postId);
+		}
+		$scope.loadPost = function(page, handler) {
+			postService.loadPosts("getTimelinePosts/" + page, handler);
+		}
+
+		$scope.handler = function(postList) {
+			if (postList.length > 0) {
+				$scope.postList = postList;
+
+				for (var i = 0; i < $scope.postList.length; i++) {
+					$scope.release.push($scope.postList[i]);
+
+				}
+			} else {
+				$scope.postList = [];
+			}
 		}
 
 		$scope.$watch('shared.user', function(newValue, oldValue) {
@@ -72,8 +51,9 @@
 		});
 
 		$scope.loadMore = function() {
-			$scope.loadPost($scope.currentPage++);
+			$scope.loadPost($scope.currentPage++, $scope.handler);
 		};
+
 		$scope.loadMore();
 	});
 </script>
@@ -91,9 +71,9 @@
 
 		<div ng-controller="viewPostController" class="row">
 			<div infinite-scroll='loadMore()' infinite-scroll-distance='0'>
-				<div ng-repeat="post in release" class="card col-md-9 m-1">
-					<div th:include="components/post :: viewPosts('thumbnail-mid')"
-						th:remove="tag"></div>
+				<div ng-repeat="post in release" class="m-1">
+					<hr />
+					<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
 				</div>
 			</div>
 		</div>

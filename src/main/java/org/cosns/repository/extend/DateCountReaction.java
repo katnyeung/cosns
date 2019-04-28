@@ -2,15 +2,12 @@ package org.cosns.repository.extend;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
 
 import org.cosns.repository.PostReaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(indexes = { @Index(name = "INDEX_DATE_COUNT_REACTION", columnList = "year,month,day") })
 @DiscriminatorValue(value = "date_count")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DateCountReaction extends PostReaction {

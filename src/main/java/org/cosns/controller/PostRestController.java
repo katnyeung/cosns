@@ -17,6 +17,7 @@ import org.cosns.repository.User;
 import org.cosns.service.HashTagService;
 import org.cosns.service.ImageService;
 import org.cosns.service.PostService;
+import org.cosns.service.RedisService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.ImageUploadDTO;
 import org.cosns.web.DTO.PostFormDTO;
@@ -49,6 +50,9 @@ public class PostRestController {
 
 	@Autowired
 	HashTagService hashTagService;
+
+	@Autowired
+	RedisService redisService;
 
 	@Value("${cosns.image.uploadFolder}")
 	String uploadFolder;
@@ -102,6 +106,26 @@ public class PostRestController {
 			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_POST_TAG_TYPE_ALL, user);
 		} else {
 			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_POST_TAG_TYPE_ALL);
+		}
+
+		plr.setPostList(postList);
+		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+		return plr;
+	}
+
+	@GetMapping(path = "/getTopPost/{type}/{date}")
+	public DefaultResult getTopDayPost(@PathVariable("type") String type, @PathVariable("date") String date, HttpSession session) {
+		PostListResult plr = new PostListResult();
+
+		User user = (User) session.getAttribute("user");
+		List<Post> postList = null;
+
+		if (user != null) {
+			postList = postService.findTopPost(type, date, user.getUserId());
+		} else {
+			postList = postService.findTopPost(type, date, null);
+
 		}
 
 		plr.setPostList(postList);
@@ -226,6 +250,8 @@ public class PostRestController {
 
 			hashTagService.saveHashToRedis(post, hashTagSet, ConstantsUtil.REDIS_POST_TAG_GROUP, ConstantsUtil.REDIS_POST_TAG_TYPE_PHOTO);
 
+			redisService.addPostRecord(post.getPostId());
+
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			dr.setStatus(ConstantsUtil.RESULT_ERROR);
@@ -287,9 +313,13 @@ public class PostRestController {
 		User user = (User) session.getAttribute("user");
 
 		if (user != null) {
+
 			Post post = postService.removePost(postReactionDTO.getPostId(), user);
-			
+
 			if (post != null) {
+
+				redisService.removePostRecord(post.getPostId());
+
 				prr.setType(ConstantsUtil.POST_REACTION_CANCEL);
 				prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 			} else {

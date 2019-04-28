@@ -7,58 +7,37 @@
 </head>
 <body ng-app="application">
 	<script>
-		var main = angular.module('application', []);
+		var main = angular.module('application', [ 'ngSanitize' ]);
 		main.controller('viewPostController', function($scope, $http, postService, messageService) {
-			$scope.shared = messageService.getShared();
-			var handleResponse = function(response, type) {
-				if (response.data.status == 'success') {
-					$scope.message(type + " success");
-				} else {
-					$scope.message(type + " failed : " + response.data.remarks);
-				}
-			}
+			postService.setMessageService(messageService);
 
 			$scope.likePost = function(postId) {
-				postService.likePost(postId).then(function(response) {
-					//handleResponse(response, 'like');
-				});
+				postService.likePost(postId);
 			}
-
 			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId).then(function(response) {
-					handleResponse(response, 'retweet');
-				});
+				postService.retweetPost(postId);
 			}
-
 			$scope.removePost = function(postId) {
-				if (confirm("Remove this post?")) {
-					postService.removePost(postId).then(function(response) {
-						handleResponse(response, 'remove');
-					});
-				}
+				postService.removePost(postId);
 			}
-			
-			$scope.loadPost = function() {
-				postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]").then(function(response) {
-					if (response.data.postList.length > 0) {
-						$scope.postList = response.data.postList;
-					} else {
-						$scope.postList = {};
-					}
-				});
-			};
-			$scope.loadPost();
+			$scope.loadPost = function(handler) {
+				postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]", handler);
+			}
 
-			$scope.message = function(message) {
-				messageService.setMessage(message);
+			var handler = function(postList) {
+				$scope.postList = postList;
 			}
+
+			$scope.loadPost(handler);
+
+			$scope.shared = messageService.getShared();
 
 			$scope.$watch('shared.user', function(newValue, oldValue) {
-				console.log(newValue);
 				if (newValue != oldValue) {
-					$scope.loadPost();
+					$scope.loadPost(handler);
 				}
 			});
+
 		});
 
 		main.controller('viewUserController', function($scope, $http, messageService) {
@@ -141,26 +120,21 @@
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div class="container" ng-controller="viewUserController">
-		<div class="container well">
-			<img src="/pimages/{{profileImage}}" class="rounded img-fluid " /><br />
-			{{user.uniqueName}} ( {{user.email}} )
+		<div class="container">
+			<img src="/pimages/{{profileImage}}" class="rounded img-fluid " /><br /> {{user.uniqueName}} ( {{user.email}} )
 			<pre>{{user.message}}</pre>
 			<br /> Following
 			<ul>
-				<li ng-repeat="followerId in user.followers"><a
-					href="/u/{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].userId}}">{{userMap[followerId].uniqueName
-						? userMap[followerId].uniqueName : userMap[followerId].email}}</a></li>
+				<li ng-repeat="followerId in user.followers"><a href="/u/{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].userId}}">{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].email}}</a></li>
 			</ul>
-			<button type="button"
-				th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>
-			<button type="button"
-				th:attr="ng-click='unfollow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && isFollowed'">Unfollow</button>
+			<button class="btn btn-info" type="button" th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>
+			<button class="btn btn-warning" type="button" th:attr="ng-click='unfollow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && isFollowed'">Unfollow</button>
 
 		</div>
-		<div ng-controller="viewPostController" class="container">
-			<div ng-repeat="post in postList" class="card col-md-9 m-1">
-				<div th:include="components/post :: viewPosts('thumbnail')"
-					th:remove="tag"></div>
+		<div ng-controller="viewPostController" class="row-fluid">
+			<div ng-repeat="post in postList" class="m-1">
+				<hr/>
+				<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
 			</div>
 		</div>
 	</div>

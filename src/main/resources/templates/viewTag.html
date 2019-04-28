@@ -10,82 +10,49 @@
 </head>
 <body ng-app="application">
 	<script>
-		var main = angular.module('application', [ 'infinite-scroll' ]);
+		var main = angular.module('application', [ 'infinite-scroll','ngSanitize' ]);
 
-		main.controller('searchController', function($scope, $http, messageService) {
+		main.controller('searchController', function($scope, $http, messageService , postService) {
 
-			$scope.keyword = /*'[[${hashTag}]'*/{};
-
-			$scope.search = function() {
-				console.log($scope.keyword);
-				if ($scope.keyword) {
-					$http({
-						url : "/post/searchPosts",
-						method : "POST",
-						headers : {
-							'Content-Type' : 'application/json'
-						},
-						data : {
-							keyword : $scope.keyword
-						}
-					}).then(function(response) {
-						if (response.data.postList) {
-							$scope.postList = response.data.postList;
-						} else {
-							$scope.message("no records found");
-						}
-
-					});
-				}
-			}
-			$scope.message = function(message) {
-				messageService.setMessage(message);
-			}
-
-		});
-
-		main.controller('viewPostController', function($scope, postService, messageService) {
 			$scope.shared = messageService.getShared();
-
-			var handleResponse = function(response, type) {
-				if (response.data.status == 'success') {
-					$scope.message(type + " success");
-				} else {
-					$scope.message(type + " failed : " + response.data.remarks);
+			
+			$scope.keyword = '[[${hashTag}]]';
+			
+			$scope.search = function() {
+				if ($scope.keyword) {
+					postService.searchPosts($scope.keyword, handler);
 				}
 			}
+			
+			postService.setMessageService(messageService);
 
 			$scope.likePost = function(postId) {
-				postService.likePost(postId).then(function(response) {
-					//handleResponse(response, 'like');
-				});
+				postService.likePost(postId);
 			}
-
 			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId).then(function(response) {
-					handleResponse(response, 'retweet');
-				});
+				postService.retweetPost(postId);
 			}
-
 			$scope.removePost = function(postId) {
-				if (confirm("Remove this post?")) {
-					postService.removePost(postId).then(function(response) {
-						handleResponse(response, 'remove');
-					});
-				}
+				postService.removePost(postId);
+			}
+			$scope.searchPost = function(keyword, handler) {
+				postService.searchPost(keyword, handler);
 			}
 
-			$scope.message = function(message) {
-				messageService.setMessage(message);
+			var handler = function(postList) {
+				$scope.postList = postList;
 			}
+
 
 			$scope.$watch('shared.user', function(newValue, oldValue) {
 				if (newValue != oldValue) {
-					$scope.loadPost();
+					$scope.loadPost(handler);
 				}
 			});
 
+			$scope.search();
 		});
+
 	</script>
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
 
@@ -96,16 +63,15 @@
 		<div ng-controller="searchController" class="row m-5">
 
 			<div class="form-inline">
-				<h3>Search</h3>
+				<h3>Tag</h3>
 				&nbsp;
 				<form ng-submit="search()">
 					<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
 					<button class="form-control mr-sm-2" type="submit">Search</button>
 				</form>
 			</div>
-			<div ng-show="postList" class="row-m5">
-				<h3>Search Result</h3>
-				<div ng-repeat="post in postList | filter: {removed : false}" class="card col-md-3 m-1">
+			<div ng-show="postList" class="row">
+				<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-3  m-5">
 					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
 			</div>

@@ -32,9 +32,9 @@ public abstract class Event extends Auditable<String> {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long eventId;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	@JsonFormat(timezone = "GMT+08:00", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	Date start;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	@JsonFormat(timezone = "GMT+08:00", shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	Date end;
 
 	@NotNull

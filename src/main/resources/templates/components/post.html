@@ -1,5 +1,11 @@
 <header th:fragment="viewPostScript">
 	<script>
+		main.filter('hashTag', function() {
+			return function(val) {
+				return val.replace(/#(\S[^#^\n]*)/g, '<a href="/ht/$1">#$1</a>')
+			};
+		});
+
 		main.factory('postService', function($http) {
 			var shared = {
 				messageService : null
@@ -82,19 +88,46 @@
 							'Content-Type' : 'application/json'
 						}
 					}).then(function(response) {
+						shared.messageService.setMessage(response.data.remarks);
 						if (response.data.status === 'success') {
-							shared.messageService.setMessage(response.data.remarks);
-							if (response.data.postList.length > 0) {
+							if (response.data.postList && response.data.postList.length > 0) {
 								callback(response.data.postList);
 							} else {
-								callback({});
+								callback([]);
 							}
-
+						} else {
+							share.messageService.setMessage(response.data.remarks);
 						}
+
 					});
 				},
+				searchPosts : function(keyword, callback) {
+					if (keyword) {
+						$http({
+							url : "/post/searchPosts",
+							method : "POST",
+							headers : {
+								'Content-Type' : 'application/json'
+							},
+							data : {
+								keyword : keyword
+							}
+						}).then(function(response) {
+							shared.messageService.setMessage(response.data.remarks);
+							if (response.data.status === 'success') {
+								if (response.data.postList && response.data.postList.length > 0) {
+									callback(response.data.postList);
+								} else {
+									callback([]);
+								}
+							} else {
+								share.messageService.setMessage(response.data.remarks);
+							}
+
+						});
+					}
+				},
 				setMessageService : function(messageService) {
-					console.log("setting messageService : " + messageService);
 					shared.messageService = messageService;
 				},
 				getShared : function() {
@@ -107,108 +140,141 @@
 
 <body th:fragment="viewPosts(section)">
 
+	<th:block th:switch="${section}">
+
+		<div th:case="'detail'">
+			<div th:include="components/post :: viewPostDetail()" th:remove="tag"></div>
+		</div>
+		<div th:case="'thumbnail-mid'">
+			<div th:include="components/post :: viewPostThumbnailMid()" th:remove="tag"></div>
+		</div>
+		<div th:case="'thumbnail'" class="row">
+			<div th:include="components/post :: viewPostThumbnail()" th:remove="tag"></div>
+		</div>
+	</th:block>
+
+</body>
+
+<body th:fragment="viewPostDetail()">
+
+	<div th:include="components/post :: RetweetedBy()" th:remove="tag"></div>
+
+	<div th:include="components/post :: CreatorAndCreateDate()" th:remove="tag"></div>
+
+	<div th:include="components/post :: LikeAndRetweet()" th:remove="tag"></div>
+
+
+	<div th:attr="ng-repeat='image in post.postImages'">
+		<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+	</div>
+
+	<div class="well" ng-bind-html="post.message | hashTag"></div>
+
+</body>
+
+<body th:fragment="viewPostThumbnailMid()">
+
+	<div th:include="components/post :: RetweetedBy()" th:remove="tag"></div>
+
+	<div th:include="components/post :: CreatorAndCreateDate()" th:remove="tag"></div>
+
+	<div th:include="components/post :: LikeAndRetweet()" th:remove="tag"></div>
+
+
+	<a href="/p/{{post.postId}}">
+		<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
+			<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+		</div>
+		<div class="row m-0 p-1">
+			<div class="col-md-4 m-0 p-1" th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
+				<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+			</div>
+		</div>
+	</a>
+
+	<div class="well" ng-bind-html="post.message | hashTag"></div>
+</body>
+
+<body th:fragment="viewPostThumbnail()">
+
+	<div th:include="components/post :: LikeAndRetweet()" th:remove="tag"></div>
+
+	<div th:include="components/post :: Creator()" th:remove="tag"></div>
+
+	<a href="/p/{{post.postId}}">
+		<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
+			<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+		</div>
+		<div class="row m-0 p-1">
+			<div class="col-md-5 m-0 p-1" th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
+				<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+			</div>
+		</div>
+	</a>
+	<div th:attr="ng-repeat='hashtag in post.hashtags'">
+		<a href="/ht/{{hashtag.hashTag}}">#{{hashtag.hashTag}}</a>
+	</div>
+
+</body>
+
+<body th:fragment="RetweetedBy()">
 	<div ng-show="post.retweetedBy">
-		<div class="row shadow-sm">
+		<div class="row shadow-sm card">
 			<div class="col">
-				<span style="font-size: 12px">/Retweet By</span> <span
-					ng-repeat="retweetedByPost in post.retweetedBy"> <a
-					href="/u/{{retweetedByPost.user.uniqueName ? retweetedByPost.user.uniqueName : retweetedByPost.user.userId}}"
-					style="font-size: 14px">{{retweetedByPost.user.uniqueName ?
-						retweetedByPost.user.uniqueName : retweetedByPost.user.email}}</a>
+				<span style="font-size: 12px"><i class="fas fa-undo"></i> &nbsp; Retweet By</span> <span ng-repeat="retweetedByPost in post.retweetedBy"> <a href="/u/{{retweetedByPost.user.uniqueName ? retweetedByPost.user.uniqueName : retweetedByPost.user.userId}}" style="font-size: 14px">{{retweetedByPost.user.displayName ? retweetedByPost.user.displayName : retweetedByPost.user.uniqueName}}</a>
 				</span>
 			</div>
 
 			<div class="col-ml-auto" style="font-size: 10px">
-				<a href="/p/{{post.postId}}">{{post.createdate |
-					date:'MM/dd/yyyy'}}</a> &nbsp;
+				<a href="/p/{{post.postId}}">{{post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp;
 			</div>
 		</div>
 	</div>
+</body>
 
+<body th:fragment="CreatorAndCreateDate()">
 	<div class="row">
 		<div class="col">
-			{{post.postId}} <a
-				href="/u/{{post.user.uniqueName ? post.user.uniqueName : post.user.userId}}"
-				style="font-size: 14px">{{post.user.displayName ?
-				post.user.displayName : post.user.uniqueName}}</a>
+			<i class="fas fa-id-card"></i> {{post.postId}} &nbsp;<i class="fas fa-user"></i>&nbsp;<a href="/u/{{post.user.uniqueName ? post.user.uniqueName : post.user.userId}}" style="font-size: 14px">{{post.user.displayName ? post.user.displayName : post.user.uniqueName}}</a>
 		</div>
 
 		<div class="col-ml-auto" style="font-size: 10px">
-			<a href="/p/{{post.postId}}">{{post.releaseDate ?
-				post.releaseDate : post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp; <a
-				href="#" ng-show="shared.user.userId == post.user.userId"
-				ng-click="removePost(post);$event.preventDefault()">X</a>
+			<a href="/p/{{post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp; 
+			
+			<a href="#" ng-show="shared.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()" ><i class="far fa-trash-alt"></i></a>
 		</div>
 	</div>
-	<div th:include="components/post :: viewPostBody(${section})"></div>
-
 </body>
 
-<body th:fragment="viewPostBody(section)">
-	<div ng-show="shared.user" class='navbar-form'>
-		<div class="row">
-			<div class="col-mr-1">
-				<a href="#" class="btn"
-					ng-click="likePost(post); $event.preventDefault();"> <span
-					ng-show="post.liked">Unlike</span> <span ng-show="!post.liked">Like</span>
-					<span ng-show="post.likeCount > 0">{{post.likeCount}}</span>
-				</a>
-			</div>
-			<div
-				ng-show="!post.retweeted && shared.user.userId != post.user.userId">
-				<a href="#" class="btn"
-					ng-click="retweetPost(post); $event.preventDefault();"> Retweet
-					<span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span>
-				</a> <span ng-show="post.retweeted"> Retweet <span
-					ng-show="post.retweetCount > 0">{{post.retweetCount}}</span></span>
-			</div>
-		</div>
+<body th:fragment="Creator()">
+	<div class="ml-auto pt-2">
+		<a href="/u/{{post.user.uniqueName ? post.user.uniqueName : post.user.userId}}" style="font-size: 14px">@{{post.user.displayName ? post.user.displayName : post.user.uniqueName}}</a>
 	</div>
-	<div ng-show="!shared.user">
-		Like <span ng-show="post.likeCount > 0">{{post.likeCount}}</span>
-		Retweet <span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span>
-	</div>
+</body>
 
+<body th:fragment="LikeAndRetweet()">
+	<div ng-show="shared.user" class='mr-auto d-inline-flex'>
+		<span>
+			<a href="#" class="btn" ng-click="likePost(post); $event.preventDefault();"> 
+			<span ng-show="post.liked"><i class="fas fa-heart" style="color: red"></i></span> 
+			<span ng-show="!post.liked"><i class="far fa-heart"></i> </span> 
+			<span ng-show="post.likeCount > 0">{{post.likeCount}}</span>
+			</a>
+		</span>
+		<span ng-show="post.retweeted"  class="btn">
+			<i class="fas fa-retweet" style="color:#CCCCCC"></i> <span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span>
+		</span>
+		<span ng-show="!post.retweeted && shared.user.userId != post.user.userId">
+			<a href="#" class="btn" ng-click="retweetPost(post); $event.preventDefault();"> <i class="fas fa-retweet"></i> <span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span>
+			</a>
+		</span>
+	</div>
+	<div ng-show="!shared.user" class='mr-auto'>
+		<span class="btn"><i class="far fa-heart"></i><span ng-show="post.likeCount > 0"> {{post.likeCount}}</span>
+		<span ng-show="post.retweetCount > 0"><i class="fas fa-share"></i> {{post.retweetCount}}</span>
+		</span>
+	</div>
 	<div>
-		<th:block th:switch="${section}">
-			<div th:case="'detail'">
-				<div th:attr="ng-repeat='image in post.postImages'">
-					<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
-				</div>
-			</div>
-			<div th:case="'thumbnail'">
-				<a href="/p/{{post.postId}}">
-					<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
-						<img src="/images/{{image.filename}}"
-							class="img-fluid m-1 rounded" />
-					</div>
-					<div class="row m-0 p-1">
-						<div class="col-md-4 m-0 p-1"
-							th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
-							<img src="/images/{{image.filename}}"
-								class="img-fluid m-1 rounded" />
-						</div>
-					</div>
-				</a>
-			</div>
-			<div th:case="'thumbnail-mid'">
-				<a href="/p/{{post.postId}}">
-					<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
-						<img src="/images/{{image.filename}}"
-							class="img-fluid m-1 rounded" />
-					</div>
-					<div class="row m-0 p-1">
-						<div class="col-md-5 m-0 p-1"
-							th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
-							<img src="/images/{{image.filename}}"
-								class="img-fluid m-1 rounded" />
-						</div>
-					</div>
-				</a>
-			</div>
-		</th:block>
-
+	{{post.todayViewCount}} - {{post.totalViewCount}}
 	</div>
-
-	<pre>{{post.message}}</pre>
 </body>

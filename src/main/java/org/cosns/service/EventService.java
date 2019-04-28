@@ -52,7 +52,9 @@ public class EventService {
 
 			String userName;
 
-			if (post.getUser().getUniqueName() != null) {
+			if (post.getUser().getDisplayName() != null) {
+				userName = post.getUser().getDisplayName();
+			} else if (post.getUser().getUniqueName() != null) {
 				userName = post.getUser().getUniqueName();
 			} else {
 				userName = "#" + post.getUser().getUserId();

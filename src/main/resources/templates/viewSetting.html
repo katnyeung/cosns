@@ -163,7 +163,7 @@
 									<div ng-repeat="file in $flow.files">
 										<div class="progress" style="width: auto"
 											ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
-											<div class="bar" style="width: {{file.progress()* 100">
+											<div class="bar" style="width: {{file.progress()* 100}}%">
 												<span>{{(file.progress() * 100).toFixed(0)}}%</span>
 											</div>
 										</div>

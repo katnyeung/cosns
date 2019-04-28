@@ -5,59 +5,39 @@
 <script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
 <script>
-	var main = angular.module('application', []);
+	var main = angular.module('application', ['ngSanitize']);
 
 	main.controller('viewPostController', function($scope, postService, messageService) {
-		$scope.shared = messageService.getShared();
 
-		var handleResponse = function(response, type) {
-			if (response.data.status == 'success') {
-				$scope.message(type + " success");
-			} else {
-				$scope.message(type + " failed : " + response.data.remarks);
-			}
-		}
+		postService.setMessageService(messageService);
 
 		$scope.likePost = function(postId) {
-			postService.likePost(postId).then(function(response) {
-				//handleResponse(response, 'like');
-			});
+			postService.likePost(postId);
 		}
-
 		$scope.retweetPost = function(postId) {
-			postService.retweetPost(postId).then(function(response) {
-				handleResponse(response, 'retweet');
-			});
+			postService.retweetPost(postId);
 		}
-		
 		$scope.removePost = function(postId) {
-			if(confirm("Remove this post?")){
-				postService.removePost(postId).then(function(response) {
-					handleResponse(response, 'remove');
-				});
-			}
+			postService.removePost(postId);
 		}
-		
-		$scope.loadPost = function() {
-			postService.loadPosts("getPost/[[${postId}]]").then(function(response) {
-				if (response.data.postList.length > 0) {
-					$scope.postList = response.data.postList;
-				} else {
-					$scope.postList = {};
-				}
-			});
-		};
-		$scope.loadPost();
+		$scope.loadPost = function(handler) {
+			postService.loadPosts("getPost/[[${postId}]]", handler);
+		}
 
-		$scope.message = function(message) {
-			messageService.setMessage(message);
+		var handler = function(postList) {
+			$scope.postList = postList;
 		}
+
+		$scope.loadPost(handler);
+
+		$scope.shared = messageService.getShared();
 
 		$scope.$watch('shared.user', function(newValue, oldValue) {
 			if (newValue != oldValue) {
-				$scope.loadPost();
+				$scope.loadPost(handler);
 			}
 		});
+
 	});
 </script>
 </head>
@@ -67,9 +47,10 @@
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
-	<div class="container-fluid">
+	<div class="container">
 		<div ng-controller="viewPostController" class="row">
-			<div ng-repeat="post in postList" class="card col">
+			<div ng-repeat="post in postList">
+				<hr/>
 				<div th:include="components/post :: viewPosts('detail')" th:remove="tag"></div>
 			</div>
 		</div>

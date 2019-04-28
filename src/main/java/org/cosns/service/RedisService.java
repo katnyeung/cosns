@@ -1,11 +1,15 @@
 package org.cosns.service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import org.cosns.util.ConstantsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.SortParameters.Order;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.query.SortQuery;
+import org.springframework.data.redis.core.query.SortQueryBuilder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,6 +37,14 @@ public class RedisService {
 
 	public void setHashValue(String key, String type, String value) {
 		stringRedisTemplate.opsForHash().put(key, type, value);
+	}
+
+	public void addPostRecord(Long postId) {
+		stringRedisTemplate.opsForSet().add(ConstantsUtil.REDIS_POST_GROUP, "" + postId);
+	}
+
+	public void removePostRecord(Long postId) {
+		stringRedisTemplate.opsForSet().remove(ConstantsUtil.REDIS_POST_GROUP, "" + postId);
 	}
 
 	public void incrLike(Long postId, Long userId) {
@@ -68,7 +80,7 @@ public class RedisService {
 	}
 
 	public void incrTotalPostView(Long postId) {
-		stringRedisTemplate.opsForHash().increment(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY, (long) 1);
+		stringRedisTemplate.opsForHash().increment(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TOTAL, (long) 1);
 	}
 
 	public Long getTotalPostView(Long postId) {
@@ -95,11 +107,23 @@ public class RedisService {
 	}
 
 	public void resetTodayPostView(Long postId) {
-		stringRedisTemplate.opsForHash().put(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY, (long) 0);
+		stringRedisTemplate.opsForHash().put(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY, "0");
 	}
 
 	public void deleteKey(String key) {
 		stringRedisTemplate.delete(key);
+	}
+
+	public List<String> getSortedKeysByToday() {
+		
+		SortQuery<String> query = SortQueryBuilder
+				.sort(ConstantsUtil.REDIS_POST_GROUP)
+				.by(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":*->today")
+				.order(Order.DESC)
+				.build();
+		
+		 return stringRedisTemplate.sort(query);
+		
 	}
 
 }

@@ -10,65 +10,43 @@
 </head>
 <body ng-app="application">
 	<script>
-		var main = angular.module('application', [ 'infinite-scroll' ]);
+		var main = angular.module('application', [ 'infinite-scroll', 'ngSanitize' ]);
 
 		main.controller('searchController', function($scope, $http, postService, messageService) {
 
-			$scope.shared = messageService.getShared();
-			
 			$scope.search = function() {
-				console.log($scope.keyword);
 				if ($scope.keyword) {
-					$http({
-						url : "/post/searchPosts",
-						method : "POST",
-						headers : {
-							'Content-Type' : 'application/json'
-						},
-						data : {
-							keyword : $scope.keyword
-						}
-					}).then(function(response) {
-						if (response.data.postList) {
-							$scope.message("found " + response.data.postList.length + " records");
-							$scope.postList = response.data.postList;
-						} else {
-							$scope.message("no records found");
-						}
+					postService.searchPosts($scope.keyword, handler);
+				}
+			}
 
-					});
-				}
-			}
-			var handleResponse = function(response, type) {
-				if (response.data.status == 'success') {
-					$scope.message(type + " success");
-				} else {
-					$scope.message(type + " failed : " + response.data.remarks);
-				}
-			}
+			postService.setMessageService(messageService);
 
 			$scope.likePost = function(postId) {
-				postService.likePost(postId).then(function(response) {
-					//handleResponse(response, 'like');
-				});
+				postService.likePost(postId);
 			}
-
 			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId).then(function(response) {
-					handleResponse(response, 'retweet');
-				});
+				postService.retweetPost(postId);
+			}
+			$scope.removePost = function(postId) {
+				postService.removePost(postId);
+			}
+			$scope.searchPost = function(keyword, handler) {
+				postService.searchPost(keyword, handler);
 			}
 
-			$scope.removePost = function(postId) {
-				if (confirm("Remove this post?")) {
-					postService.removePost(postId).then(function(response) {
-						handleResponse(response, 'remove');
-					});
+			var handler = function(postList) {
+				$scope.postList = postList;
+			}
+
+			$scope.shared = messageService.getShared();
+
+			$scope.$watch('shared.user', function(newValue, oldValue) {
+				if (newValue != oldValue) {
+					$scope.search();
 				}
-			}
-			$scope.message = function(message) {
-				messageService.setMessage(message);
-			}
+			});
+
 		});
 
 		main.controller('viewPostController', function($scope, postService, messageService) {
@@ -103,6 +81,58 @@
 			});
 
 		});
+
+		main.controller('topPostController', function($scope, $filter, postService, messageService) {
+
+			postService.setMessageService(messageService);
+
+			$scope.likePost = function(postId) {
+				postService.likePost(postId);
+			}
+			$scope.retweetPost = function(postId) {
+				postService.retweetPost(postId);
+			}
+			$scope.removePost = function(postId) {
+				postService.removePost(postId);
+			}
+			$scope.loadPost = function(type, handler) {
+				var curDate = $filter('date')(new Date(), 'yyyy-MM-dd');
+				postService.loadPosts("getTopPost/" + type + "/" + curDate, handler);
+			}
+
+			var handler = function(postList) {
+				$scope.postList = postList;
+			}
+
+			$scope.shared = messageService.getShared();
+
+			$scope.$watch('shared.user', function(newValue, oldValue) {
+				if (newValue != oldValue) {
+					$scope.loadPost(handler);
+				}
+			});
+			$scope.orderByString = '-todayViewCount';
+
+
+			$scope.dayTopPost = function() {
+				$scope.orderByString = '-todayViewCount';
+				$scope.loadPost('day', handler);
+			}
+			$scope.monthTopPost = function() {
+				$scope.orderByString = '-todayViewCount';
+				$scope.loadPost('month', handler);
+			}
+			$scope.yearTopPost = function() {
+				$scope.orderByString = '-todayViewCount';
+				$scope.loadPost('year', handler);
+			}
+			$scope.allTopPost = function() {
+				$scope.orderByString = '-totalViewCount';
+				$scope.loadPost('all', handler);
+			}
+
+			$scope.loadPost('day', handler);
+		});
 	</script>
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
 
@@ -120,22 +150,35 @@
 					<button class="form-control mr-sm-2" type="submit">Search</button>
 				</form>
 			</div>
-			<div ng-show="postList" class="row-m5">
+			<div ng-show="postList" class="row">
 				<h3>Search Result</h3>
-				<div ng-repeat="post in postList | filter: {removed : false}"
-					class="card col-md-3 m-1">
-					<div th:include="components/post :: viewPosts('thumbnail')"
-						th:remove="tag"></div>
+				<div ng-repeat="post in postList | filter: {removed : false}" class="card col-md-3 m-1">
+					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
 			</div>
 		</div>
-		<h3 class="row m-5">Latest 20 Post</h3>
-		<div ng-controller="viewPostController" class="row m-5">
+		<div ng-controller="topPostController" class="container mb-5">
+			<div class="btn-group row" role="group" aria-label="Button group">
+				<button type="button" class="btn btn-secondary" ng-click="dayTopPost()">Today</button>
+				<button type="button" class="btn btn-secondary" ng-click="monthTopPost()">Month</button>
+				<button type="button" class="btn btn-secondary" ng-click="yearTopPost()">Year</button>
+				<button type="button" class="btn btn-secondary" ng-click="allTopPost()">All times</button>
+			</div>
+			<hr />
+			<div ng-show="postList" class="row">
+				<div ng-repeat="post in postList | filter: {removed : false} | orderBy : orderByString" class="col-md-2 m-3 p-1">
+					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
+				</div>
+			</div>
+		</div>
 
-			<div ng-repeat="post in postList | filter: {removed : false}"
-				class="card col-md-3 m-1">
-				<div th:include="components/post :: viewPosts('thumbnail')"
-					th:remove="tag"></div>
+
+
+		<h3 class="row m-5">Latest 20 Post</h3>
+		<hr class="row m-5" />
+		<div ng-controller="viewPostController" class="row mb-5">
+			<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-2 m-3 p-1">
+				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 			</div>
 		</div>
 

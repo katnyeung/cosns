@@ -62,7 +62,7 @@ public abstract class Post extends Auditable<String> {
 	private List<PostImage> postImages;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-	private Set<HashTag> hashtags;
+	private List<HashTag> hashtags;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
@@ -137,11 +137,11 @@ public abstract class Post extends Auditable<String> {
 		this.postImages = postImages;
 	}
 
-	public Set<HashTag> getHashtags() {
+	public List<HashTag> getHashtags() {
 		return hashtags;
 	}
 
-	public void setHashtags(Set<HashTag> hashtags) {
+	public void setHashtags(List<HashTag> hashtags) {
 		this.hashtags = hashtags;
 	}
 

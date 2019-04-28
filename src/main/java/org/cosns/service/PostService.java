@@ -1,9 +1,12 @@
 package org.cosns.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,9 +62,9 @@ public class PostService {
 		List<Post> postList = this.getPost(postId);
 
 		if (postList.iterator().hasNext()) {
-			
+
 			Post post = postList.iterator().next();
-			
+
 			logger.info("removing post : " + post.getPostId());
 			if (post.getUser().getUserId() != user.getUserId()) {
 				// final check
@@ -77,8 +80,10 @@ public class PostService {
 			post = postDAO.save(post);
 
 			return post;
+		} else {
+			return null;
 		}
-		return null;
+
 	}
 
 	public Post writePhotoPost(PostFormDTO postDTO, User user) {
@@ -395,16 +400,29 @@ public class PostService {
 
 					post.setTotalViewCount(totalPostView);
 
-					DateCountReaction dcr = new DateCountReaction();
-					dcr.setPost(post);
-					dcr.setYear(Calendar.getInstance().get(Calendar.YEAR));
-					dcr.setMonth(Calendar.getInstance().get(Calendar.MONTH) + 1);
-					dcr.setDay(Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
-					dcr.setViewCount(todayPostView);
-					dcr.setStatus(ConstantsUtil.POST_REACTION_ACTIVE);
+					int year = Calendar.getInstance().get(Calendar.YEAR);
+					int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+					int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
-					postReactionDAO.save(dcr);
+					Optional<DateCountReaction> optionalDCR = postReactionDAO.findByDateAndPostId(day, month, year, post.getPostId());
 
+					if (optionalDCR.isPresent()) {
+						DateCountReaction presentDCR = optionalDCR.get();
+						presentDCR.setViewCount(todayPostView);
+
+						postReactionDAO.save(presentDCR);
+					} else {
+						DateCountReaction dcr = new DateCountReaction();
+						dcr.setPost(post);
+						dcr.setYear(year);
+						dcr.setMonth(month);
+						dcr.setDay(day);
+						dcr.setViewCount(todayPostView);
+						dcr.setStatus(ConstantsUtil.POST_REACTION_ACTIVE);
+
+						postReactionDAO.save(dcr);
+
+					}
 					postDAO.save(post);
 
 					redisService.resetTodayPostView(postId);
@@ -413,5 +431,55 @@ public class PostService {
 				}
 			}
 		}
+	}
+
+	public List<Post> findTopPost(String type, String date, Long userId) {
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			Calendar calendar = Calendar.getInstance();
+			Date dateObject = sdf.parse(date);
+
+			calendar.setTime(dateObject);
+
+			int month = calendar.get(Calendar.MONTH) + 1;
+			int year = calendar.get(Calendar.YEAR);
+
+			if (type.equalsIgnoreCase("day")) {
+				List<String> keys = redisService.getSortedKeysByToday();
+
+				if (userId != null) {
+					return setLikeRetweetedAndCount(getPostByIds(keys), userId);
+				} else {
+					return setLikeRetweetCount(getPostByIds(keys));
+				}
+
+			} else if (type.equalsIgnoreCase("month")) {
+				if (userId != null) {
+					return setLikeRetweetedAndCount(postDAO.findTopMonthPosts(month, year, PageRequest.of(0, 20)), userId);
+				} else {
+					return setLikeRetweetCount(postDAO.findTopMonthPosts(month, year, PageRequest.of(0, 20)));
+				}
+			} else if (type.equalsIgnoreCase("year")) {
+				if (userId != null) {
+					return setLikeRetweetedAndCount(postDAO.findTopYearPosts(year, PageRequest.of(0, 20)), userId);
+				} else {
+					return setLikeRetweetCount(postDAO.findTopYearPosts(year, PageRequest.of(0, 20)));
+				}
+			} else if (type.equalsIgnoreCase("all")) {
+				if (userId != null) {
+					return setLikeRetweetedAndCount(postDAO.findTopPosts(year, PageRequest.of(0, 20)), userId);
+				} else {
+					return setLikeRetweetCount(postDAO.findTopPosts(year, PageRequest.of(0, 20)));
+				}
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private List<Post> getPostByIds(List<String> keys) {
+		Set<Long> idList = keys.stream().mapToLong(Long::parseLong).boxed().collect(Collectors.toSet());
+		return postDAO.findPostByPostIdSet(idList);
 	}
 }
