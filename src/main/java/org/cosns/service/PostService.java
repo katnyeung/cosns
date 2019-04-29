@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -408,7 +407,7 @@ public class PostService {
 
 					if (optionalDCR.isPresent()) {
 						DateCountReaction presentDCR = optionalDCR.get();
-						presentDCR.setViewCount(todayPostView);
+						presentDCR.setViewCount(presentDCR.getViewCount() + todayPostView);
 
 						postReactionDAO.save(presentDCR);
 					} else {
@@ -467,9 +466,9 @@ public class PostService {
 				}
 			} else if (type.equalsIgnoreCase("all")) {
 				if (userId != null) {
-					return setLikeRetweetedAndCount(postDAO.findTopPosts(year, PageRequest.of(0, 20)), userId);
+					return setLikeRetweetedAndCount(postDAO.findTopPosts(PageRequest.of(0, 20)), userId);
 				} else {
-					return setLikeRetweetCount(postDAO.findTopPosts(year, PageRequest.of(0, 20)));
+					return setLikeRetweetCount(postDAO.findTopPosts(PageRequest.of(0, 20)));
 				}
 			}
 		} catch (ParseException e) {

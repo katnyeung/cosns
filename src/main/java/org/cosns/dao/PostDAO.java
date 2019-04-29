@@ -27,7 +27,7 @@ public interface PostDAO extends PagingAndSortingRepository<Post, Long> {
 	public List<Post> findTopYearPosts(@Param("year") int year, Pageable pageable);
 	
 	@Query("SELECT p FROM Post p ORDER BY p.totalViewCount DESC")
-	public List<Post> findTopPosts(int year, PageRequest of);
+	public List<Post> findTopPosts(PageRequest of);
 	
 	@Query("SELECT p FROM Post p INNER JOIN p.user u WHERE u.uniqueName = :uniqueName AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")
 	public List<Post> findPostByUniqueName(@Param("uniqueName") String uniqueName);

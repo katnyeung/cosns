@@ -60,6 +60,16 @@ public class PostRestController {
 	@Value("${cosns.image.uploadPattern}")
 	String uploadPattern;
 
+	@GetMapping(path = "/sync")
+	public DefaultResult sync(HttpSession session) {
+		DefaultResult dr = new DefaultResult();
+		dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+		postService.syncPostCountToDB();
+
+		return dr;
+	}
+
 	@GetMapping(path = "/getPosts")
 	public DefaultResult getPosts(HttpSession session) {
 

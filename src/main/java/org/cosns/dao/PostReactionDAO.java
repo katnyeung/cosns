@@ -14,6 +14,6 @@ public interface PostReactionDAO extends JpaRepository<PostReaction, Long> {
 	Optional<PostReaction> findByPostIdUserId(@Param("postId") Long postId, @Param("userId") Long userId);
 
 	@Query("SELECT pr FROM PostReaction pr WHERE TYPE(pr) = DateCountReaction AND day = :day AND month = :month AND year = :year AND pr.post.postId = :postId")
-	Optional<DateCountReaction> findByDateAndPostId(@Param("day") int day, @Param("month") int month, @Param("year") int year, @Param("userId") Long userId);
+	Optional<DateCountReaction> findByDateAndPostId(@Param("day") int day, @Param("month") int month, @Param("year") int year, @Param("postId") Long postId);
 
 }
