@@ -12,13 +12,13 @@
 			postService.setMessageService(messageService);
 
 			$scope.likePost = function(postId) {
-				postService.likePost(postId);
+				postService.likePost(postId, 'viewPost');
 			}
 			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId);
+				postService.retweetPost(postId, 'viewPost');
 			}
 			$scope.removePost = function(postId) {
-				postService.removePost(postId);
+				postService.removePost(postId, 'viewPost');
 			}
 			$scope.loadPost = function(handler) {
 				postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]", handler);
@@ -131,8 +131,8 @@
 			<button class="btn btn-warning" type="button" th:attr="ng-click='unfollow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && isFollowed'">Unfollow</button>
 
 		</div>
-		<div ng-controller="viewPostController" class="row-fluid">
-			<div ng-repeat="post in postList" class="m-1">
+		<div ng-controller="viewPostController" class="row ml-4 mr-4">
+			<div ng-repeat="post in postList" class="col-md-3 m-0">
 				<hr/>
 				<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
 			</div>

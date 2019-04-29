@@ -198,11 +198,11 @@ public class PostService {
 	}
 
 	public List<Post> findLatestPosts(Long userId) {
-		return setLikeRetweetedAndCount(postDAO.findLatestPosts(PageRequest.of(0, 20)), userId);
+		return setLikeRetweetedAndCount(postDAO.findLatestPosts(PageRequest.of(0, 10)), userId);
 	}
 
 	public List<Post> findLatestPosts() {
-		return setLikeRetweetCount(postDAO.findLatestPosts(PageRequest.of(0, 20)));
+		return setLikeRetweetCount(postDAO.findLatestPosts(PageRequest.of(0, 10)));
 	}
 
 	public List<Post> findTimelinePosts(Long userId, int startFrom) {
@@ -454,21 +454,21 @@ public class PostService {
 
 			} else if (type.equalsIgnoreCase("month")) {
 				if (userId != null) {
-					return setLikeRetweetedAndCount(postDAO.findTopMonthPosts(month, year, PageRequest.of(0, 20)), userId);
+					return setLikeRetweetedAndCount(postDAO.findTopMonthPosts(month, year, PageRequest.of(0, 10)), userId);
 				} else {
-					return setLikeRetweetCount(postDAO.findTopMonthPosts(month, year, PageRequest.of(0, 20)));
+					return setLikeRetweetCount(postDAO.findTopMonthPosts(month, year, PageRequest.of(0, 10)));
 				}
 			} else if (type.equalsIgnoreCase("year")) {
 				if (userId != null) {
-					return setLikeRetweetedAndCount(postDAO.findTopYearPosts(year, PageRequest.of(0, 20)), userId);
+					return setLikeRetweetedAndCount(postDAO.findTopYearPosts(year, PageRequest.of(0, 10)), userId);
 				} else {
-					return setLikeRetweetCount(postDAO.findTopYearPosts(year, PageRequest.of(0, 20)));
+					return setLikeRetweetCount(postDAO.findTopYearPosts(year, PageRequest.of(0, 10)));
 				}
 			} else if (type.equalsIgnoreCase("all")) {
 				if (userId != null) {
-					return setLikeRetweetedAndCount(postDAO.findTopPosts(PageRequest.of(0, 20)), userId);
+					return setLikeRetweetedAndCount(postDAO.findTopPosts(PageRequest.of(0, 10)), userId);
 				} else {
-					return setLikeRetweetCount(postDAO.findTopPosts(PageRequest.of(0, 20)));
+					return setLikeRetweetCount(postDAO.findTopPosts(PageRequest.of(0, 10)));
 				}
 			}
 		} catch (ParseException e) {
@@ -478,7 +478,7 @@ public class PostService {
 	}
 
 	private List<Post> getPostByIds(List<String> keys) {
-		Set<Long> idList = keys.stream().mapToLong(Long::parseLong).boxed().collect(Collectors.toSet());
+		Set<Long> idList = keys.stream().limit(10).mapToLong(Long::parseLong).boxed().collect(Collectors.toSet());
 		return postDAO.findPostByPostIdSet(idList);
 	}
 }

@@ -27,13 +27,13 @@
 			postService.setMessageService(messageService);
 
 			$scope.likePost = function(postId) {
-				postService.likePost(postId);
+				postService.likePost(postId, 'viewPost');
 			}
 			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId);
+				postService.retweetPost(postId, 'viewPost');
 			}
 			$scope.removePost = function(postId) {
-				postService.removePost(postId);
+				postService.removePost(postId, 'viewPost');
 			}
 			$scope.searchPost = function(keyword, handler) {
 				postService.searchPost(keyword, handler);
@@ -71,7 +71,7 @@
 				</form>
 			</div>
 			<div ng-show="postList" class="row">
-				<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-3  m-5">
+				<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-5 m-5">
 					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
 			</div>

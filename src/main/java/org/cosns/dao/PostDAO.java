@@ -20,10 +20,10 @@ public interface PostDAO extends PagingAndSortingRepository<Post, Long> {
 	@Query("SELECT p FROM Post p WHERE TYPE(p) = PhotoPost AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")
 	public List<Post> findLatestPosts(Pageable pageable);
 
-	@Query("SELECT p FROM Post p WHERE p.postId IN ( SELECT pr.post.postId FROM PostReaction pr WHERE pr.month = :month AND pr.year = :year GROUP BY pr.month ORDER BY SUM(pr.year) DESC )")
+	@Query("SELECT p FROM Post p WHERE Type(p) = PhotoPost AND p.postId IN ( SELECT pr.post.postId FROM PostReaction pr WHERE pr.month = :month AND pr.year = :year GROUP BY pr.month, pr.post.postId ORDER BY SUM(pr.year) DESC )")
 	public List<Post> findTopMonthPosts(@Param("month") int month, @Param("year") int year, Pageable pageable);
 
-	@Query("SELECT p FROM Post p WHERE p.postId IN ( SELECT pr.post.postId FROM PostReaction pr WHERE pr.year = :year GROUP BY pr.year ORDER BY SUM(pr.year) DESC )")
+	@Query("SELECT p FROM Post p WHERE Type(p) = PhotoPost AND p.postId IN ( SELECT pr.post.postId FROM PostReaction pr WHERE pr.year = :year GROUP BY pr.year, pr.post.postId ORDER BY SUM(pr.year) DESC )")
 	public List<Post> findTopYearPosts(@Param("year") int year, Pageable pageable);
 	
 	@Query("SELECT p FROM Post p ORDER BY p.totalViewCount DESC")

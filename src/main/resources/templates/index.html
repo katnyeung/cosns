@@ -12,7 +12,7 @@
 	<script>
 		var main = angular.module('application', [ 'infinite-scroll', 'ngSanitize' ]);
 
-		main.controller('searchController', function($scope, $http, postService, messageService) {
+		main.controller('searchController', function($scope, $http, postService, messageService, $rootScope) {
 
 			$scope.search = function() {
 				if ($scope.keyword) {
@@ -23,13 +23,13 @@
 			postService.setMessageService(messageService);
 
 			$scope.likePost = function(postId) {
-				postService.likePost(postId);
+				postService.likePost(postId, 'search');
 			}
 			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId);
+				postService.retweetPost(postId, 'search');
 			}
 			$scope.removePost = function(postId) {
-				postService.removePost(postId);
+				postService.removePost(postId, 'search');
 			}
 			$scope.searchPost = function(keyword, handler) {
 				postService.searchPost(keyword, handler);
@@ -47,20 +47,25 @@
 				}
 			});
 
+			$scope.$on('postUpdate', function(event, value) {
+				if (value != 'search') {
+					$scope.search();
+				}
+			})
 		});
 
-		main.controller('viewPostController', function($scope, postService, messageService) {
+		main.controller('latestPostController', function($scope, postService, messageService, $rootScope) {
 
 			postService.setMessageService(messageService);
 
 			$scope.likePost = function(postId) {
-				postService.likePost(postId);
+				postService.likePost(postId, 'latestPost');
 			}
 			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId);
+				postService.retweetPost(postId, 'latestPost');
 			}
 			$scope.removePost = function(postId) {
-				postService.removePost(postId);
+				postService.removePost(postId, 'latestPost');
 			}
 			$scope.loadPost = function(handler) {
 				postService.loadPosts("getLatestPost", handler);
@@ -73,32 +78,38 @@
 			$scope.loadPost(handler);
 
 			$scope.shared = messageService.getShared();
-			
+
 			$scope.$watch('shared.user', function(newValue, oldValue) {
 				if (newValue != oldValue) {
 					$scope.loadPost(handler);
 				}
 			});
 
+			$scope.$on('postUpdate', function(event, value) {
+				if (value != 'latestPost') {
+					$scope.loadPost(handler);
+				}
+			})
 		});
 
-		main.controller('topPostController', function($scope, $filter, postService, messageService) {
+		main.controller('topPostController', function($scope, $filter, postService, messageService, $rootScope) {
 			$scope.shared = messageService.getShared();
-			
+
 			postService.setMessageService(messageService);
-			
+
 			$scope.orderByString = '-todayViewCount';
 			$scope.selectedType = 'day';
-			
+
 			$scope.likePost = function(postId) {
-				postService.likePost(postId);
+				postService.likePost(postId, 'topPost');
 			}
 			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId);
+				postService.retweetPost(postId, 'topPost');
 			}
 			$scope.removePost = function(postId) {
-				postService.removePost(postId);
+				postService.removePost(postId, 'topPost');
 			}
+
 			$scope.loadPost = function(handler) {
 				var type = $scope.selectedType;
 				var curDate = $filter('date')(new Date(), 'yyyy-MM-dd');
@@ -114,11 +125,11 @@
 					$scope.loadPost(handler);
 				}
 			});
-			
+
 			$scope.dayTopPost = function() {
 				$scope.orderByString = '-todayViewCount';
 				$scope.selectedType = 'day';
-				
+
 				$scope.loadPost(handler);
 			}
 			$scope.monthTopPost = function() {
@@ -141,6 +152,13 @@
 			}
 
 			$scope.loadPost(handler);
+
+			$scope.$on('postUpdate', function(event, value) {
+				if (value != 'topPost') {
+					$scope.loadPost(handler);
+				}
+			})
+
 		});
 	</script>
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
@@ -148,58 +166,45 @@
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
-	<div class="container-fluid">
+	<div class="container">
 		<div ng-controller="searchController" class="container mb-5">
 
-			<div class="row form-inline">
-				<h3>Search</h3>
-				&nbsp;
+			<div class="form-inline">
+				<h3 class="mt-2">Search</h3> &nbsp;
 				<form ng-submit="search()">
 					<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
 					<button class="form-control mr-sm-2" type="submit">Search</button>
 				</form>
 			</div>
 			<div ng-show="postList" class="row">
-				<h3>Search Result</h3>
-				<div ng-repeat="post in postList | filter: {removed : false}"
-					class="card col-md-3 m-1">
-					<div th:include="components/post :: viewPosts('thumbnail')"
-						th:remove="tag"></div>
+				<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-2 m-4">
+					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
 			</div>
 		</div>
 		<div ng-controller="topPostController" class="container mb-5">
-			<div class="btn-group row" role="group" aria-label="Button group">
-				<button type="button" class="btn btn-secondary"
-					ng-click="dayTopPost()">Today</button>
-				<button type="button" class="btn btn-secondary"
-					ng-click="monthTopPost()">Month</button>
-				<button type="button" class="btn btn-secondary"
-					ng-click="yearTopPost()">Year</button>
-				<button type="button" class="btn btn-secondary"
-					ng-click="allTopPost()">All times</button>
+			<div class="btn-group" role="group" aria-label="Button group">
+				<button type="button" class="btn btn-secondary" ng-click="dayTopPost()">Today</button>
+				<button type="button" class="btn btn-secondary" ng-click="monthTopPost()">Month</button>
+				<button type="button" class="btn btn-secondary" ng-click="yearTopPost()">Year</button>
+				<button type="button" class="btn btn-secondary" ng-click="allTopPost()">All Times</button>
 			</div>
 			<hr />
 			<div ng-show="postList" class="row">
-				<div
-					ng-repeat="post in postList | filter: {removed : false} | orderBy : orderByString"
-					class="col-md-2 m-3 p-1">
-					<div th:include="components/post :: viewPosts('thumbnail')"
-						th:remove="tag"></div>
+				<div ng-repeat="post in postList | filter: {removed : false} | orderBy : orderByString" class="col-md-2 m-4">
+					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
 			</div>
 		</div>
 
 
 
-		<div ng-controller="viewPostController" class="container">
-			<h3 class="row">Latest 20 Post</h3>
+		<div ng-controller="latestPostController" class="container">
+			<h3 class="row">Latest 10 Post</h3>
 			<hr class="row" />
 			<div class="row">
-				<div ng-repeat="post in postList | filter: {removed : false}"
-					class="col-md-2 m-3 p-1">
-					<div th:include="components/post :: viewPosts('thumbnail')"
-						th:remove="tag"></div>
+				<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-2 m-4">
+					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
 			</div>
 

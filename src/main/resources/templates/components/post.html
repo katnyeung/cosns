@@ -2,17 +2,17 @@
 	<script>
 		main.filter('hashTag', function() {
 			return function(val) {
-				return val.replace(/#(\S[^#^\n]*)/g, '<a href="/ht/$1">#$1</a>')
+				return val.replace(/#(\S[^#^\n]*)/g, '<a href="/ht/$1" class="badge badge-info">#$1</a> &nbsp;')
 			};
 		});
 
-		main.factory('postService', function($http) {
+		main.factory('postService', function($http, $rootScope) {
 			var shared = {
 				messageService : null
 			};
 
 			return {
-				likePost : function(post) {
+				likePost : function(post, from) {
 					return $http({
 						url : "/post/likePost",
 						method : "POST",
@@ -24,9 +24,6 @@
 						}
 					}).then(function(response) {
 						if (response.data.status === 'success') {
-
-							shared.messageService.setMessage(response.data.remarks);
-
 							if (response.data.type === 'incr') {
 								post.likeCount++;
 								post.liked = true;
@@ -34,11 +31,15 @@
 								post.likeCount--;
 								post.liked = false;
 							}
+
+							shared.messageService.setMessage(response.data.remarks);
+							$rootScope.$broadcast('postUpdate', from);
+
 						}
 						return response;
 					});
 				},
-				retweetPost : function(post) {
+				retweetPost : function(post, from) {
 					return $http({
 						url : "/post/retweetPost",
 						method : "POST",
@@ -54,11 +55,13 @@
 							post.retweeted = true;
 
 							shared.messageService.setMessage(response.data.remarks);
+							$rootScope.$broadcast('postUpdate', from);
+
 						}
 						return response;
 					});
 				},
-				removePost : function(post) {
+				removePost : function(post, from) {
 					return $http({
 						url : "/post/removePost",
 						method : "POST",
@@ -73,6 +76,7 @@
 							post.removed = true;
 
 							shared.messageService.setMessage(response.data.remarks);
+							$rootScope.$broadcast('postUpdate', from);
 						}
 						return response;
 					});
@@ -160,12 +164,12 @@
 
 	<div th:include="components/post :: LikeAndRetweet()" th:remove="tag"></div>
 
+	<div class="well" ng-bind-html="post.message | hashTag"></div>
 
 	<div th:attr="ng-repeat='image in post.postImages'">
 		<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
 	</div>
 
-	<div class="well" ng-bind-html="post.message | hashTag"></div>
 
 </body>
 
@@ -202,14 +206,14 @@
 		<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
 			<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
 		</div>
-		<div class="row m-0 p-1">
-			<div class="col-md-5 m-0 p-1" th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
-				<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
+		<div class="row m-0 pb-1" ng-show="post.postImages.length > 1">
+			<div class="col-md-1 m-0 p-1" th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
+				<i class="far fa-circle" style="color:#AAAAAA"></i>
 			</div>
 		</div>
 	</a>
-	<div th:attr="ng-repeat='hashtag in post.hashtags'">
-		<a href="/ht/{{hashtag.hashTag}}">#{{hashtag.hashTag}}</a>
+	<div th:attr="ng-repeat='hashtag in post.hashtags'" class="m-0 p-0">
+		<a href="/ht/{{hashtag.hashTag}}" class="badge badge-info">#{{hashtag.hashTag}}</a>&nbsp;
 	</div>
 
 </body>
@@ -236,9 +240,7 @@
 		</div>
 
 		<div class="col-ml-auto" style="font-size: 10px">
-			<a href="/p/{{post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp; 
-			
-			<a href="#" ng-show="shared.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()" ><i class="far fa-trash-alt"></i></a>
+			<a href="/p/{{post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp; <a href="#" ng-show="shared.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()"><i class="far fa-trash-alt"></i></a>
 		</div>
 	</div>
 </body>
@@ -251,27 +253,14 @@
 
 <body th:fragment="LikeAndRetweet()">
 	<div ng-show="shared.user" class='mr-auto d-inline-flex'>
-		<span>
-			<a href="#" class="btn" ng-click="likePost(post); $event.preventDefault();"> 
-			<span ng-show="post.liked"><i class="fas fa-heart" style="color: red"></i></span> 
-			<span ng-show="!post.liked"><i class="far fa-heart"></i> </span> 
-			<span ng-show="post.likeCount > 0">{{post.likeCount}}</span>
-			</a>
-		</span>
-		<span ng-show="post.retweeted"  class="btn">
-			<i class="fas fa-retweet" style="color:#CCCCCC"></i> <span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span>
-		</span>
-		<span ng-show="!post.retweeted && shared.user.userId != post.user.userId">
-			<a href="#" class="btn" ng-click="retweetPost(post); $event.preventDefault();"> <i class="fas fa-retweet"></i> <span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span>
-			</a>
+		<span> <a href="#" class="btn" ng-click="likePost(post); $event.preventDefault();"> <span ng-show="post.liked"><i class="fas fa-heart" style="color: red"></i></span> <span ng-show="!post.liked"><i class="far fa-heart"></i> </span> <span ng-show="post.likeCount > 0">{{post.likeCount}}</span>
+		</a>
+		</span> <span ng-show="post.retweeted" class="btn"> <i class="fas fa-retweet" style="color: #CCCCCC"></i> <span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span>
+		</span> <span ng-show="!post.retweeted && shared.user.userId != post.user.userId"> <a href="#" class="btn" ng-click="retweetPost(post); $event.preventDefault();"> <i class="fas fa-retweet"></i> <span ng-show="post.retweetCount > 0">{{post.retweetCount}}</span>
+		</a>
 		</span>
 	</div>
 	<div ng-show="!shared.user" class='mr-auto'>
-		<span class="btn"><i class="far fa-heart"></i><span ng-show="post.likeCount > 0"> {{post.likeCount}}</span>
-		<span ng-show="post.retweetCount > 0"><i class="fas fa-share"></i> {{post.retweetCount}}</span>
-		</span>
-	</div>
-	<div>
-	{{post.todayViewCount}} - {{post.totalViewCount}}
+		<span class="btn"><i class="far fa-heart"></i><span ng-show="post.likeCount > 0"> {{post.likeCount}}</span> <span ng-show="post.retweetCount > 0"><i class="fas fa-share"></i> {{post.retweetCount}}</span> </span>
 	</div>
 </body>

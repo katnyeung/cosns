@@ -5,20 +5,20 @@
 <script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
 <script>
-	var main = angular.module('application', ['ngSanitize']);
+	var main = angular.module('application', [ 'ngSanitize' ]);
 
 	main.controller('viewPostController', function($scope, postService, messageService) {
 
 		postService.setMessageService(messageService);
 
 		$scope.likePost = function(postId) {
-			postService.likePost(postId);
+			postService.likePost(postId, 'viewPost');
 		}
 		$scope.retweetPost = function(postId) {
-			postService.retweetPost(postId);
+			postService.retweetPost(postId, 'viewPost');
 		}
 		$scope.removePost = function(postId) {
-			postService.removePost(postId);
+			postService.removePost(postId, 'viewPost');
 		}
 		$scope.loadPost = function(handler) {
 			postService.loadPosts("getPost/[[${postId}]]", handler);
@@ -50,7 +50,7 @@
 	<div class="container">
 		<div ng-controller="viewPostController" class="row">
 			<div ng-repeat="post in postList">
-				<hr/>
+				<hr />
 				<div th:include="components/post :: viewPosts('detail')" th:remove="tag"></div>
 			</div>
 		</div>
