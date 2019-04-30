@@ -2,6 +2,7 @@ package org.cosns.repository;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -44,6 +45,10 @@ public abstract class Event extends Auditable<String> {
 	@NotNull
 	@Lob
 	String url;
+
+	@Lob
+	@Column(nullable = true)
+	String description;
 
 	@JsonIgnore
 	@NotNull
@@ -107,6 +112,14 @@ public abstract class Event extends Auditable<String> {
 
 	public void setColor(String color) {
 		this.color = color;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }
