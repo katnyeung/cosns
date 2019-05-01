@@ -122,9 +122,9 @@ public class PostService {
 		StringBuilder sb = new StringBuilder();
 		String postMessage = post.getMessage();
 
-		if (postMessage != null && postMessage.length() > 5 && hashTagSet.size() > 0) {
-			// exclude all hash
+		if (hashTagSet.size() > 0) {
 
+			// exclude all hash
 			postMessage = postMessage.replaceAll(ConstantsUtil.HASHTAG_PATTERN, "");
 
 			// String firstTenChar = post.getMessage().substring(0,
@@ -163,7 +163,6 @@ public class PostService {
 			}
 
 			// no duplicated
-
 		} else {
 			sb.append(post.getPostId() + "" + uniqueCurrentTimeMS());
 		}

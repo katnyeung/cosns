@@ -28,8 +28,7 @@ public class HashTagService {
 
 	public Set<String> parseHash(String postMessage) {
 		Pattern pattern = Pattern.compile(ConstantsUtil.HASHTAG_PATTERN);
-		String message = postMessage;
-		Matcher matcher = pattern.matcher(message);
+		Matcher matcher = pattern.matcher(postMessage);
 
 		Set<String> hashTagSet = new HashSet<>();
 

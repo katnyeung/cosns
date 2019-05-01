@@ -61,7 +61,6 @@ public class ConstantsUtil {
 
 	public static final int USER_DATE_AVAILABLE_TO_ASSIGN_UNIQUE_NAME = 20;
 
-	public static final int POST_KEY_MESSAGE_LENGTH = 20;
 	public static final int POST_KEY_HASHTAG_LENGTH = 10;
 	public static final int POST_KEY_HASHTAG_NUMBER = 3;
 
