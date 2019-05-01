@@ -143,7 +143,7 @@
 						<td class="span3">Profile Image :</td>
 						<td>
 							<div
-								flow-init="{target: '/user/uploadProfileImage', testChunks:false, singleFile:true, chunkSize : 10000000}"
+								flow-init="{target: '/images/uploadProfileImage', testChunks:false, singleFile:true, chunkSize : 10000000}"
 								flow-files-submitted="$flow.upload()"
 								flow-file-success="$file.msg = $message"
 								flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)"

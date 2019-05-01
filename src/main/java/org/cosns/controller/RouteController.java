@@ -9,6 +9,7 @@ import org.cosns.service.ImageService;
 import org.cosns.service.RedisService;
 import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
+import org.cosns.util.DefaultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -91,17 +92,51 @@ public class RouteController {
 		return "viewTimeline";
 	}
 
-	@GetMapping(path = "p/{postId}")
-	public String viewPost(@PathVariable("postId") Long postId, HttpSession session, Model model) {
+	@GetMapping(path = "p/{postKey}")
+	public String viewPost(@PathVariable("postKey") String postKey, HttpSession session, Model model) throws DefaultException {
+		User loggedUser = (User) session.getAttribute("user");
+
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		}
+		logger.info("searching from redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + postKey + " ->" + ConstantsUtil.REDIS_POST_ID);
+
+		logger.info("hasKey : " + redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + postKey));
+
+		if (!redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + postKey)) {
+			logger.info("redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + postKey + " ->" + ConstantsUtil.REDIS_POST_ID + ", redis not found");
+
+			try {
+				logger.info("postId string : " + postKey);
+				Long postId = Long.parseLong(postKey);
+				logger.info("try to parse ID : " + postId);
+				model.addAttribute("postId", postId);
+			} catch (NumberFormatException nfe) {
+				logger.info("post not found");
+				throw new DefaultException("post not found");
+			}
+		} else {
+
+			String postIdString = (String) redisService.getHashValue(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + postKey, ConstantsUtil.REDIS_POST_ID);
+
+			model.addAttribute("postId", postIdString);
+		}
+
+		return "viewPost";
+	}
+
+	@GetMapping(path = "ht/{orderByType}/{hashTag}")
+	public String viewHashTag(@PathVariable("orderByType") String orderByType, @PathVariable("hashTag") String hashTag, HttpSession session, Model model) {
 		User loggedUser = (User) session.getAttribute("user");
 
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
 		}
 
-		model.addAttribute("postId", postId);
+		model.addAttribute("orderByType", orderByType);
+		model.addAttribute("hashTag", hashTag);
 
-		return "viewPost";
+		return "viewTag";
 	}
 
 	@GetMapping(path = "ht/{hashTag}")
@@ -111,7 +146,7 @@ public class RouteController {
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
 		}
-
+		model.addAttribute("orderByType", "date");
 		model.addAttribute("hashTag", hashTag);
 
 		return "viewTag";

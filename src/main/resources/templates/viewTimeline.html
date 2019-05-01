@@ -14,14 +14,14 @@
 		$scope.release = [];
 		$scope.postList = [];
 
-		$scope.likePost = function(postId) {
-			postService.likePost(postId, 'viewPost');
+		$scope.likePost = function(post) {
+			postService.likePost(post, 'viewPost');
 		}
-		$scope.retweetPost = function(postId) {
-			postService.retweetPost(postId, 'viewPost');
+		$scope.retweetPost = function(post) {
+			postService.retweetPost(post, 'viewPost');
 		}
-		$scope.removePost = function(postId) {
-			postService.removePost(postId, 'viewPost');
+		$scope.removePost = function(post) {
+			postService.removePost(post, 'viewPost');
 		}
 		$scope.loadPost = function(page, handler) {
 			postService.loadPosts("getTimelinePosts/" + page, handler);
@@ -69,8 +69,8 @@
 	<div class="container">
 		<div ng-controller="viewPostController" class="row ml-5 mr-5">
 			<div infinite-scroll='loadMore()' infinite-scroll-distance='0'>
-				<h3 class="row ml-5 mr-5">Timeline</h3>
-				<div ng-repeat="post in release" class="ml-5 mr-5">
+				<h3 class="row ml-5 mr-5">timeline</h3>
+				<div ng-repeat="post in release | filter: {removed : false}" class="ml-5 mr-5">
 					<hr />
 					<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
 				</div>

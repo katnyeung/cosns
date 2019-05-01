@@ -102,7 +102,7 @@
 
 					});
 				},
-				searchPosts : function(keyword, callback) {
+				searchPosts : function(keyword, orderByType, callback) {
 					if (keyword) {
 						$http({
 							url : "/post/searchPosts",
@@ -111,7 +111,8 @@
 								'Content-Type' : 'application/json'
 							},
 							data : {
-								keyword : keyword
+								keyword : keyword,
+								orderBy : orderByType
 							}
 						}).then(function(response) {
 							shared.messageService.setMessage(response.data.remarks);
@@ -182,7 +183,7 @@
 	<div th:include="components/post :: LikeAndRetweet()" th:remove="tag"></div>
 
 
-	<a href="/p/{{post.postId}}">
+	<a href="/p/{{post.postKey ? post.postKey : post.postId}}">
 		<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
 			<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
 		</div>
@@ -202,7 +203,7 @@
 
 	<div th:include="components/post :: Creator()" th:remove="tag"></div>
 
-	<a href="/p/{{post.postId}}">
+	<a href="/p/{{post.postKey ? post.postKey : post.postId}}">
 		<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
 			<img src="/images/{{image.filename}}" class="img-fluid m-1 rounded" />
 		</div>
@@ -240,7 +241,7 @@
 		</div>
 
 		<div class="col-ml-auto" style="font-size: 10px">
-			<a href="/p/{{post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp; <a href="#" ng-show="shared.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()"><i class="far fa-trash-alt"></i></a>
+			<a href="/p/{{post.postKey ? post.postKey : post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'MM/dd/yyyy'}}</a> &nbsp; <a href="#" ng-show="shared.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()"><i class="far fa-trash-alt"></i></a>
 		</div>
 	</div>
 </body>
@@ -263,4 +264,5 @@
 	<div ng-show="!shared.user" class='mr-auto'>
 		<span class="btn"><i class="far fa-heart"></i><span ng-show="post.likeCount > 0"> {{post.likeCount}}</span> <span ng-show="post.retweetCount > 0"><i class="fas fa-share"></i> {{post.retweetCount}}</span> </span>
 	</div>
+	<div>{{post.totalViewCount}} - {{post.todayViewCount}} - {{post.createdate}}</div>
 </body>

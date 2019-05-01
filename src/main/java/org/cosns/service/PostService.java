@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -30,6 +32,7 @@ import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.PostFormDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -85,7 +88,7 @@ public class PostService {
 
 	}
 
-	public Post writePhotoPost(PostFormDTO postDTO, User user) {
+	public Post writePhotoPost(PostFormDTO postDTO, User user, Set<String> hashTagSet) {
 		logger.info("Writing Post By User : " + user.getUserId());
 
 		// create post
@@ -94,6 +97,9 @@ public class PostService {
 		post.setReleaseDate(removeTime(postDTO.getReleaseDate()));
 		post.setStatus(ConstantsUtil.POST_ACTIVE);
 		post.setUser(user);
+
+		// assign key to post
+		assignKey(post, hashTagSet);
 
 		post = (PhotoPost) postDAO.save(post);
 
@@ -109,6 +115,77 @@ public class PostService {
 		}
 
 		return post;
+	}
+
+	public Post assignKey(Post post, Set<String> hashTagSet) {
+
+		StringBuilder sb = new StringBuilder();
+		String postMessage = post.getMessage();
+
+		if (postMessage != null && postMessage.length() > 5 && hashTagSet.size() > 0) {
+			// exclude all hash
+
+			postMessage = postMessage.replaceAll(ConstantsUtil.HASHTAG_PATTERN, "");
+
+			// String firstTenChar = post.getMessage().substring(0,
+			// Math.min(postMessage.length(), ConstantsUtil.POST_KEY_MESSAGE_LENGTH));
+			// sb.append(firstTenChar.replaceAll(" ", "_"));
+
+			String creator = post.getUser().getUniqueName();
+
+			if (creator == null) {
+				creator = "" + post.getUser().getUserId();
+			}
+
+			sb.append(creator);
+
+			int count = 0;
+			sb.append("_");
+
+			String prepend = "";
+			for (String hashTag : hashTagSet) {
+				if (count++ < ConstantsUtil.POST_KEY_HASHTAG_NUMBER) {
+					// first 3 hashTag
+					String hashTagFirstTenChar = hashTag.substring(0, Math.min(hashTag.length(), ConstantsUtil.POST_KEY_HASHTAG_LENGTH));
+
+					sb.append(prepend);
+					sb.append(hashTagFirstTenChar.replaceAll(" ", "_"));
+					prepend = "_";
+				}
+			}
+
+			// check redis exist or not
+			String checkWith = ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + sb.toString();
+
+			int checkCount = 0;
+			while (redisService.hasKey(checkWith)) {
+				checkWith = checkWith + "_" + checkCount++;
+			}
+
+			// no duplicated
+
+		} else {
+			sb.append(post.getPostId() + "" + uniqueCurrentTimeMS());
+		}
+
+		post.setPostKey(sb.toString());
+
+		logger.info("saved postId : " + post.getPostId() + " to : " + post.getPostKey());
+
+		return post;
+	}
+
+	private static final AtomicLong LAST_TIME_MS = new AtomicLong();
+
+	public static long uniqueCurrentTimeMS() {
+		long now = System.currentTimeMillis();
+		while (true) {
+			long lastTime = LAST_TIME_MS.get();
+			if (lastTime >= now)
+				now = lastTime + 1;
+			if (LAST_TIME_MS.compareAndSet(lastTime, now))
+				return now;
+		}
 	}
 
 	public Date removeTime(Date date) {
@@ -158,7 +235,9 @@ public class PostService {
 		Map<Long, List<Post>> processedMap = new LinkedHashMap<>();
 
 		for (Post post : postList) {
+			logger.info("grouping : " + post.getPostId());
 			if (post instanceof RetweetPost) {
+				logger.info("is retweetPost");
 				RetweetPost retweetedPost = ((RetweetPost) post);
 
 				List<Post> savedList = processedMap.get(retweetedPost.getPost().getPostId());
@@ -180,13 +259,30 @@ public class PostService {
 			if (post instanceof PhotoPost) {
 				if (processedMap.get(post.getPostId()) != null) {
 					List<Post> retweetedBy = processedMap.get(post.getPostId());
+					// find retweet latest time
+					Date latestTime = null;
+
+					for (Post retweetPost : retweetedBy) {
+						if (latestTime != null) {
+							if (retweetPost.getCreatedate().compareTo(latestTime) > 0) {
+								latestTime = retweetPost.getCreatedate();
+							}
+						} else {
+							latestTime = retweetPost.getCreatedate();
+						}
+					}
+					post.setCreatedate(latestTime);
 					post.setRetweetedBy(retweetedBy);
 				}
 				returnPost.add(post);
 			}
 		}
 
-		return returnPost;
+		return sortByCreatedate(returnPost);
+	}
+
+	public List<Post> sortByCreatedate(List<Post> post) {
+		return post.stream().sorted(Comparator.comparing(Post::getCreatedate).reversed()).collect(Collectors.toList());
 	}
 
 	private List<Post> setLikeRetweetCount(List<Post> postList) {
@@ -225,11 +321,11 @@ public class PostService {
 		return setLikeRetweetedAndCount(postDAO.findPostByPostId(postId), userId);
 	}
 
-	public List<Post> searchPosts(String query, String postType) {
-		return searchPosts(query, postType, null);
+	public List<Post> searchPosts(String query, String postType, String orderBy) {
+		return searchPosts(query, postType, orderBy, null);
 	}
 
-	public List<Post> searchPosts(String query, String postType, User user) {
+	public List<Post> searchPosts(String query, String postType, String orderBy, User user) {
 
 		Map<Long, Integer> hitBox = new HashMap<>();
 
@@ -267,12 +363,24 @@ public class PostService {
 
 		logger.info(hitBox.toString());
 
-		if (hitBox.size() > 0) {
+		String orderByString = "createdate";
 
+		if (orderBy != null) {
+			switch (orderBy) {
+			case "date":
+				orderByString = "createdate";
+				break;
+			case "view":
+				orderByString = "totalViewCount";
+				break;
+			}
+		}
+
+		if (hitBox.size() > 0) {
 			if (user != null) {
-				return setLikeRetweetedAndCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet()), user.getUserId());
+				return setLikeRetweetedAndCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet(), Sort.by(orderByString).descending()), user.getUserId());
 			} else {
-				return setLikeRetweetCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet()));
+				return setLikeRetweetCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet(), Sort.by(orderByString).descending()));
 			}
 		} else {
 			return null;

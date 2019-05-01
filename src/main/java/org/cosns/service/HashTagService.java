@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import org.cosns.dao.HashTagDAO;
 import org.cosns.repository.HashTag;
 import org.cosns.repository.Post;
+import org.cosns.util.ConstantsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +26,9 @@ public class HashTagService {
 	@Autowired
 	private RedisService redisService;
 
-	public Set<String> parseHash(Post post) {
-		Pattern pattern = Pattern.compile("#([^\\s][^#^\\n]*)");
-		String message = post.getMessage();
+	public Set<String> parseHash(String postMessage) {
+		Pattern pattern = Pattern.compile(ConstantsUtil.HASHTAG_PATTERN);
+		String message = postMessage;
 		Matcher matcher = pattern.matcher(message);
 
 		Set<String> hashTagSet = new HashSet<>();
@@ -49,6 +50,10 @@ public class HashTagService {
 
 			hashTagDAO.save(hashObject);
 		}
+	}
+
+	public void savePostKeyToRedis(Post post) {
+		redisService.setHashValue(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + post.getPostKey(), ConstantsUtil.REDIS_POST_ID, "" + post.getPostId());
 	}
 
 	public void saveHashToRedis(Post post, Set<String> hashTagSet, String postTagPrefix, String postTypePrefix) {

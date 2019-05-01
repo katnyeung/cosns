@@ -17,7 +17,7 @@ public class DailySyncPostCount {
 	@Autowired
 	PostService postService;
 	
-	@Scheduled(cron = "0 * * 1 * ?")
+	@Scheduled(cron = "0 0 */4 * * *")
 	public void scheduleTaskWithCronExpression() {
 		logger.info("Cron Task :: Execution Time - " + dateTimeFormatter.format(LocalDateTime.now()));
 		

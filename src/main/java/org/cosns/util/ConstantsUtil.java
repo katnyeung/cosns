@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ConstantsUtil {
+
+	public static final String HASHTAG_PATTERN = "#([^\\s][^#^\\n]*)";
+
 	public final static String USER_STATUS_ACTIVE = "A";
 	public final static String USER_STATUS_PEND = "P";
 	public final static String USER_STATUS_DISABLED = "D";
@@ -41,9 +44,13 @@ public class ConstantsUtil {
 	public static final String REDIS_POST_TAG_TYPE_SELLING = "sell";
 	public static final String REDIS_POST_TAG_TYPE_ALL = "all";
 
-	public static final String REDIS_POST_GROUP = "post";
-	public static final String REDIS_POST_TYPE_LIKE = "like";
-	public static final String REDIS_POST_TYPE_RETWEET = "retweet";
+	public static final String REDIS_POST_GROUP = "postset";
+
+	public static final String REDIS_POST_NAME_GROUP = "postname";
+	public static final String REDIS_POST_ID = "id";
+
+	public static final String REDIS_POST_LIKE_GROUP = "postlike";
+	public static final String REDIS_POST_RETWEET_GROUP = "postretweet";
 
 	public static final String REDIS_USER_GROUP = "user";
 	public static final String REDIS_USER_TYPE_ID = "id";
@@ -54,7 +61,12 @@ public class ConstantsUtil {
 
 	public static final int USER_DATE_AVAILABLE_TO_ASSIGN_UNIQUE_NAME = 20;
 
+	public static final int POST_KEY_MESSAGE_LENGTH = 20;
+	public static final int POST_KEY_HASHTAG_LENGTH = 10;
+	public static final int POST_KEY_HASHTAG_NUMBER = 3;
+
 	public static final Map<String, String> mimeMap;
+
 	static {
 		Map<String, String> aMap = new HashMap<>();
 		aMap.put("image/jpeg", "jpg");

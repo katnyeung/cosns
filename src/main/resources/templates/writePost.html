@@ -113,7 +113,7 @@
 
 			<div class="form-group">
 				<h4>Images</h4>
-				<div flow-init="{target: '/post/uploadImage', testChunks:false,  chunkSize:10000000}" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message" flow-name="obj.flow">
+				<div flow-init="{target: '/images/uploadImage', testChunks:false,  chunkSize:10000000}" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message" flow-name="obj.flow">
 					<div flow-drop flow-btn flow-drag-enter="style={border:'4px solid green'}" flow-drag-leave="style={}" ng-style="style" class="btn btn-danger">Click or Drop image here</div>
 					<div class="mt-2"></div>
 					<div sv-root sv-part="$flow.files" class="row">

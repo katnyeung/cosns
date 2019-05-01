@@ -42,6 +42,8 @@ public abstract class Post extends Auditable<String> {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long postId;
 
+	private String postKey;
+	
 	private Date releaseDate;
 
 	@Lob
@@ -223,6 +225,19 @@ public abstract class Post extends Auditable<String> {
 
 	public void setRemoved(boolean isRemoved) {
 		this.isRemoved = isRemoved;
+	}
+
+	public String getPostKey() {
+		return postKey;
+	}
+
+	public void setPostKey(String postKey) {
+		this.postKey = postKey;
+	}
+
+	@Override
+	public String toString() {
+		return "Post [postId=" + postId + ", releaseDate=" + releaseDate + " createDate : " + super.getCreatedate() + "]";
 	}
 
 }

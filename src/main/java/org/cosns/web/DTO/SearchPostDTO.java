@@ -5,6 +5,8 @@ import java.util.Date;
 public class SearchPostDTO {
 	String keyword;
 
+	String orderBy;
+
 	Date fromDate;
 	Date toDate;
 
@@ -30,6 +32,14 @@ public class SearchPostDTO {
 
 	public void setToDate(Date toDate) {
 		this.toDate = toDate;
+	}
+
+	public String getOrderBy() {
+		return orderBy;
+	}
+
+	public void setOrderBy(String orderBy) {
+		this.orderBy = orderBy;
 	}
 
 }

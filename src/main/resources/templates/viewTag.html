@@ -10,39 +10,39 @@
 </head>
 <body ng-app="application">
 	<script>
-		var main = angular.module('application', [ 'infinite-scroll','ngSanitize' ]);
+		var main = angular.module('application', [ 'infinite-scroll', 'ngSanitize' ]);
 
-		main.controller('searchController', function($scope, $http, messageService , postService) {
+		main.controller('searchController', function($scope, $http, messageService, postService) {
 
 			$scope.shared = messageService.getShared();
-			
+
 			$scope.keyword = '[[${hashTag}]]';
-			
+			$scope.orderByType = '[[${orderByType}]]';
+
 			$scope.search = function() {
 				if ($scope.keyword) {
-					postService.searchPosts($scope.keyword, handler);
+					postService.searchPosts($scope.keyword,$scope.orderByKey, handler);
 				}
 			}
-			
+
 			postService.setMessageService(messageService);
 
-			$scope.likePost = function(postId) {
-				postService.likePost(postId, 'viewPost');
+			$scope.likePost = function(post) {
+				postService.likePost(post, 'viewPost');
 			}
-			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId, 'viewPost');
+			$scope.retweetPost = function(post) {
+				postService.retweetPost(post, 'viewPost');
 			}
-			$scope.removePost = function(postId) {
-				postService.removePost(postId, 'viewPost');
+			$scope.removePost = function(post) {
+				postService.removePost(post, 'viewPost');
 			}
 			$scope.searchPost = function(keyword, handler) {
-				postService.searchPost(keyword, handler);
+				postService.searchPost(keyword, $scope.orderByType, handler);
 			}
 
 			var handler = function(postList) {
 				$scope.postList = postList;
 			}
-
 
 			$scope.$watch('shared.user', function(newValue, oldValue) {
 				if (newValue != oldValue) {
@@ -52,7 +52,6 @@
 
 			$scope.search();
 		});
-
 	</script>
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
 
@@ -63,9 +62,13 @@
 		<div ng-controller="searchController" class="row m-5">
 
 			<div class="form-inline">
-				<h3>Tag</h3>
+				<h3>tag</h3>
 				&nbsp;
 				<form ng-submit="search()">
+					<div class="btn-group btn-group-sm  btn-light form-inline" role="group" aria-label="Basic example">
+						<button type="button" class="btn" ng-class="{'btn-warning' : orderByType == 'view'}" ng-click="orderByType = 'view'">view</button>
+						<button type="button" class="btn " ng-class="{'btn-warning' : orderByType == 'date'}" ng-click="orderByType = 'date'">date</button>
+					</div>
 					<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
 					<button class="form-control mr-sm-2" type="submit">Search</button>
 				</form>

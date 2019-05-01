@@ -11,14 +11,14 @@
 		main.controller('viewPostController', function($scope, $http, postService, messageService) {
 			postService.setMessageService(messageService);
 
-			$scope.likePost = function(postId) {
-				postService.likePost(postId, 'viewPost');
+			$scope.likePost = function(post) {
+				postService.likePost(post, 'viewPost');
 			}
-			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId, 'viewPost');
+			$scope.retweetPost = function(post) {
+				postService.retweetPost(post, 'viewPost');
 			}
-			$scope.removePost = function(postId) {
-				postService.removePost(postId, 'viewPost');
+			$scope.removePost = function(post) {
+				postService.removePost(post, 'viewPost');
 			}
 			$scope.loadPost = function(handler) {
 				postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]", handler);
@@ -121,7 +121,7 @@
 
 	<div class="container" ng-controller="viewUserController">
 		<div class="container">
-			<img src="/pimages/{{profileImage}}" class="rounded img-fluid " /><br /> {{user.uniqueName}} ( {{user.email}} )
+			<img src="/pimages/{{profileImage}}" class="rounded img-fluid"/><br /> {{user.uniqueName}} ( {{user.email}} )
 			<pre>{{user.message}}</pre>
 			<br /> Following
 			<ul>
@@ -132,7 +132,7 @@
 
 		</div>
 		<div ng-controller="viewPostController" class="row ml-4 mr-4">
-			<div ng-repeat="post in postList" class="col-md-3 m-0">
+			<div ng-repeat="post in postList | filter: {removed : false} " class="col-md-3 m-0">
 				<hr/>
 				<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
 			</div>

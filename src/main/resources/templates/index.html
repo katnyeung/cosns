@@ -3,8 +3,6 @@
 <html lang="en">
 <head>
 
-
-
 <script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
 </head>
@@ -16,23 +14,23 @@
 
 			$scope.search = function() {
 				if ($scope.keyword) {
-					postService.searchPosts($scope.keyword, handler);
+					postService.searchPosts($scope.keyword, 'date', handler);
 				}
 			}
 
 			postService.setMessageService(messageService);
 
-			$scope.likePost = function(postId) {
-				postService.likePost(postId, 'search');
+			$scope.likePost = function(post) {
+				postService.likePost(post, 'search');
 			}
-			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId, 'search');
+			$scope.retweetPost = function(post) {
+				postService.retweetPost(post, 'search');
 			}
-			$scope.removePost = function(postId) {
-				postService.removePost(postId, 'search');
+			$scope.removePost = function(post) {
+				postService.removePost(post, 'search');
 			}
 			$scope.searchPost = function(keyword, handler) {
-				postService.searchPost(keyword, handler);
+				postService.searchPost(keyword, 'date', handler);
 			}
 
 			var handler = function(postList) {
@@ -58,14 +56,14 @@
 
 			postService.setMessageService(messageService);
 
-			$scope.likePost = function(postId) {
-				postService.likePost(postId, 'latestPost');
+			$scope.likePost = function(post) {
+				postService.likePost(post, 'latestPost');
 			}
-			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId, 'latestPost');
+			$scope.retweetPost = function(post) {
+				postService.retweetPost(post, 'latestPost');
 			}
-			$scope.removePost = function(postId) {
-				postService.removePost(postId, 'latestPost');
+			$scope.removePost = function(post) {
+				postService.removePost(post, 'latestPost');
 			}
 			$scope.loadPost = function(handler) {
 				postService.loadPosts("getLatestPost", handler);
@@ -100,14 +98,14 @@
 			$scope.orderByString = '-todayViewCount';
 			$scope.selectedType = 'day';
 
-			$scope.likePost = function(postId) {
-				postService.likePost(postId, 'topPost');
+			$scope.likePost = function(post) {
+				postService.likePost(post, 'topPost');
 			}
-			$scope.retweetPost = function(postId) {
-				postService.retweetPost(postId, 'topPost');
+			$scope.retweetPost = function(post) {
+				postService.retweetPost(post, 'topPost');
 			}
-			$scope.removePost = function(postId) {
-				postService.removePost(postId, 'topPost');
+			$scope.removePost = function(post) {
+				postService.removePost(post, 'topPost');
 			}
 
 			$scope.loadPost = function(handler) {
@@ -170,7 +168,7 @@
 		<div ng-controller="searchController" class="container mb-5">
 
 			<div class="form-inline">
-				<h3 class="mt-2">Search</h3> &nbsp;
+				<h3 class="mt-2">search</h3> &nbsp;
 				<form ng-submit="search()">
 					<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
 					<button class="form-control mr-sm-2" type="submit">Search</button>

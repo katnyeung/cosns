@@ -1,16 +1,12 @@
 package org.cosns.controller;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.tomcat.util.http.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.cosns.repository.Post;
 import org.cosns.repository.PostReaction;
 import org.cosns.repository.User;
@@ -19,23 +15,19 @@ import org.cosns.service.ImageService;
 import org.cosns.service.PostService;
 import org.cosns.service.RedisService;
 import org.cosns.util.ConstantsUtil;
-import org.cosns.web.DTO.ImageUploadDTO;
 import org.cosns.web.DTO.PostFormDTO;
 import org.cosns.web.DTO.PostReactionDTO;
 import org.cosns.web.DTO.SearchPostDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.PostListResult;
 import org.cosns.web.result.PostReactionResult;
-import org.cosns.web.result.UploadImageResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/post")
@@ -53,12 +45,6 @@ public class PostRestController {
 
 	@Autowired
 	RedisService redisService;
-
-	@Value("${cosns.image.uploadFolder}")
-	String uploadFolder;
-
-	@Value("${cosns.image.uploadPattern}")
-	String uploadPattern;
 
 	@GetMapping(path = "/sync")
 	public DefaultResult sync(HttpSession session) {
@@ -106,16 +92,16 @@ public class PostRestController {
 	}
 
 	@PostMapping(path = "/searchPosts")
-	public DefaultResult getPost(@RequestBody SearchPostDTO searchPost, HttpSession session) {
+	public DefaultResult searchPost(@RequestBody SearchPostDTO searchPost, HttpSession session) {
 		PostListResult plr = new PostListResult();
 
 		User user = (User) session.getAttribute("user");
 		List<Post> postList = null;
 
 		if (user != null) {
-			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_POST_TAG_TYPE_ALL, user);
+			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_POST_TAG_TYPE_ALL, searchPost.getOrderBy(), user);
 		} else {
-			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_POST_TAG_TYPE_ALL);
+			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_POST_TAG_TYPE_ALL, searchPost.getOrderBy());
 		}
 
 		plr.setPostList(postList);
@@ -125,7 +111,7 @@ public class PostRestController {
 	}
 
 	@GetMapping(path = "/getTopPost/{type}/{date}")
-	public DefaultResult getTopDayPost(@PathVariable("type") String type, @PathVariable("date") String date, HttpSession session) {
+	public DefaultResult getTopPost(@PathVariable("type") String type, @PathVariable("date") String date, HttpSession session) {
 		PostListResult plr = new PostListResult();
 
 		User user = (User) session.getAttribute("user");
@@ -145,7 +131,7 @@ public class PostRestController {
 	}
 
 	@GetMapping(path = "/getLatestPost")
-	public DefaultResult getPost(HttpSession session) {
+	public DefaultResult getLatestPost(HttpSession session) {
 		PostListResult plr = new PostListResult();
 
 		User user = (User) session.getAttribute("user");
@@ -201,48 +187,6 @@ public class PostRestController {
 		return plr;
 	}
 
-	@PostMapping(value = "/uploadImage", consumes = { "multipart/form-data" })
-	public DefaultResult uploadImageContent(ImageUploadDTO imageInfo, HttpSession session) throws IOException, NullPointerException, SizeLimitExceededException {
-		UploadImageResult result = new UploadImageResult();
-		User user = (User) session.getAttribute("user");
-
-		if (user != null) {
-			try {
-				String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
-
-				logger.info("inside upload image");
-
-				MultipartFile fromFile = imageInfo.getFile();
-
-				String fileName = uuidPrefix + "." + FilenameUtils.getExtension(fromFile.getOriginalFilename());
-
-				String targetPath = uploadFolder + fileName;
-
-				logger.info("targetPath : " + targetPath);
-
-				imageService.uploadImage(fromFile, targetPath, 2048);
-
-				imageService.savePostImage(uploadFolder, fileName, fromFile.getSize(), user);
-
-				result.setFilePath(fileName);
-				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
-
-			} catch (Exception ex) {
-				ex.printStackTrace();
-
-				result.setStatus(ConstantsUtil.RESULT_ERROR);
-				result.setRemarks(ex.getLocalizedMessage());
-
-			}
-
-		} else {
-			result.setStatus(ConstantsUtil.RESULT_ERROR);
-			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
-		}
-
-		return result;
-	}
-
 	@PostMapping(path = "/writePost")
 	@Transactional
 	public DefaultResult writePost(@RequestBody PostFormDTO postDTO, HttpSession session) {
@@ -250,9 +194,9 @@ public class PostRestController {
 		User user = (User) session.getAttribute("user");
 
 		if (user != null) {
-			Post post = postService.writePhotoPost(postDTO, user);
+			Set<String> hashTagSet = hashTagService.parseHash(postDTO.getPostMessage());
 
-			Set<String> hashTagSet = hashTagService.parseHash(post);
+			Post post = postService.writePhotoPost(postDTO, user, hashTagSet);
 
 			logger.info("writing hash : " + hashTagSet);
 
@@ -260,6 +204,8 @@ public class PostRestController {
 
 			hashTagService.saveHashToRedis(post, hashTagSet, ConstantsUtil.REDIS_POST_TAG_GROUP, ConstantsUtil.REDIS_POST_TAG_TYPE_PHOTO);
 
+			hashTagService.savePostKeyToRedis(post);
+			
 			redisService.addPostRecord(post.getPostId());
 
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
@@ -319,6 +265,7 @@ public class PostRestController {
 
 	@PostMapping(path = "/removePost")
 	public DefaultResult removePost(@RequestBody PostReactionDTO postReactionDTO, HttpSession session) {
+
 		PostReactionResult prr = new PostReactionResult();
 		User user = (User) session.getAttribute("user");
 
@@ -327,11 +274,14 @@ public class PostRestController {
 			Post post = postService.removePost(postReactionDTO.getPostId(), user);
 
 			if (post != null) {
+				logger.info("removing post : " + post.getPostId());
 
-				redisService.removePostRecord(post.getPostId());
+				redisService.removePostRecord(post);
 
 				prr.setType(ConstantsUtil.POST_REACTION_CANCEL);
 				prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+				prr.setRemarks("Remove OK");
 			} else {
 				prr.setStatus(ConstantsUtil.RESULT_ERROR);
 				prr.setRemarks("Remove Failed");
