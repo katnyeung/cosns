@@ -6,7 +6,8 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.activation.FileTypeMap;
 import javax.servlet.http.HttpSession;
@@ -21,6 +22,8 @@ import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.ImageUploadDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.UploadImageResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -36,7 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/")
 public class ImageRestController {
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	ImageService imageService;
@@ -49,12 +52,22 @@ public class ImageRestController {
 
 	@GetMapping(path = "images/{imageFile}", produces = MediaType.IMAGE_JPEG_VALUE)
 	public ResponseEntity<byte[]> getPostImage(@PathVariable("imageFile") String imageFile, HttpSession session, Model model) throws IOException {
+		boolean isThumbnail = false;
+
+		Pattern pattern = Pattern.compile("([a-zA-Z0-9]*)" + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "\\.([a-zA-Z0-9]*)");
+		Matcher matcher = pattern.matcher(imageFile);
+
+		if (matcher.matches()) {
+			isThumbnail = true;
+			imageFile = matcher.group(1) + "." + matcher.group(2);
+		}
 
 		List<PostImage> postImageSet = imageService.findActivePostImageByFilename(imageFile);
 		if (postImageSet.iterator().hasNext()) {
 			PostImage postImage = postImageSet.iterator().next();
 
-			File img = new File(postImage.getStoredPath() + postImage.getFilename());
+			File img = new File(postImage.getStoredPath() + (isThumbnail ? postImage.getThumbnailFilename() : postImage.getFilename()));
+
 			return ResponseEntity.ok().contentType(MediaType.valueOf(FileTypeMap.getDefaultFileTypeMap().getContentType(img))).body(Files.readAllBytes(img.toPath()));
 
 		} else {
@@ -79,7 +92,7 @@ public class ImageRestController {
 
 	}
 
-	@PostMapping(value = "images/uploadImage", consumes = { "multipart/form-data" })
+	@PostMapping(value = "post/uploadImage", consumes = { "multipart/form-data" })
 	public DefaultResult uploadImageContent(ImageUploadDTO imageInfo, HttpSession session) throws IOException, NullPointerException, SizeLimitExceededException {
 		UploadImageResult result = new UploadImageResult();
 		User user = (User) session.getAttribute("user");
@@ -88,19 +101,70 @@ public class ImageRestController {
 			try {
 				String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
 
+				logger.info("user : " + user.getUserId() + " upload image");
+
+				MultipartFile fromFile = imageInfo.getFile();
+
+				String ext = FilenameUtils.getExtension(fromFile.getOriginalFilename());
+
+				String filename = uuidPrefix + "." + ext;
+				String thumbnailFilename = uuidPrefix + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "." + ext;
+
+				String targetFullPath = uploadFolder + filename;
+				logger.info("targetFullPath : " + targetFullPath);
+
+				File targetFile = imageService.uploadImage(fromFile, targetFullPath);
+				File thumbnailFile = new File(uploadFolder + thumbnailFilename);
+
+				imageService.resizeImage(targetFile, targetFile, ext, 2048);
+				imageService.resizeImage(targetFile, thumbnailFile, ext, 512);
+
+				imageService.savePostImage(uploadFolder, filename, thumbnailFilename, targetFile.getTotalSpace(), user);
+
+				result.setFilePath(filename);
+				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+			} catch (Exception ex) {
+				ex.printStackTrace();
+
+				result.setStatus(ConstantsUtil.RESULT_ERROR);
+				result.setRemarks(ex.getLocalizedMessage());
+
+			}
+
+		} else {
+			result.setStatus(ConstantsUtil.RESULT_ERROR);
+			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+		}
+
+		return result;
+	}
+
+	@PostMapping(value = "user/uploadProfileImage", consumes = { "multipart/form-data" })
+	public DefaultResult uploadProfileImage(ImageUploadDTO imageInfo, HttpSession session) throws IOException, NullPointerException {
+		UploadImageResult result = new UploadImageResult();
+		User user = (User) session.getAttribute("user");
+
+		if (user != null) {
+			try {
+
+				String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
+
 				logger.info("inside upload image");
 
 				MultipartFile fromFile = imageInfo.getFile();
 
-				String fileName = uuidPrefix + "." + FilenameUtils.getExtension(fromFile.getOriginalFilename());
+				String ext = FilenameUtils.getExtension(fromFile.getOriginalFilename());
+
+				String fileName = uuidPrefix + "." + ext;
 
 				String targetPath = uploadFolder + fileName;
 
-				logger.info("targetPath : " + targetPath);
+				File targetFile = imageService.uploadImage(fromFile, targetPath);
 
-				imageService.uploadImage(fromFile, targetPath, 2048);
+				imageService.resizeImage(targetFile, targetFile, ext, 200);
 
-				imageService.savePostImage(uploadFolder, fileName, fromFile.getSize(), user);
+				imageService.saveProfileImage(uploadFolder, fileName, fromFile.getSize(), user);
 
 				result.setFilePath(fileName);
 				result.setStatus(ConstantsUtil.RESULT_SUCCESS);

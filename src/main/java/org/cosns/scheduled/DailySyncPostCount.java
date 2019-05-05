@@ -2,16 +2,18 @@ package org.cosns.scheduled;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.cosns.service.PostService;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DailySyncPostCount {
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
+
 	private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
 	@Autowired

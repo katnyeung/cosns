@@ -1,5 +1,6 @@
 package org.cosns.repository;
 
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name = "image",indexes = { @Index(name = "INDEX_IMAGEPATH", columnList = "filename") })
+@Table(name = "image", indexes = { @Index(name = "INDEX_IMAGEPATH", columnList = "filename") })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "image_type")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
@@ -30,7 +31,7 @@ public abstract class Image extends Auditable<String> {
 	private Long imageId;
 
 	private int seq;
-	
+
 	@JsonIgnore
 	@Lob
 	@NotNull
@@ -39,9 +40,13 @@ public abstract class Image extends Auditable<String> {
 	@NotNull
 	@Size(max = 255)
 	private String filename;
-	
+
+	@Column(nullable = true)
+	@Size(max = 255)
+	private String thumbnailFilename;
+
 	@JsonIgnore
-	private double size;
+	private Long size;
 
 	@JsonIgnore
 	@NotNull
@@ -72,11 +77,11 @@ public abstract class Image extends Auditable<String> {
 		this.filename = filename;
 	}
 
-	public double getSize() {
+	public Long getSize() {
 		return size;
 	}
 
-	public void setSize(double size) {
+	public void setSize(Long size) {
 		this.size = size;
 	}
 
@@ -94,6 +99,14 @@ public abstract class Image extends Auditable<String> {
 
 	public void setStoredPath(String storedPath) {
 		this.storedPath = storedPath;
+	}
+
+	public String getThumbnailFilename() {
+		return thumbnailFilename;
+	}
+
+	public void setThumbnailFilename(String thumbnailFilename) {
+		this.thumbnailFilename = thumbnailFilename;
 	}
 
 }

@@ -8,7 +8,11 @@
 	var main = angular.module('application', [ 'infinite-scroll', 'ngSanitize' ]);
 
 	main.controller('viewPostController', function($scope, $http, $window, postService, messageService) {
+		$scope.shared = messageService.getShared();
+		$scope.sharedUser = messageService.getSharedUser();
+
 		postService.setMessageService(messageService);
+
 		$scope.currentPage = 0;
 		$scope.shared = messageService.getShared();
 		$scope.release = [];
@@ -40,7 +44,7 @@
 			}
 		}
 
-		$scope.$watch('shared.user', function(newValue, oldValue) {
+		$scope.$watch('sharedUser.user', function(newValue, oldValue) {
 			if (newValue != oldValue) {
 				if (!newValue) {
 					$window.location.href = '/';
@@ -66,14 +70,12 @@
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
-	<div class="container">
-		<div ng-controller="viewPostController" class="row ml-5 mr-5">
-			<div infinite-scroll='loadMore()' infinite-scroll-distance='0'>
-				<h3 class="row ml-5 mr-5">timeline</h3>
-				<div ng-repeat="post in release | filter: {removed : false}" class="ml-5 mr-5">
-					<hr />
-					<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
-				</div>
+	<div class="container" ng-controller="viewPostController">
+		<h3 class="row m-3">timeline</h3>
+		<div infinite-scroll='loadMore()' infinite-scroll-distance='0'>
+			<div ng-repeat="post in release | filter: {removed : false}" class="col-md-7">
+				<hr />
+				<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
 			</div>
 		</div>
 	</div>

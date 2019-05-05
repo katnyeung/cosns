@@ -1,9 +1,5 @@
 package org.cosns.util;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 public class ConstantsUtil {
 
 	public static final String HASHTAG_PATTERN = "#([^\\s][^#^\\n]*)";
@@ -39,10 +35,13 @@ public class ConstantsUtil {
 	public static final String ERROR_MESSAGE_USER_NOT_FOUND = "User not found";
 	public static final String ERROR_MESSAGE_USER_ALREADY_FOLLOWED = "User already followed";
 
-	public static final String REDIS_POST_TAG_GROUP = "posttag";
-	public static final String REDIS_POST_TAG_TYPE_PHOTO = "photo";
-	public static final String REDIS_POST_TAG_TYPE_SELLING = "sell";
-	public static final String REDIS_POST_TAG_TYPE_ALL = "all";
+	public static final String REDIS_TAG_GROUP = "tag";
+	public static final String REDIS_TAG_TYPE_PHOTO = "photo";
+	public static final String REDIS_TAG_TYPE_USER = "user";
+	public static final String REDIS_TAG_TYPE_EVENT = "event";
+	public static final String REDIS_TAG_TYPE_SELLING = "sell";
+	public static final String REDIS_TAG_TYPE_ALL_POST = "photo,sell";
+	public static final String REDIS_TAG_TYPE_ALL = "all";
 
 	public static final String REDIS_POST_GROUP = "postset";
 
@@ -62,15 +61,8 @@ public class ConstantsUtil {
 	public static final int USER_DATE_AVAILABLE_TO_ASSIGN_UNIQUE_NAME = 20;
 
 	public static final int POST_KEY_HASHTAG_LENGTH = 10;
-	public static final int POST_KEY_HASHTAG_NUMBER = 3;
+	public static final int POST_KEY_HASHTAG_NUMBER = 5;
 
-	public static final Map<String, String> mimeMap;
-
-	static {
-		Map<String, String> aMap = new HashMap<>();
-		aMap.put("image/jpeg", "jpg");
-		aMap.put("image/png", "png");
-		mimeMap = Collections.unmodifiableMap(aMap);
-	}
+	public static final String IMAGE_THUMBNAIL_POSTFIX = "_s";
 
 }

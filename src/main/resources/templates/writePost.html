@@ -23,7 +23,8 @@
 
 		main.controller('writePostController', function($scope, $http, $timeout, $window, messageService) {
 			$scope.obj = {};
-
+			$scope.uploading = false;
+			
 			var releaseDateString = '[[${releaseDate}]]';
 
 			if (releaseDateString === '') {
@@ -33,18 +34,23 @@
 			}
 
 			$scope.validate = function(file) {
-				console.log(file.size);
 				if (file.size > 5000000) {
 					$scope.message("file is too big");
 					return false;
 				}
 				return true;
 			}
-
+			$scope.uploading = function() {
+				$scope.uploading = true;
+				$scope.message("Uploading");
+				return true;
+			}
+			$scope.uploaded = function() {
+				$scope.uploading = false;
+				$scope.message("");
+				return true;
+			}
 			$scope.submit = function() {
-
-				$scope.posting = true;
-
 				if ($scope.postMessage) {
 					var fileList = [];
 
@@ -72,7 +78,7 @@
 							$scope.message("Post Success");
 
 							$timeout(function() {
-								$window.location.href = '/u';
+								$window.location.href = '/@';
 							}, 1000);
 
 						} else {
@@ -96,10 +102,10 @@
 
 	<div ng-controller="writePostController" class="container">
 
-		<h3>Write Post</h3>
+		<h3 class="row m-1">write</h3>
 		<form ng-submit="submit()">
 			<div class="m-1 pb-3 pt-2">
-				<button type="submit" class="btn btn-primary">Post</button>
+				<button type="submit" class="btn btn-primary" ng-disabled="uploading">Post</button>
 			</div>
 
 			<div class="form-group">
@@ -113,7 +119,15 @@
 
 			<div class="form-group">
 				<h4>Images</h4>
-				<div flow-init="{target: '/images/uploadImage', testChunks:false,  chunkSize:10000000}" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message" flow-name="obj.flow">
+				<div 
+					flow-init="{target: '/post/uploadImage', testChunks:false,  chunkSize:10000000}" 
+					flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file);uploading();" 
+					flow-files-submitted="$flow.upload()" 
+					flow-file-success="$file.msg = $message;uploaded();" 
+					
+					flow-name="obj.flow"
+					
+					>
 					<div flow-drop flow-btn flow-drag-enter="style={border:'4px solid green'}" flow-drag-leave="style={}" ng-style="style" class="btn btn-danger">Click or Drop image here</div>
 					<div class="mt-2"></div>
 					<div sv-root sv-part="$flow.files" class="row">
@@ -122,7 +136,7 @@
 
 							<img flow-img="file" class="img-fluid rounded" />
 							<div class="progress" style="width: auto" ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
-								<div style="width: {{file.progress()* 100}}%" class="bar">
+								<div style="width: {{file.progress()* 100" class="bar">
 									<span>{{(file.progress() * 100).toFixed(0)}}%</span>
 								</div>
 							</div>

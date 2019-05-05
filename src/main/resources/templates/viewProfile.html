@@ -9,6 +9,9 @@
 	<script>
 		var main = angular.module('application', [ 'ngSanitize' ]);
 		main.controller('viewPostController', function($scope, $http, postService, messageService) {
+			$scope.shared = messageService.getShared();
+			$scope.sharedUser = messageService.getSharedUser();
+
 			postService.setMessageService(messageService);
 
 			$scope.likePost = function(post) {
@@ -30,9 +33,7 @@
 
 			$scope.loadPost(handler);
 
-			$scope.shared = messageService.getShared();
-
-			$scope.$watch('shared.user', function(newValue, oldValue) {
+			$scope.$watch('sharedUser.user', function(newValue, oldValue) {
 				if (newValue != oldValue) {
 					$scope.loadPost(handler);
 				}
@@ -42,15 +43,14 @@
 
 		main.controller('viewUserController', function($scope, $http, messageService) {
 			$scope.shared = messageService.getShared();
+			$scope.sharedUser = messageService.getSharedUser();
 
 			$scope.followedList = {};
 			$scope.userList = {};
 			$scope.isFollowed = false;
 
-			console.log($scope.shared);
-
-			if ($scope.shared.user) {
-				$scope.followedList = $scope.shared.user.followers;
+			if ($scope.sharedUser.user) {
+				$scope.followedList = $scope.sharedUser.user.followers;
 			}
 
 			$http({
@@ -120,20 +120,26 @@
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div class="container" ng-controller="viewUserController">
-		<div class="container">
-			<img src="/pimages/{{profileImage}}" class="rounded img-fluid"/><br /> {{user.uniqueName}} ( {{user.email}} )
-			<pre>{{user.message}}</pre>
-			<br /> Following
-			<ul>
-				<li ng-repeat="followerId in user.followers"><a href="/u/{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].userId}}">{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].email}}</a></li>
-			</ul>
-			<button class="btn btn-info" type="button" th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>
-			<button class="btn btn-warning" type="button" th:attr="ng-click='unfollow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && isFollowed'">Unfollow</button>
-
+		<div class="row m-3">
+			<div class="col-12">
+				<img ng-src="{{profileImage ? '/pimages/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" class="rounded img-fluid" />
+			</div>
+			<div class="col-12">{{user.uniqueName}} ( {{user.email}} )</div>
+			<div class="col-12">
+				<pre>{{user.message}}</pre>
+			</div>
+			<div class="col-12" ng-show="user.followers > 0">
+				<br /> Following
+				<ul>
+					<li ng-repeat="followerId in user.followers"><a href="/@{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].userId}}">{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].email}}</a></li>
+				</ul>
+				<button class="btn btn-info" type="button" th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>
+				<button class="btn btn-warning" type="button" th:attr="ng-click='unfollow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && isFollowed'">Unfollow</button>
+			</div>
 		</div>
 		<div ng-controller="viewPostController" class="row ml-4 mr-4">
 			<div ng-repeat="post in postList | filter: {removed : false} " class="col-md-3 m-0">
-				<hr/>
+				<hr />
 				<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
 			</div>
 		</div>

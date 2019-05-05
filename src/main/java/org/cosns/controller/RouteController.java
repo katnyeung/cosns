@@ -1,7 +1,5 @@
 package org.cosns.controller;
 
-import java.util.logging.Logger;
-
 import javax.servlet.http.HttpSession;
 
 import org.cosns.repository.User;
@@ -10,6 +8,8 @@ import org.cosns.service.RedisService;
 import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.util.DefaultException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/")
 public class RouteController {
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	RedisService redisService;
@@ -92,19 +92,20 @@ public class RouteController {
 		return "viewTimeline";
 	}
 
-	@GetMapping(path = "p/{postKey}")
-	public String viewPost(@PathVariable("postKey") String postKey, HttpSession session, Model model) throws DefaultException {
+	@GetMapping(path = "@{userName}/{postKey}")
+	public String viewPost(@PathVariable("userName") String userName, @PathVariable("postKey") String postKey, HttpSession session, Model model) throws DefaultException {
+
 		User loggedUser = (User) session.getAttribute("user");
 
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
 		}
-		logger.info("searching from redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + postKey + " ->" + ConstantsUtil.REDIS_POST_ID);
+		logger.info("searching from redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " ->" + ConstantsUtil.REDIS_POST_ID);
 
-		logger.info("hasKey : " + redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + postKey));
+		logger.info("hasKey : " + redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey));
 
-		if (!redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + postKey)) {
-			logger.info("redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + postKey + " ->" + ConstantsUtil.REDIS_POST_ID + ", redis not found");
+		if (!redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey)) {
+			logger.info("redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " -> " + ConstantsUtil.REDIS_POST_ID + ", redis not found");
 
 			try {
 				logger.info("postId string : " + postKey);
@@ -117,7 +118,7 @@ public class RouteController {
 			}
 		} else {
 
-			String postIdString = (String) redisService.getHashValue(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + postKey, ConstantsUtil.REDIS_POST_ID);
+			String postIdString = (String) redisService.getHashValue(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey, ConstantsUtil.REDIS_POST_ID);
 
 			model.addAttribute("postId", postIdString);
 		}
@@ -125,8 +126,8 @@ public class RouteController {
 		return "viewPost";
 	}
 
-	@GetMapping(path = "ht/{orderByType}/{hashTag}")
-	public String viewHashTag(@PathVariable("orderByType") String orderByType, @PathVariable("hashTag") String hashTag, HttpSession session, Model model) {
+	@GetMapping(path = "h/{hashTag}/{orderByType}")
+	public String viewHashTag(@PathVariable("hashTag") String hashTag, @PathVariable("orderByType") String orderByType, HttpSession session, Model model) {
 		User loggedUser = (User) session.getAttribute("user");
 
 		if (loggedUser != null) {
@@ -139,7 +140,7 @@ public class RouteController {
 		return "viewTag";
 	}
 
-	@GetMapping(path = "ht/{hashTag}")
+	@GetMapping(path = "h/{hashTag}")
 	public String viewHashTag(@PathVariable("hashTag") String hashTag, HttpSession session, Model model) {
 		User loggedUser = (User) session.getAttribute("user");
 
@@ -152,7 +153,7 @@ public class RouteController {
 		return "viewTag";
 	}
 
-	@GetMapping(path = "u")
+	@GetMapping(path = "@")
 	public String viewProfile(HttpSession session, Model model) {
 		User loggedUser = (User) session.getAttribute("user");
 		if (loggedUser != null) {
@@ -165,8 +166,8 @@ public class RouteController {
 		return "viewProfile";
 	}
 
-	@GetMapping(path = "u/{username}")
-	public String viewProfile(@PathVariable("username") String username, HttpSession session, Model model) {
+	@GetMapping(path = "@{userName}")
+	public String viewProfile(@PathVariable("userName") String userName, HttpSession session, Model model) {
 		try {
 			User loggedUser = (User) session.getAttribute("user");
 			if (loggedUser != null) {
@@ -180,24 +181,24 @@ public class RouteController {
 				Long userId = Long.parseLong(userIdString);
 				targetUser = userService.getUserById(userId);
 			} else {
-				targetUser = userService.getUserByUniqueName(username);
+				targetUser = userService.getUserByUniqueName(userName);
 			}
 
 			if (targetUser != null) {
 				model.addAttribute("targetUser", targetUser);
 			} else {
-				logger.info("not found uniquename " + username);
-				targetUser = userService.getUserById(Long.parseLong(username));
+				logger.info("not found uniquename " + userName);
+				targetUser = userService.getUserById(Long.parseLong(userName));
 				if (targetUser != null) {
-					logger.info("found id " + username);
+					logger.info("found id " + userName);
 					if (targetUser.getUniqueName() != null) {
-						return "redirect:/u/" + targetUser.getUniqueName();
+						return "redirect:/@" + targetUser.getUniqueName();
 					} else {
 						model.addAttribute("targetUser", targetUser);
 					}
 				} else {
 
-					logger.info("either not found id " + username);
+					logger.info("either not found id " + userName);
 					return "redirect:/";
 				}
 			}
@@ -220,5 +221,49 @@ public class RouteController {
 		}
 
 		return "viewSetting";
+	}
+
+	@GetMapping(path = "e/{eventName}")
+	public String viewEvent(@PathVariable("eventName") String eventName, HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		}
+
+		model.addAttribute("eventName", eventName);
+
+		return "viewEvent";
+	}
+
+	@GetMapping(path = "writeEvent")
+	public String addEvent(HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		} else {
+			return "redirect:/";
+		}
+
+		return "writeEvent";
+	}
+
+	@GetMapping(path = "writeEvent/{startEndDate}")
+	public String addEvent(@PathVariable("startEndDate") String startEndDate, HttpSession session, Model model) {
+		String[] startEndDateArr = startEndDate.split("&");
+
+		String startDate = startEndDateArr[0];
+		String endDate = startEndDateArr[1];
+
+		model.addAttribute("startDate", startDate);
+		model.addAttribute("endDate", endDate);
+
+		User loggedUser = (User) session.getAttribute("user");
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		} else {
+			return "redirect:/";
+		}
+
+		return "writeEvent";
 	}
 }

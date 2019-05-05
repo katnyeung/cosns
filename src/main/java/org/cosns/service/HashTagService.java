@@ -4,21 +4,26 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.cosns.dao.HashTagDAO;
-import org.cosns.repository.HashTag;
+import org.cosns.repository.Event;
 import org.cosns.repository.Post;
+import org.cosns.repository.User;
+import org.cosns.repository.extend.EventHashTag;
+import org.cosns.repository.extend.PostHashTag;
+import org.cosns.repository.extend.UserHashTag;
 import org.cosns.util.ConstantsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class HashTagService {
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	HashTagDAO hashTagDAO;
@@ -40,9 +45,9 @@ public class HashTagService {
 		return hashTagSet;
 	}
 
-	public void saveHash(Post post, Set<String> hashTagSet) {
+	public void savePostHash(Post post, Set<String> hashTagSet) {
 		for (String hashTag : hashTagSet) {
-			HashTag hashObject = new HashTag();
+			PostHashTag hashObject = new PostHashTag();
 
 			hashObject.setHashTag(hashTag);
 			hashObject.setPost(post);
@@ -51,13 +56,43 @@ public class HashTagService {
 		}
 	}
 
-	public void savePostKeyToRedis(Post post) {
-		redisService.setHashValue(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + post.getPostKey(), ConstantsUtil.REDIS_POST_ID, "" + post.getPostId());
+	public void saveEventHash(Event event, Set<String> hashTagSet) {
+		for (String hashTag : hashTagSet) {
+			EventHashTag hashObject = new EventHashTag();
+
+			hashObject.setHashTag(hashTag);
+			hashObject.setEvent(event);
+
+			hashTagDAO.save(hashObject);
+		}
 	}
 
-	public void saveHashToRedis(Post post, Set<String> hashTagSet, String postTagPrefix, String postTypePrefix) {
+	public void saveUserHash(User user, Set<String> hashTagSet) {
 		for (String hashTag : hashTagSet) {
-			redisService.addSetItem(postTagPrefix + ":" + hashTag.toLowerCase().trim(), postTypePrefix + ":" + post.getPostId());
+			UserHashTag hashObject = new UserHashTag();
+
+			hashObject.setHashTag(hashTag);
+			hashObject.setUser(user);
+
+			hashTagDAO.save(hashObject);
+		}
+	}
+
+	public void savePostHashToRedis(Post post, Set<String> hashTagSet, String tagPrefix, String typePrefix) {
+		for (String hashTag : hashTagSet) {
+			redisService.addSetItem(tagPrefix + ":" + hashTag.toLowerCase().trim(), typePrefix + ":" + post.getPostId());
+		}
+	}
+
+	public void saveEventHashToRedis(Event event, Set<String> hashTagSet, String tagPrefix, String typePrefix) {
+		for (String hashTag : hashTagSet) {
+			redisService.addSetItem(tagPrefix + ":" + hashTag.toLowerCase().trim(), typePrefix + ":" + event.getEventId());
+		}
+	}
+
+	public void saveUserHashToRedis(User user, Set<String> hashTagSet, String tagPrefix, String typePrefix) {
+		for (String hashTag : hashTagSet) {
+			redisService.addSetItem(tagPrefix + ":" + hashTag.toLowerCase().trim(), typePrefix + ":" + user.getUserId());
 		}
 	}
 

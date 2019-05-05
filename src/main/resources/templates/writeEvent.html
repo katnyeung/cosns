@@ -1,0 +1,114 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+
+
+
+<script th:include="components/header :: headerLibrary" th:remove="tag"></script>
+
+</head>
+<body ng-app="application">
+	<script>
+		var main = angular.module('application', [ 'ngSanitize' ]);
+
+		main.controller('addEventController', function($scope, $http, messageService) {
+
+			var startDateString = '[[${startDate}]]';
+			var endDateString = '[[${endDate}]]';
+
+			if (startDateString === '') {
+				$scope.startDate = new Date();
+			} else {
+				$scope.startDate = new Date(startDateString);
+			}
+
+			if (endDateString === '') {
+				$scope.endDate = new Date();
+			} else {
+				$scope.endDate = new Date(endDateString);
+			}
+
+			$scope.submit = function() {
+				if ($scope.eventName) {
+					$http({
+						url : "/event/addEvent",
+						method : "POST",
+						headers : {
+							'Content-Type' : 'application/json'
+						},
+						data : {
+							eventName : $scope.eventName,
+							description : $scope.description,
+							url : $scope.url,
+							startDate : $scope.startDate,
+							endDate : $scope.endDate
+						}
+					}).then(function(response) {
+						if (response.data.status === 'success') {
+							messageService.setMessage("Success added Event");
+
+						}
+					});
+				}
+			}
+
+		})
+	</script>
+	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
+
+	<div th:include="components/header :: headerScript" th:remove="tag"></div>
+	<div th:include="components/header :: headerBody" th:remove="tag"></div>
+
+	<div class="container" ng-controller="addEventController">
+
+		<div class="form-inline row m-1">
+			<h3>event</h3>
+
+		</div>
+		<hr class="row" />
+		<div class="row">
+			<form method="post" ng-submit="submit()" class="form-group">
+				<div class="row m-2">
+					Event Name <input type="text" name="name" ng-model="eventName" placeholder="(Name)" class="form-control mr-sm-2" />
+				</div>
+				<div class="row m-2">
+					Description
+					<textarea name="description" ng-model="description" placeholder="(Description)" class="form-control mr-sm-2" rows="10"></textarea>
+				</div>
+				<div class="row m-2">
+					URL <input type="text" name="url" ng-model="url" placeholder="(URL)" class="form-control mr-sm-2" />
+				</div>
+				<div class="row m-2">
+					Country <select ng-model="country" class="form-control mr-sm-2">
+						<option value="hkg" selected>Hong Kong</option>
+						<option value="szn">China - SZ</option>
+						<option value="gzu">China - GZ</option>
+						<option value="sha">China - Shanghai</option>
+						<option value="twn">Taiwan</option>
+						<option value="jpn">Japan</option>
+						<option value="other">Other</option>
+					</select>
+				</div>
+				<br />
+				<div class="row m-2 form-inline">
+					Start Date <input type="date" name="startDate" ng-model="startDate" class="form-control mr-sm-2" /> End Date <input type="date" name="endDate" ng-model="endDate" class="form-control mr-sm-2" />
+				</div>
+				<br />
+				<div class="row m-2">
+					<input type="submit" value="Add" class="form-control btn btn-info" />
+				</div>
+
+			</form>
+		</div>
+	</div>
+
+
+	<hr>
+
+	<footer>
+		<p>&copy; Company 2013</p>
+	</footer>
+
+</body>
+</html>

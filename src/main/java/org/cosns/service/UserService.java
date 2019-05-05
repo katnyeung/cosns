@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.cosns.dao.FriendRequestDAO;
 import org.cosns.dao.UserDAO;
@@ -16,13 +16,14 @@ import org.cosns.repository.extend.ProfileImage;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.UserFormDTO;
 import org.cosns.web.DTO.UserSettingDTO;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	ImageService imageService;

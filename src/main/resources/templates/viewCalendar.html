@@ -38,26 +38,29 @@
 			eventClick : function(info) {
 				info.jsEvent.preventDefault();
 
-				console.log(info.jsEvent);
-				$("#dialogCalendar .message").html("<a href='/ht/" + info.event.title + "'>" + info.event.title + "</a><br/> <a href ='" + info.event.url + "'>" + info.event.url + "</a>");
-				$('#dialogCalendar').dialog({
-					title : info.event.start,
-					position : {
-						my : "center",
-						at : "left+" + info.jsEvent.clientX + "px top+" + (info.jsEvent.clientY + 70) + "px ",
-						of : window
-					},
-				});
+				console.log(info.event);
+				var content = "<br/><span class='badge'>" + info.event.title + "</span>";
+				content += "<br/> <a href ='" + info.event.url + "' classs='btn btn-info'>" + info.event.url + "</a>";
+				if (info.event.extendedProps.description) {
+					content += "<br/> " + info.event.extendedProps.description + "";
+				}
+				if (info.event.extendedProps.image) {
+					content += "<img src='" + info.event.extendedProps.image + "' class='img-fluid m-1 rounded'/>";
+				}
+
+				$("#detail .message").html(content);
+
 				$(".ui-dialog-titlebar").hide();
 			},
 			selectable : true,
 			select : function(info) {
 				info.jsEvent.preventDefault();
 
-				$("#dialogCalendar .message").html("<a href ='w/" + info.startStr + "'> Write Post </a><br/><a href='registEvent/"+ info.startStr + "&" + info.endStr + "'>Regist Event</a>");
+				var endDate = new Date(info.end.setDate(info.end.getDate() - 1));
+				var endDateString = endDate.getFullYear() + "-" + (endDate.getMonth() + 1) + "-" + endDate.getDate();
+
+				$("#dialogCalendar .message").html("<a href ='w/" + info.startStr + "' class='btn'> Write Post </a><br/><a href='/writeEvent/"+ info.startStr + "&" + endDateString + "' class='btn'>Regist Event</a>");
 				$('#dialogCalendar').dialog({
-					width : 60,
-					height : 100,
 					position : {
 						my : "center",
 						at : "left+" + info.jsEvent.clientX + "px top+" + (info.jsEvent.clientY + 60) + "px ",
@@ -85,9 +88,12 @@
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
 	<div class="container" ng-controller="calendarController">
-		<h3>calendar</h3>
-		<div class="container-fluid">
-			<div id='calendar'></div>
+		<h3 class="row m-3">calendar</h3>
+		<div class="row">
+			<div id='calendar' class="col-md-10"></div>
+			<div id='detail' class="col-md-2">
+				<p class="message"></p>
+			</div>
 		</div>
 	</div>
 

@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import javax.imageio.ImageIO;
 
@@ -15,6 +15,7 @@ import org.cosns.repository.User;
 import org.cosns.repository.extend.PostImage;
 import org.cosns.repository.extend.ProfileImage;
 import org.cosns.util.ConstantsUtil;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +27,7 @@ import com.mortennobel.imagescaling.ResampleOp;
 
 @Service
 public class ImageService {
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	PostImageDAO postImageDAO;
@@ -34,10 +35,11 @@ public class ImageService {
 	@Autowired
 	ProfileImageDAO profileImageDAO;
 
-	public void savePostImage(String storedPath, String targetFileName, Long fileSize, User user) {
+	public void savePostImage(String storedPath, String targetFilename, String thumbnailFilename, Long fileSize, User user) {
 		PostImage image = new PostImage();
 		image.setStoredPath(storedPath);
-		image.setFilename(targetFileName);
+		image.setFilename(targetFilename);
+		image.setThumbnailFilename(thumbnailFilename);
 		image.setSize(fileSize);
 		image.setStatus(ConstantsUtil.IMAGE_PEND);
 
@@ -48,6 +50,7 @@ public class ImageService {
 		ProfileImage image = new ProfileImage();
 		image.setStoredPath(storedPath);
 		image.setFilename(targetFileName);
+		image.setThumbnailFilename(null);
 		image.setSize(fileSize);
 		image.setStatus(ConstantsUtil.IMAGE_PEND);
 		image.setUser(user);
@@ -55,7 +58,7 @@ public class ImageService {
 		profileImageDAO.save(image);
 	}
 
-	public File uploadImage(MultipartFile file, String targetPath, int size) throws IllegalStateException, IOException, NullPointerException {
+	public File uploadImage(MultipartFile file, String targetPath) throws IllegalStateException, IOException, NullPointerException {
 
 		File targetFile = new File(targetPath);
 
@@ -63,19 +66,17 @@ public class ImageService {
 
 		logger.info("file : " + targetFile);
 
-		resizeImage(targetFile, file.getContentType(), size);
-
 		return targetFile;
 	}
 
-	public void resizeImage(File targetFile, String contentType, int size) throws IOException {
-		logger.info("target file : " + targetFile);
-		logger.info("Content Type : " + contentType);
+	public void resizeImage(File fromFile, File outputFile, String ext, int size) throws IOException {
+		logger.info("target file : " + fromFile);
+		logger.info("Content Type : " + ext);
 		logger.info("Size : " + size);
 
 		// resize image
-		BufferedImage in = ImageIO.read(targetFile);
-		
+		BufferedImage in = ImageIO.read(fromFile);
+
 		if (in.getWidth() > size || in.getHeight() > size) {
 			ResampleOp resizeOp = new ResampleOp(DimensionConstrain.createMaxDimension(size, -1));
 
@@ -84,7 +85,7 @@ public class ImageService {
 
 			BufferedImage scaledImage = resizeOp.filter(in, null);
 
-			ImageIO.write(scaledImage, ConstantsUtil.mimeMap.get(contentType), targetFile);
+			ImageIO.write(scaledImage, ext, outputFile);
 			logger.info("Write file complete");
 		}
 

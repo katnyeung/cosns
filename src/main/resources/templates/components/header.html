@@ -18,7 +18,8 @@
 
 	<style type="text/css">
 body {
-	font-family: Microsoft JhengHei;
+	font-family: Microsoft JhengHei; !important
+	font-size:14px;
 }
 
 .container {
@@ -39,31 +40,13 @@ body {
 
 <header th:fragment="headerScript">
 	<div th:include="components/loginRegister :: loginRegisterScript" th:remove="tag"></div>
+	<script src="/js/message.js"></script>
 	<script>
-		main.factory('messageService', function() {
-			var shared = {
-				dialogMessage : '',
-				user : null
-			};
-
-			return {
-				getShared : function() {
-					return shared;
-				},
-				setMessage : function(message) {
-					shared.dialogMessage = message;
-				},
-				setUser : function(user) {
-					shared.user = user;
-				}
-			}
-		});
-
 		main.controller('messageController', function($scope, $timeout, messageService) {
 			$scope.shared = messageService.getShared();
 
 			var timeoutPromise;
-			$scope.$watch('shared', function() {
+			$scope.$watch('shared', function(newValue, oldValue) {
 				$timeout.cancel(timeoutPromise);
 
 				timeoutPromise = $timeout(function() {

@@ -130,10 +130,7 @@
 			<h3>Settings</h3>
 			<div class="row">
 				<div class="col-md-4 form-inline p-2">
-					<input type="password" ng-model="password" name="password"
-						placeholder="Password" class="form-control" /> <input
-						type="submit" id="update" value="update"
-						class="btn btn-primary form-control" />
+					<input type="password" ng-model="password" name="password" placeholder="Password" class="form-control" /> <input type="submit" id="update" value="update" class="btn btn-primary form-control" />
 				</div>
 			</div>
 			<div class="row">
@@ -142,34 +139,23 @@
 					<tr>
 						<td class="span3">Profile Image :</td>
 						<td>
-							<div
-								flow-init="{target: '/images/uploadProfileImage', testChunks:false, singleFile:true, chunkSize : 10000000}"
-								flow-files-submitted="$flow.upload()"
-								flow-file-success="$file.msg = $message"
-								flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)"
-								flow-name="obj.flow">
+							<div flow-init="{target: '/user/uploadProfileImage', testChunks:false, singleFile:true, chunkSize : 10000000}" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file)" flow-name="obj.flow">
 
 								<div class="span2">
 									<div class="thumbnail" ng-show="!$flow.files.length">
-										<img
-											ng-src="{{profileImage ? '/pimages/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}"
-											style="width: 150px; height: 150px" flow-btn /> <span
-											style="color: #CFCFCF">(Optional)</span>
+										<img ng-src="{{profileImage ? '/pimages/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" style="width: 150px; height: 150px" flow-btn /> <span style="color: #CFCFCF">(Optional)</span>
 									</div>
 									<div class="thumbnail" ng-show="$flow.files.length">
-										<img flow-img="$flow.files[0]"
-											style="width: 150px; height: 150px" flow-btn />
+										<img flow-img="$flow.files[0]" style="width: 150px; height: 150px" flow-btn />
 									</div>
 									<div ng-repeat="file in $flow.files">
-										<div class="progress" style="width: auto"
-											ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
-											<div class="bar" style="width: {{file.progress()* 100}}%">
+										<div class="progress" style="width: auto" ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
+											<div class="bar" style="width: {{file.progress()* 100">
 												<span>{{(file.progress() * 100).toFixed(0)}}%</span>
 											</div>
 										</div>
 									</div>
-									<button type="button" class="btn btn-info " flow-btn>select
-										image</button>
+									<button type="button" class="btn btn-info " flow-btn>select image</button>
 								</div>
 
 							</div>
@@ -178,29 +164,21 @@
 					<tr>
 						<td>Assign Unique ID :</td>
 						<td><div class="form-inline">
-								<input type="hidden" ng-mode="checkName" /> @<input type="text"
-									ng-model="uniqueName" name="uniqueName"
-									placeholder="(Optional)" class="form-control" /> <br />
-								&nbsp;
-								<button type="button" ng-click="checkUniqueName('inline')"
-									class="btn btn-info btn-sm form-control">Check</button>
+								<input type="hidden" ng-mode="checkName" /> @<input type="text" ng-model="uniqueName" name="uniqueName" placeholder="(Optional)" class="form-control" /> <br /> &nbsp;
+								<button type="button" ng-click="checkUniqueName('inline')" class="btn btn-info btn-sm form-control">Check</button>
 
-							</div> <small id="emailHelp" class="form-text text-muted warning"
-							ng-show="uniqueNameMessage">{{uniqueNameMessage}}</small></td>
+							</div> <small id="emailHelp" class="form-text text-muted warning" ng-show="uniqueNameMessage">{{uniqueNameMessage}}</small></td>
 					</tr>
 					<tr>
 						<td>Display Name :</td>
 						<td><div class="form-inline">
-								<input type="text" ng-model="displayName" name="displayName"
-									placeholder="(Optional)" class="form-control" />
+								<input type="text" ng-model="displayName" name="displayName" placeholder="(Optional)" class="form-control" />
 							</div></td>
 					</tr>
 					<tr>
 						<td>Profile Message :</td>
 						<td><div>
-								<textarea ng-model="profileMessage" name="message" rows="10"
-									class="form-control" style="min-width: 100%"
-									placeholder="(Optional)"></textarea>
+								<textarea ng-model="profileMessage" name="message" rows="10" class="form-control" style="min-width: 100%" placeholder="(Optional)"></textarea>
 							</div></td>
 					</tr>
 				</table>

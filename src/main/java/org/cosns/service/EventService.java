@@ -4,20 +4,24 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.cosns.dao.EventDAO;
 import org.cosns.dao.PostDAO;
 import org.cosns.repository.Event;
 import org.cosns.repository.HashTag;
+import org.cosns.repository.Image;
 import org.cosns.repository.Post;
 import org.cosns.repository.extend.PhotoEvent;
+import org.cosns.util.ConstantsUtil;
+import org.cosns.web.DTO.EventDetailDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EventService {
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	PostDAO postDAO;
@@ -30,6 +34,18 @@ public class EventService {
 
 		eventSet.stream().forEach(u -> {
 			u.setColor("red");
+			u.setTitle(u.getEventName());
+		});
+
+		return eventSet;
+	}
+
+	public Set<Event> getEventByUniqueName(String uniqueName) {
+		Set<Event> eventSet = eventDAO.getEventByUniqueName(uniqueName);
+
+		eventSet.stream().forEach(u -> {
+			u.setColor("red");
+			u.setTitle(u.getEventName());
 		});
 
 		return eventSet;
@@ -57,22 +73,42 @@ public class EventService {
 			} else if (post.getUser().getUniqueName() != null) {
 				userName = post.getUser().getUniqueName();
 			} else {
-				userName = "#" + post.getUser().getUserId();
+				userName = "@" + post.getUser().getUserId();
 			}
 
 			StringBuilder sb = new StringBuilder(userName);
 			for (HashTag hashTag : post.getHashtags()) {
 				sb.append("#");
 				sb.append(hashTag.getHashTag());
+				sb.append(" ");
 			}
-			event.setTitle(sb.toString());
 
-			event.setUrl("/p/" + post.getPostId());
+			event.setUrl("/@" + post.getPostKey());
 			event.setColor("blue");
+
+			event.setTitle(post.getPostKey());
+
+			for (Image image : post.getPostImages()) {
+				event.setImage("/images/" + image.getThumbnailFilename());
+				break;
+			}
 
 			eventSet.add(event);
 		}
 
 		return eventSet;
+	}
+
+	public Event createEvent(EventDetailDTO eventDTO) {
+		Event event = new PhotoEvent();
+		event.setEventName(eventDTO.getEventName());
+		event.setDescription(eventDTO.getDescription());
+		event.setUrl(eventDTO.getUrl());
+		event.setStart(eventDTO.getStartDate());
+		event.setEnd(eventDTO.getEndDate());
+		event.setStatus(ConstantsUtil.EVENT_ACTIVE);
+
+		event = eventDAO.save(event);
+		return event;
 	}
 }

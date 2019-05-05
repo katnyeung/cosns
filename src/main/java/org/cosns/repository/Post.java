@@ -25,6 +25,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.cosns.repository.extend.PostHashTag;
 import org.cosns.repository.extend.PostImage;
 import org.cosns.util.Auditable;
 
@@ -64,7 +65,7 @@ public abstract class Post extends Auditable<String> {
 	private List<PostImage> postImages;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-	private List<HashTag> hashtags;
+	private List<PostHashTag> hashtags;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
@@ -139,11 +140,11 @@ public abstract class Post extends Auditable<String> {
 		this.postImages = postImages;
 	}
 
-	public List<HashTag> getHashtags() {
+	public List<PostHashTag> getHashtags() {
 		return hashtags;
 	}
 
-	public void setHashtags(List<HashTag> hashtags) {
+	public void setHashtags(List<PostHashTag> hashtags) {
 		this.hashtags = hashtags;
 	}
 

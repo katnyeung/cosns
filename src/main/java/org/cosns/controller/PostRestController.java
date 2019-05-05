@@ -2,7 +2,6 @@ package org.cosns.controller;
 
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
@@ -21,6 +20,8 @@ import org.cosns.web.DTO.SearchPostDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.PostListResult;
 import org.cosns.web.result.PostReactionResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/post")
 public class PostRestController {
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	PostService postService;
@@ -99,9 +100,9 @@ public class PostRestController {
 		List<Post> postList = null;
 
 		if (user != null) {
-			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_POST_TAG_TYPE_ALL, searchPost.getOrderBy(), user);
+			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_TAG_TYPE_ALL_POST, searchPost.getOrderBy(), user);
 		} else {
-			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_POST_TAG_TYPE_ALL, searchPost.getOrderBy());
+			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_TAG_TYPE_ALL_POST, searchPost.getOrderBy());
 		}
 
 		plr.setPostList(postList);
@@ -200,12 +201,12 @@ public class PostRestController {
 
 			logger.info("writing hash : " + hashTagSet);
 
-			hashTagService.saveHash(post, hashTagSet);
+			hashTagService.savePostHash(post, hashTagSet);
 
-			hashTagService.saveHashToRedis(post, hashTagSet, ConstantsUtil.REDIS_POST_TAG_GROUP, ConstantsUtil.REDIS_POST_TAG_TYPE_PHOTO);
+			hashTagService.savePostHashToRedis(post, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_PHOTO);
 
-			hashTagService.savePostKeyToRedis(post);
-			
+			redisService.savePostKeyToRedis(post);
+
 			redisService.addPostRecord(post.getPostId());
 
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);

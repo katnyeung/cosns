@@ -13,15 +13,15 @@
 		var main = angular.module('application', [ 'infinite-scroll', 'ngSanitize' ]);
 
 		main.controller('searchController', function($scope, $http, messageService, postService) {
-
 			$scope.shared = messageService.getShared();
-
+			$scope.sharedUser = messageService.getSharedUser();
+			
 			$scope.keyword = '[[${hashTag}]]';
 			$scope.orderByType = '[[${orderByType}]]';
 
 			$scope.search = function() {
 				if ($scope.keyword) {
-					postService.searchPosts($scope.keyword,$scope.orderByKey, handler);
+					postService.searchPosts($scope.keyword, $scope.orderByType, handler);
 				}
 			}
 
@@ -44,7 +44,7 @@
 				$scope.postList = postList;
 			}
 
-			$scope.$watch('shared.user', function(newValue, oldValue) {
+			$scope.$watch('sharedUser.user', function(newValue, oldValue) {
 				if (newValue != oldValue) {
 					$scope.loadPost(handler);
 				}
@@ -58,30 +58,29 @@
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
-	<div class="container">
-		<div ng-controller="searchController" class="row m-5">
+	<div class="container" ng-controller="searchController">
 
-			<div class="form-inline">
-				<h3>tag</h3>
-				&nbsp;
-				<form ng-submit="search()">
-					<div class="btn-group btn-group-sm  btn-light form-inline" role="group" aria-label="Basic example">
-						<button type="button" class="btn" ng-class="{'btn-warning' : orderByType == 'view'}" ng-click="orderByType = 'view'">view</button>
-						<button type="button" class="btn " ng-class="{'btn-warning' : orderByType == 'date'}" ng-click="orderByType = 'date'">date</button>
-					</div>
-					<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
-					<button class="form-control mr-sm-2" type="submit">Search</button>
-				</form>
-			</div>
-			<div ng-show="postList" class="row">
-				<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-5 m-5">
-					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
+		<div class="form-inline row m-1">
+			<h3>tag</h3>
+			&nbsp;
+			<form ng-submit="search()">
+				<div class="btn-group btn-group-sm  btn-light form-inline" role="group" aria-label="Basic example">
+					<button type="button" class="btn" ng-class="{'btn-warning' : orderByType == 'view'}" ng-click="orderByType = 'view'">view</button>
+					<button type="button" class="btn " ng-class="{'btn-warning' : orderByType == 'date'}" ng-click="orderByType = 'date'">date</button>
 				</div>
+				<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
+				<button class="form-control mr-sm-2" type="submit">Search</button>
+			</form>
+		</div>
+		<hr class="row" />
+		<div ng-show="postList" class="row">
+			<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-3">
+				<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
 			</div>
 		</div>
-
-
 	</div>
+
+
 	<hr>
 
 	<footer>

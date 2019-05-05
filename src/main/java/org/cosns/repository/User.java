@@ -22,6 +22,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.cosns.repository.extend.ProfileImage;
+import org.cosns.repository.extend.UserHashTag;
 import org.cosns.util.Auditable;
 import org.cosns.util.ConstantsUtil;
 import org.hibernate.annotations.Where;
@@ -91,6 +92,9 @@ public class User extends Auditable<String> {
 	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private Set<PostReaction> postReaction;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<UserHashTag> hashtags;
 
 	@JsonIgnore
 	private Date lastUpdateUniqueNameDate;
@@ -205,6 +209,14 @@ public class User extends Auditable<String> {
 
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
+	}
+
+	public List<UserHashTag> getHashtags() {
+		return hashtags;
+	}
+
+	public void setHashtags(List<UserHashTag> hashtags) {
+		this.hashtags = hashtags;
 	}
 
 }

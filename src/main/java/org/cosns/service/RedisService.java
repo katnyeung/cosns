@@ -1,13 +1,22 @@
 package org.cosns.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.cosns.repository.Post;
 import org.cosns.util.ConstantsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.SortParameters.Order;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.query.SortQuery;
 import org.springframework.data.redis.core.query.SortQueryBuilder;
@@ -15,7 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RedisService {
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
@@ -25,10 +34,11 @@ public class RedisService {
 	}
 
 	public Set<String> findKeys(String query) {
-		return stringRedisTemplate.keys("*" + query + "*");
+		return scanKeys(query);
 	}
 
 	public boolean hasKey(String query) {
+		logger.info("redis : checking : " + query + ", exist ? " + stringRedisTemplate.hasKey(query));
 		return stringRedisTemplate.hasKey(query);
 	}
 
@@ -53,6 +63,10 @@ public class RedisService {
 		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + post.getPostKey());
 		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + post.getPostKey());
 		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_LIKE_GROUP + ":" + post.getPostKey());
+	}
+
+	public void savePostKeyToRedis(Post post) {
+		setHashValue(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + post.getPostKey(), ConstantsUtil.REDIS_POST_ID, "" + post.getPostId());
 	}
 
 	public void incrLike(Long postId, Long userId) {
@@ -123,11 +137,43 @@ public class RedisService {
 	}
 
 	public List<String> getSortedKeysByToday() {
-
 		SortQuery<String> query = SortQueryBuilder.sort(ConstantsUtil.REDIS_POST_GROUP).by(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":*->today").order(Order.DESC).build();
-
 		return stringRedisTemplate.sort(query);
+	}
 
+	public Set<String> scanKeys(String pattern) {
+		Set<String> keySet = new HashSet<>();
+
+		logger.info("Searching for pattern {}", pattern);
+		Iterable<byte[]> byters = stringRedisTemplate.execute(new RedisCallback<Iterable<byte[]>>() {
+
+			@Override
+			public Iterable<byte[]> doInRedis(RedisConnection connection) throws DataAccessException {
+
+				List<byte[]> binaryKeys = new ArrayList<byte[]>();
+
+				ScanOptions.ScanOptionsBuilder scanOptionsBuilder = new ScanOptions.ScanOptionsBuilder();
+				scanOptionsBuilder.match(pattern);
+				Cursor<byte[]> cursor = connection.scan(scanOptionsBuilder.build());
+				while (cursor.hasNext()) {
+					binaryKeys.add(cursor.next());
+				}
+
+				try {
+					cursor.close();
+				} catch (IOException e) {
+					logger.info("Had a problem", e);
+				}
+
+				return binaryKeys;
+			}
+		});
+
+		for (byte[] byteArr : byters) {
+			logger.info(new String(byteArr));
+			keySet.add(new String(byteArr));
+		}
+		return keySet;
 	}
 
 }

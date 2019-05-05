@@ -1,95 +1,46 @@
 <!-- components/header.html -->
 <header th:fragment="loginRegisterScript">
+	<script src="/js/user.js"></script>
 	<script th:inline="javascript">
-		main.controller('userController', function($scope, $http, $timeout, messageService) {
+		main.controller('userController', function($scope, $http, $timeout, messageService, userService) {
+			$scope.shared = messageService.getShared();
+			$scope.sharedUser = messageService.getSharedUser();
+
+			userService.setMessageService(messageService);
+
 			$scope.login = function() {
-				$scope.showRegister = false;
-				if ($scope.login.email) {
-					$http({
-						url : "/user/login",
-						method : "POST",
-						headers : {
-							'Content-Type' : 'application/json'
-						},
-						data : {
-							'email' : $scope.login.email,
-							'password' : $scope.login.password,
+				userService.login($scope.login.email, $scope.login.password).then(function() {
+					$scope.showRegister = false;
+				});
 
-						}
-					}).then(function(response) {
-						if (response.data.status == 'success') {
-
-							messageService.setUser(response.data.user);
-							$scope.message(response.data.remarks)
-						} else {
-
-							$scope.message(response.data.remarks)
-						}
-
-					});
-				}
 			};
 			$scope.logout = function() {
-				$http({
-					url : "/user/logout",
-					method : "GET",
-					headers : {
-						'Content-Type' : 'application/json'
-					}
-				}).then(function(response) {
-					messageService.setUser(response.data.user);
-
-				});
+				userService.logout();
 			};
 
 			$scope.register = function() {
 				if ($scope.register.email) {
 					if ($scope.register.password == $scope.register.passwordAgain) {
-						$http({
-							url : "/user/register",
-							method : "POST",
-							headers : {
-								'Content-Type' : 'application/json'
-							},
-							data : {
-								'email' : $scope.register.email,
-								'password' : $scope.register.password,
-								'passwordAgain' : $scope.register.passwordAgain,
-							}
-						}).then(function(response) {
-							if(response.data.status == 'success'){
-								$scope.message(response.data.remarks);
-								$scope.showRegister = false;
-							}else{
-								$scope.message(response.data.remarks);
-							}
-							
+						userService.register($scope.register.email, $scope.register.password, $scope.register.passwordAgain).then(function() {
+							$scope.showRegister = false;
 						});
 					} else {
-						$scope.message("please verify your password")
+						shared.messageService.setMessage("please verify your password");
 					}
-
 				}
+
 			};
 
-			$scope.message = function(message) {
-				messageService.setMessage(message);
-			}
-
 			messageService.setUser(/*[[${user}]]*/{});
-
-			$scope.shared = messageService.getShared();
 		});
 	</script>
 </header>
 <header th:fragment="loginRegisterBody">
 	<nav class="mr-auto">
-		<a class="p-2 text-dark" href="/c">Calendar</a> 
-		<a class="p-2 text-dark" href="/t" ng-show="shared.user">Timeline</a> 
-		<a class="p-2 text-dark" href="/w" ng-show="shared.user">Write</a>
+		<a class="p-2 text-dark" href="/c">Calendar</a> <a class="p-2 text-dark" href="/t" ng-show="sharedUser.user">Timeline</a> <a class="p-2 text-dark" href="/w" ng-show="sharedUser.user">Write</a>
 	</nav>
 
-	<div ng-hide="shared.user" class="ml-auto">
+	<div ng-hide="sharedUser.user" class="ml-auto">
 		<form ng-submit="login()" class="form-inline">
 			<input class="form-control mr-sm-2" type="text" ng-model="login.email" name="email" placeholder="Email"> <input class="form-control mr-sm-2" type="password" ng-model="login.password" name="password" placeholder="Password">
 
@@ -99,8 +50,8 @@
 		</form>
 	</div>
 
-	<div ng-show="shared.user">
-		<a href="/u/" class="btn">{{shared.user.displayName ? shared.user.displayName : shared.user.uniqueName}}</a>  <a href="/setting/" class="btn"><i class="fas fa-cog"></i> Setting</a> <a href="#" ng-click="logout(); $event.preventDefault();" class="btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+	<div ng-show="sharedUser.user">
+		<a href="/@" class="btn">{{sharedUser.user.displayName ? sharedUser.user.displayName : (sharedUser.user.uniqueName ? sharedUser.user.uniqueName : sharedUser.user.email)}}</a> <a href="/setting/" class="btn"><i class="fas fa-cog"></i> Setting</a> <a href="#" ng-click="logout(); $event.preventDefault();" class="btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
 	</div>
 
 </header>

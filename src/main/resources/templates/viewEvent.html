@@ -1,0 +1,60 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+
+
+
+<script th:include="components/header :: headerLibrary" th:remove="tag"></script>
+
+</head>
+<body ng-app="application">
+	<script>
+		var main = angular.module('application', [ 'ngSanitize' ]);
+
+		main.controller('eventController', function($scope, $http, messageService) {
+			$scope.shared = messageService.getShared();
+			$scope.sharedUser = messageService.getSharedUser();
+
+			$scope.eventName = '[[${eventName}]]';
+
+			$http({
+				url : "/event/getEventDetail",
+				method : "GET",
+				headers : {
+					'Content-Type' : 'application/json'
+				},
+				data : {
+					eventName : $scope.eventName
+				}
+			}).then(function(response) {
+				if (response.data.status === 'success') {
+					$scope.event = response.data.event
+				}
+			});
+
+		});
+	</script>
+	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
+
+	<div th:include="components/header :: headerScript" th:remove="tag"></div>
+	<div th:include="components/header :: headerBody" th:remove="tag"></div>
+
+	<div class="container" ng-controller="eventController">
+
+		<div class="form-inline row m-1">
+			<h3>event</h3>
+			{{event}}
+		</div>
+		<hr class="row" />
+
+	</div>
+
+	<hr>
+
+	<footer>
+		<p>&copy; Company 2013</p>
+	</footer>
+
+</body>
+</html>

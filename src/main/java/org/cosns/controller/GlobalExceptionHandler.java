@@ -1,21 +1,20 @@
 package org.cosns.controller;
 
-import java.util.logging.Logger;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.tomcat.util.http.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.util.DefaultException;
 import org.cosns.web.result.ErrorResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@ExceptionHandler({ DefaultException.class })
 	@ResponseBody

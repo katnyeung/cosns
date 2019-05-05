@@ -1,21 +1,26 @@
 package org.cosns.repository;
 
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.cosns.repository.extend.EventHashTag;
 import org.cosns.util.Auditable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -23,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name = "event")
+@Table(name = "event", indexes = { @Index(name = "INDEX_EVENT_UNIQUENAME", columnList = "eventName") })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "event_type")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
@@ -39,8 +44,8 @@ public abstract class Event extends Auditable<String> {
 	Date end;
 
 	@NotNull
-	@Lob
-	String title;
+	@Size(max = 255)
+	String eventName;
 
 	@NotNull
 	@Lob
@@ -55,8 +60,21 @@ public abstract class Event extends Auditable<String> {
 	@Size(max = 1)
 	String status = "P";
 
+	@Lob
+	@Column(nullable = true)
+	String location;
+
 	@Transient
 	String color;
+
+	@Transient
+	String image;
+
+	@Transient
+	String title;
+
+	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+	private List<EventHashTag> hashtags;
 
 	public Long getEventId() {
 		return eventId;
@@ -80,14 +98,6 @@ public abstract class Event extends Auditable<String> {
 
 	public void setEnd(Date end) {
 		this.end = end;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
 	}
 
 	public String getUrl() {
@@ -120,6 +130,46 @@ public abstract class Event extends Auditable<String> {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public String getEventName() {
+		return eventName;
+	}
+
+	public void setEventName(String eventName) {
+		this.eventName = eventName;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public List<EventHashTag> getHashtags() {
+		return hashtags;
+	}
+
+	public void setHashtags(List<EventHashTag> hashtags) {
+		this.hashtags = hashtags;
 	}
 
 }

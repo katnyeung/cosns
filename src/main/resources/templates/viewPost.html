@@ -8,7 +8,9 @@
 	var main = angular.module('application', [ 'ngSanitize' ]);
 
 	main.controller('viewPostController', function($scope, $window, postService, messageService) {
-
+		$scope.shared = messageService.getShared();
+		$scope.sharedUser = messageService.getSharedUser();
+		
 		postService.setMessageService(messageService);
 
 		$scope.likePost = function(post) {
@@ -32,9 +34,7 @@
 
 		$scope.loadPost(handler);
 
-		$scope.shared = messageService.getShared();
-
-		$scope.$watch('shared.user', function(newValue, oldValue) {
+		$scope.$watch('sharedUser.user', function(newValue, oldValue) {
 			if (newValue != oldValue) {
 				$scope.loadPost(handler);
 			}

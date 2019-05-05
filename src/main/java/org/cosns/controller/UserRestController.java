@@ -1,14 +1,11 @@
 package org.cosns.controller;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.io.FilenameUtils;
 import org.cosns.repository.FriendRequest;
 import org.cosns.repository.User;
 import org.cosns.service.ImageService;
@@ -16,13 +13,12 @@ import org.cosns.service.PostService;
 import org.cosns.service.RedisService;
 import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
-import org.cosns.web.DTO.ImageUploadDTO;
 import org.cosns.web.DTO.RegistNameDTO;
 import org.cosns.web.DTO.UserFormDTO;
 import org.cosns.web.DTO.UserSettingDTO;
 import org.cosns.web.result.DefaultResult;
-import org.cosns.web.result.UploadImageResult;
 import org.cosns.web.result.UserResult;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,12 +27,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/user")
 public class UserRestController {
-	Logger logger = Logger.getLogger(this.getClass().getName());
+	public final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	UserService userService;
@@ -148,47 +143,6 @@ public class UserRestController {
 		}
 
 		return ur;
-	}
-
-	@PostMapping(value = "/uploadProfileImage", consumes = { "multipart/form-data" })
-	public DefaultResult uploadProfileImage(ImageUploadDTO imageInfo, HttpSession session) throws IOException, NullPointerException {
-		UploadImageResult result = new UploadImageResult();
-		User user = (User) session.getAttribute("user");
-
-		if (user != null) {
-			try {
-
-				String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
-
-				logger.info("inside upload image");
-
-				MultipartFile fromFile = imageInfo.getFile();
-
-				String fileName = uuidPrefix + "." + FilenameUtils.getExtension(fromFile.getOriginalFilename());
-
-				String targetPath = uploadFolder + fileName;
-
-				imageService.uploadImage(fromFile, targetPath, 200);
-
-				imageService.saveProfileImage(uploadFolder, fileName, fromFile.getSize(), user);
-
-				result.setFilePath(fileName);
-				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
-
-			} catch (Exception ex) {
-				ex.printStackTrace();
-
-				result.setStatus(ConstantsUtil.RESULT_ERROR);
-				result.setRemarks(ex.getLocalizedMessage());
-
-			}
-
-		} else {
-			result.setStatus(ConstantsUtil.RESULT_ERROR);
-			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
-		}
-
-		return result;
 	}
 
 	@GetMapping(path = "/logout")
