@@ -20,7 +20,7 @@ public interface UserDAO extends JpaRepository<User, Long> {
 	public Set<User> findActiveUserById(@Param("userId") Long userId);
 
 	@Query("SELECT u FROM User u WHERE u.userId IN :userIdList and u.status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
-	public Set<User> findActiveUserByIdList(@Param("userIdList") List<Long> userIdList);
+	public List<User> findActiveUserByIdList(@Param("userIdList") Set<Long> userIdList);
 
 	@Query("SELECT u FROM User u WHERE u.uniqueName = :uniqueName and u.status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
 	public Set<User> findAllUserByUniqueName(@Param("uniqueName") String uniqueName);

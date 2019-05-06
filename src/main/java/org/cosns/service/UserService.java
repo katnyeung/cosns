@@ -273,4 +273,8 @@ public class UserService {
 
 		return followerMap;
 	}
+
+	public List<User> searchEvents(Map<Long, Integer> map, String orderBy, User user) {
+		return userDAO.findActiveUserByIdList(map.keySet());
+	}
 }

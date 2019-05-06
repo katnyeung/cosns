@@ -1,6 +1,7 @@
 package org.cosns.dao;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import org.cosns.repository.Event;
@@ -16,6 +17,9 @@ public interface EventDAO extends JpaRepository<Event, Long> {
 
 	@Query("FROM Event e WHERE e.eventId = :eventId AND e.status = '" + ConstantsUtil.EVENT_ACTIVE + "' ORDER BY e.createdate DESC")
 	public Set<Event> getEventById(@Param("eventId") Long eventId);
+
+	@Query("FROM Event e WHERE e.eventId IN :eventId AND e.status = '" + ConstantsUtil.EVENT_ACTIVE + "' ORDER BY e.createdate DESC")
+	public List<Event> getEventByIdList(@Param("eventId") Set<Long> eventIdList);
 
 	@Query("FROM Event e WHERE e.eventName = :eventName AND e.status = '" + ConstantsUtil.EVENT_ACTIVE + "' ORDER BY e.createdate DESC")
 	public Set<Event> getEventByUniqueName(String eventName);

@@ -3,11 +3,9 @@ package org.cosns.service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -315,16 +313,11 @@ public class PostService {
 		return setLikeRetweetedAndCount(postDAO.findPostByPostId(postId), userId);
 	}
 
-	public List<Post> searchPosts(String query, String postType, String eventType, String userType, String orderBy) {
-		return searchPosts(query, postType, eventType, userType, orderBy, null);
+	public List<Post> searchPosts(Map<Long, Integer> hitBox, String orderBy) {
+		return searchPosts(hitBox, orderBy, null);
 	}
 
-	public List<Post> searchPosts(String queryString, String postType, String eventType, String userType, String orderBy, User user) {
-		List<String> postTypeList = Arrays.asList(postType.split(","));
-		List<String> eventTypeList = Arrays.asList(eventType.split(","));
-		List<String> userTypeList = Arrays.asList(userType.split(","));
-
-		Map<String, Map<Long, Integer>> masterHitbox = searchPostsInRedis(queryString, postTypeList, eventTypeList, userTypeList);
+	public List<Post> searchPosts(Map<Long, Integer> hitBox, String orderBy, User user) {
 
 		String orderByString = "createdate";
 
@@ -339,73 +332,16 @@ public class PostService {
 			}
 		}
 
-		if (masterHitbox.get("post").size() > 0) {
+		if (hitBox.size() > 0) {
 			if (user != null) {
-				return setLikeRetweetedAndCount(postDAO.findPostByPostIdSet(sortByValue(masterHitbox.get("post"), true).keySet(), Sort.by(orderByString).descending()), user.getUserId());
+				return setLikeRetweetedAndCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet(), Sort.by(orderByString).descending()), user.getUserId());
 			} else {
-				return setLikeRetweetCount(postDAO.findPostByPostIdSet(sortByValue(masterHitbox.get("post"), true).keySet(), Sort.by(orderByString).descending()));
+				return setLikeRetweetCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet(), Sort.by(orderByString).descending()));
 			}
 		} else {
 			return null;
 		}
 
-	}
-
-	public Map<String, Map<Long, Integer>> searchPostsInRedis(String queryString, List<String> postTypeList, List<String> eventTypeList, List<String> userTypeList) {
-		Map<String, Map<Long, Integer>> masterHitbox = new HashMap<>();
-
-		Map<Long, Integer> postHitbox = new HashMap<>();
-		Map<Long, Integer> eventHitbox = new HashMap<>();
-		Map<Long, Integer> userHitbox = new HashMap<>();
-
-		masterHitbox.put("post", postHitbox);
-		masterHitbox.put("event", eventHitbox);
-		masterHitbox.put("user", userHitbox);
-
-		String[] queryList = queryString.split(" ");
-		for (String query : queryList) {
-			Set<String> keyList = hashTagService.queryKeySet(ConstantsUtil.REDIS_TAG_GROUP, query);
-			logger.info("searched key set : " + keyList);
-
-			hashTagService.incrHashTagSearchCount(keyList);
-
-			for (String key : keyList) {
-				// set hit rate
-
-				Set<String> itemSet = hashTagService.getMembers(key);
-				for (String itemString : itemSet) {
-
-					String[] idArr = itemString.split(":");
-
-					if (idArr.length > 1) {
-						String typeItem = idArr[0];
-						String idString = idArr[1];
-
-						if (postTypeList.contains(typeItem)) {
-							putToHitbox(idString, postHitbox);
-						}
-						if (eventTypeList.contains(typeItem)) {
-							putToHitbox(idString, eventHitbox);
-						}
-						if (userTypeList.contains(typeItem)) {
-							putToHitbox(idString, userHitbox);
-						}
-					}
-				}
-			}
-		}
-
-		return masterHitbox;
-	}
-
-	private void putToHitbox(String idString, Map<Long, Integer> hitbox) {
-		Long id = Long.parseLong(idString);
-		Integer count = hitbox.get(id);
-		if (count == null) {
-			hitbox.put(id, 0);
-		} else {
-			hitbox.put(id, count + 1);
-		}
 	}
 
 	private static Map<Long, Integer> sortByValue(Map<Long, Integer> unsortMap, final boolean order) {

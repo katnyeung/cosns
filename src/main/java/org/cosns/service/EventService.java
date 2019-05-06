@@ -3,6 +3,7 @@ package org.cosns.service;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.cosns.dao.EventDAO;
@@ -11,6 +12,7 @@ import org.cosns.repository.Event;
 import org.cosns.repository.HashTag;
 import org.cosns.repository.Image;
 import org.cosns.repository.Post;
+import org.cosns.repository.User;
 import org.cosns.repository.extend.PhotoEvent;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.EventDetailDTO;
@@ -110,5 +112,9 @@ public class EventService {
 
 		event = eventDAO.save(event);
 		return event;
+	}
+
+	public List<Event> searchEvents(Map<Long, Integer> map, String orderBy, User user) {
+		return eventDAO.getEventByIdList(map.keySet());
 	}
 }

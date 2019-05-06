@@ -1,8 +1,10 @@
 package org.cosns.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -126,4 +128,60 @@ public class HashTagService {
 		}
 	}
 
+	public Map<String, Map<Long, Integer>> searchAllByHashTag(String queryString, List<String> postTypeList, List<String> eventTypeList, List<String> userTypeList) {
+		Map<String, Map<Long, Integer>> masterHitbox = new HashMap<>();
+
+		Map<Long, Integer> postHitbox = new HashMap<>();
+		Map<Long, Integer> eventHitbox = new HashMap<>();
+		Map<Long, Integer> userHitbox = new HashMap<>();
+
+		masterHitbox.put("post", postHitbox);
+		masterHitbox.put("event", eventHitbox);
+		masterHitbox.put("user", userHitbox);
+
+		String[] queryList = queryString.split(" ");
+		for (String query : queryList) {
+			Set<String> keyList = queryKeySet(ConstantsUtil.REDIS_TAG_GROUP, query);
+			logger.info("searched key set : " + keyList);
+
+			incrHashTagSearchCount(keyList);
+
+			for (String key : keyList) {
+				// set hit rate
+
+				Set<String> itemSet = getMembers(key);
+				for (String itemString : itemSet) {
+
+					String[] idArr = itemString.split(":");
+
+					if (idArr.length > 1) {
+						String typeItem = idArr[0];
+						String idString = idArr[1];
+
+						if (postTypeList.contains(typeItem)) {
+							putToHitbox(idString, postHitbox);
+						}
+						if (eventTypeList.contains(typeItem)) {
+							putToHitbox(idString, eventHitbox);
+						}
+						if (userTypeList.contains(typeItem)) {
+							putToHitbox(idString, userHitbox);
+						}
+					}
+				}
+			}
+		}
+
+		return masterHitbox;
+	}
+
+	private void putToHitbox(String idString, Map<Long, Integer> hitbox) {
+		Long id = Long.parseLong(idString);
+		Integer count = hitbox.get(id);
+		if (count == null) {
+			hitbox.put(id, 0);
+		} else {
+			hitbox.put(id, count + 1);
+		}
+	}
 }

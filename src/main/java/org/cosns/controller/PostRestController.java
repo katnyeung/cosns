@@ -1,18 +1,23 @@
 package org.cosns.controller;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import org.cosns.repository.Event;
 import org.cosns.repository.Post;
 import org.cosns.repository.PostReaction;
 import org.cosns.repository.User;
+import org.cosns.service.EventService;
 import org.cosns.service.HashTagService;
 import org.cosns.service.ImageService;
 import org.cosns.service.PostService;
 import org.cosns.service.RedisService;
+import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.PostFormDTO;
 import org.cosns.web.DTO.PostReactionDTO;
@@ -20,6 +25,7 @@ import org.cosns.web.DTO.SearchPostDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.PostListResult;
 import org.cosns.web.result.PostReactionResult;
+import org.cosns.web.result.PostUserEventListResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +43,12 @@ public class PostRestController {
 
 	@Autowired
 	PostService postService;
+
+	@Autowired
+	EventService eventService;
+
+	@Autowired
+	UserService userService;
 
 	@Autowired
 	ImageService imageService;
@@ -94,21 +106,36 @@ public class PostRestController {
 
 	@PostMapping(path = "/searchPosts")
 	public DefaultResult searchPost(@RequestBody SearchPostDTO searchPost, HttpSession session) {
-		PostListResult plr = new PostListResult();
+		PostUserEventListResult puelr = new PostUserEventListResult();
 
 		User user = (User) session.getAttribute("user");
 		List<Post> postList = null;
+		List<Event> eventList = null;
+		List<User> userList = null;
+
+		List<String> postTypeList = Arrays.asList(ConstantsUtil.REDIS_TAG_TYPE_ALL_POST.split(","));
+		List<String> eventTypeList = Arrays.asList(ConstantsUtil.REDIS_TAG_TYPE_EVENT.split(","));
+		List<String> userTypeList = Arrays.asList(ConstantsUtil.REDIS_TAG_TYPE_USER.split(","));
+
+		Map<String, Map<Long, Integer>> masterHitbox = hashTagService.searchAllByHashTag(searchPost.getKeyword().toLowerCase(), postTypeList, eventTypeList, userTypeList);
 
 		if (user != null) {
-			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_TAG_TYPE_ALL_POST, searchPost.getOrderBy(), user);
+			postList = postService.searchPosts(masterHitbox.get("post"), searchPost.getOrderBy(), user);
+			eventList = eventService.searchEvents(masterHitbox.get("event"), searchPost.getOrderBy(), user);
+			userList = userService.searchEvents(masterHitbox.get("user"), searchPost.getOrderBy(), user);
 		} else {
-			postList = postService.searchPosts(searchPost.getKeyword().toLowerCase(), ConstantsUtil.REDIS_TAG_TYPE_ALL_POST, searchPost.getOrderBy());
+			postList = postService.searchPosts(masterHitbox.get("post"), searchPost.getOrderBy());
+			eventList = eventService.searchEvents(masterHitbox.get("event"), searchPost.getOrderBy(), null);
+			userList = userService.searchEvents(masterHitbox.get("user"), searchPost.getOrderBy(), null);
 		}
 
-		plr.setPostList(postList);
-		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		puelr.setPostList(postList);
+		puelr.setEventList(eventList);
+		puelr.setUserList(userList);
 
-		return plr;
+		puelr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+		return puelr;
 	}
 
 	@GetMapping(path = "/getTopPost/{type}/{date}")
