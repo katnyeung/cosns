@@ -35,8 +35,10 @@
 				postService.searchPost(keyword, 'date', handler);
 			}
 
-			var handler = function(postList) {
-				$scope.postList = postList;
+			var handler = function(data) {
+				$scope.postList = data.postList;
+				$scope.eventList = data.eventList;
+				$scope.userList = data.userList;
 			}
 
 			$scope.$watch('sharedUser.user', function(newValue, oldValue) {
@@ -174,10 +176,12 @@
 					<button class="form-control mr-sm-2" type="submit">Search</button>
 				</form>
 			</div>
-			<div ng-show="postList" class="row">
+			<div class="row">
 				<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-2 m-4">
 					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
+				<div ng-repeat="event in eventList" class="col-md-3">{{event}}</div>
+				<div ng-repeat="user in userList" class="col-md-3">{{user}}</div>
 			</div>
 		</div>
 

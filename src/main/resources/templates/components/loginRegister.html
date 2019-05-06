@@ -40,7 +40,7 @@
 		<a class="p-2 text-dark" href="/c">Calendar</a> <a class="p-2 text-dark" href="/t" ng-show="sharedUser.user">Timeline</a> <a class="p-2 text-dark" href="/w" ng-show="sharedUser.user">Write</a>
 	</nav>
 
-	<div ng-hide="sharedUser.user" class="ml-auto">
+	<div ng-if="!sharedUser.user" class="ml-auto">
 		<form ng-submit="login()" class="form-inline">
 			<input class="form-control mr-sm-2" type="text" ng-model="login.email" name="email" placeholder="Email"> <input class="form-control mr-sm-2" type="password" ng-model="login.password" name="password" placeholder="Password">
 
@@ -50,7 +50,7 @@
 		</form>
 	</div>
 
-	<div ng-show="sharedUser.user">
+	<div ng-if="sharedUser.user">
 		<a href="/@" class="btn">{{sharedUser.user.displayName ? sharedUser.user.displayName : (sharedUser.user.uniqueName ? sharedUser.user.uniqueName : sharedUser.user.email)}}</a> <a href="/setting/" class="btn"><i class="fas fa-cog"></i> Setting</a> <a href="#" ng-click="logout(); $event.preventDefault();" class="btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
 	</div>
 

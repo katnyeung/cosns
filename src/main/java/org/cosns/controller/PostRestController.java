@@ -121,12 +121,12 @@ public class PostRestController {
 
 		if (user != null) {
 			postList = postService.searchPosts(masterHitbox.get("post"), searchPost.getOrderBy(), user);
-			eventList = eventService.searchEvents(masterHitbox.get("event"), searchPost.getOrderBy(), user);
-			userList = userService.searchEvents(masterHitbox.get("user"), searchPost.getOrderBy(), user);
+			eventList = eventService.searchEvents(masterHitbox.get("event"));
+			userList = userService.searchUsers(masterHitbox.get("user"));
 		} else {
 			postList = postService.searchPosts(masterHitbox.get("post"), searchPost.getOrderBy());
-			eventList = eventService.searchEvents(masterHitbox.get("event"), searchPost.getOrderBy(), null);
-			userList = userService.searchEvents(masterHitbox.get("user"), searchPost.getOrderBy(), null);
+			eventList = eventService.searchEvents(masterHitbox.get("event"));
+			userList = userService.searchUsers(masterHitbox.get("user"));
 		}
 
 		puelr.setPostList(postList);

@@ -112,10 +112,9 @@ main.factory('postService', function($http, $rootScope) {
 						orderBy : orderByType
 					}
 				}).then(function(response) {
-					shared.messageService.setMessage(response.data.remarks);
 					if (response.data.status === 'success') {
-						if (response.data.postList && response.data.postList.length > 0) {
-							callback(response.data.postList);
+						if (response.data) {
+							callback(response.data);
 						} else {
 							callback([]);
 						}

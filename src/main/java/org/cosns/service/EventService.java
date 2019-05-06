@@ -114,7 +114,12 @@ public class EventService {
 		return event;
 	}
 
-	public List<Event> searchEvents(Map<Long, Integer> map, String orderBy, User user) {
-		return eventDAO.getEventByIdList(map.keySet());
+	public List<Event> searchEvents(Map<Long, Integer> map) {
+		if (map.keySet().size() > 0) {
+			return eventDAO.getEventByIdList(map.keySet());
+		} else {
+			return null;
+		}
+
 	}
 }

@@ -128,6 +128,7 @@ public class HashTagService {
 		}
 	}
 
+	@Transactional
 	public Map<String, Map<Long, Integer>> searchAllByHashTag(String queryString, List<String> postTypeList, List<String> eventTypeList, List<String> userTypeList) {
 		Map<String, Map<Long, Integer>> masterHitbox = new HashMap<>();
 
