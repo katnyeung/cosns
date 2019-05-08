@@ -65,4 +65,6 @@ public class ConstantsUtil {
 
 	public static final String IMAGE_THUMBNAIL_POSTFIX = "_s";
 
+	public static final String REDIS_EVENT_NAME_GROUP = "eventname";
+	public static final String REDIS_EVENT_ID = "id";
 }

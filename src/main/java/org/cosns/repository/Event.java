@@ -15,12 +15,14 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.cosns.repository.extend.EventHashTag;
+import org.cosns.repository.extend.EventImage;
 import org.cosns.util.Auditable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -46,6 +48,10 @@ public abstract class Event extends Auditable<String> {
 	@NotNull
 	@Size(max = 255)
 	String eventName;
+
+	@NotNull
+	@Size(max = 255)
+	String eventKey;
 
 	@NotNull
 	@Lob
@@ -76,6 +82,13 @@ public abstract class Event extends Auditable<String> {
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
 	private List<EventHashTag> hashtags;
 
+	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+	@OrderBy("seq ASC")
+	private List<EventImage> eventImages;
+
+	@Transient
+	private List<Post> postList;
+
 	public Long getEventId() {
 		return eventId;
 	}
@@ -100,28 +113,28 @@ public abstract class Event extends Auditable<String> {
 		this.end = end;
 	}
 
+	public String getEventName() {
+		return eventName;
+	}
+
+	public void setEventName(String eventName) {
+		this.eventName = eventName;
+	}
+
+	public String getEventKey() {
+		return eventKey;
+	}
+
+	public void setEventKey(String eventKey) {
+		this.eventKey = eventKey;
+	}
+
 	public String getUrl() {
 		return url;
 	}
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public String getColor() {
-		return color;
-	}
-
-	public void setColor(String color) {
-		this.color = color;
 	}
 
 	public String getDescription() {
@@ -132,12 +145,12 @@ public abstract class Event extends Auditable<String> {
 		this.description = description;
 	}
 
-	public String getImage() {
-		return image;
+	public String getStatus() {
+		return status;
 	}
 
-	public void setImage(String image) {
-		this.image = image;
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public String getLocation() {
@@ -148,12 +161,20 @@ public abstract class Event extends Auditable<String> {
 		this.location = location;
 	}
 
-	public String getEventName() {
-		return eventName;
+	public String getColor() {
+		return color;
 	}
 
-	public void setEventName(String eventName) {
-		this.eventName = eventName;
+	public void setColor(String color) {
+		this.color = color;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 
 	public String getTitle() {
@@ -170,6 +191,22 @@ public abstract class Event extends Auditable<String> {
 
 	public void setHashtags(List<EventHashTag> hashtags) {
 		this.hashtags = hashtags;
+	}
+
+	public List<EventImage> getEventImages() {
+		return eventImages;
+	}
+
+	public void setEventImages(List<EventImage> eventImages) {
+		this.eventImages = eventImages;
+	}
+
+	public List<Post> getPostList() {
+		return postList;
+	}
+
+	public void setPostList(List<Post> postList) {
+		this.postList = postList;
 	}
 
 }

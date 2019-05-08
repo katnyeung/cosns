@@ -21,6 +21,6 @@ public interface EventDAO extends JpaRepository<Event, Long> {
 	@Query("FROM Event e WHERE e.eventId IN :eventId AND e.status = '" + ConstantsUtil.EVENT_ACTIVE + "' ORDER BY e.createdate DESC")
 	public List<Event> getEventByIdList(@Param("eventId") Set<Long> eventIdList);
 
-	@Query("FROM Event e WHERE e.eventName = :eventName AND e.status = '" + ConstantsUtil.EVENT_ACTIVE + "' ORDER BY e.createdate DESC")
-	public Set<Event> getEventByUniqueName(String eventName);
+	@Query("FROM Event e WHERE e.eventKey = :eventKey AND e.status = '" + ConstantsUtil.EVENT_ACTIVE + "' ORDER BY e.createdate DESC")
+	public Set<Event> getEventByEventKey(@Param("eventKey") String eventKey);
 }

@@ -33,7 +33,21 @@ public class HashTagService {
 	@Autowired
 	private RedisService redisService;
 
-	public Set<String> parseHash(String postMessage) {
+	public Set<String> parseHashByMessage(String postMessage) {
+		Pattern pattern = Pattern.compile(ConstantsUtil.HASHTAG_PATTERN);
+		Matcher matcher = pattern.matcher(postMessage);
+
+		Set<String> hashTagSet = new HashSet<>();
+
+		while (matcher.find()) {
+			String key = matcher.group(1);
+			hashTagSet.add(key);
+		}
+
+		return hashTagSet;
+	}
+
+	public Set<String> parseHashByComma(String postMessage) {
 		Pattern pattern = Pattern.compile(ConstantsUtil.HASHTAG_PATTERN);
 		Matcher matcher = pattern.matcher(postMessage);
 
@@ -184,5 +198,55 @@ public class HashTagService {
 		} else {
 			hitbox.put(id, count + 1);
 		}
+	}
+
+	public Set<String> getRelatedTag(String query, List<String> eventTypeList) {
+		Set<String> keyList = queryKeySet(ConstantsUtil.REDIS_TAG_GROUP, query);
+		Set<String> eventKeyList = new HashSet<>();
+
+		for (String key : keyList) {
+			Set<String> itemSet = getMembers(key);
+			for (String itemString : itemSet) {
+
+				String[] idArr = itemString.split(":");
+
+				if (idArr.length > 1) {
+					String typeItem = idArr[0];
+
+					if (eventTypeList.contains(typeItem)) {
+						eventKeyList.add(key.replaceAll(ConstantsUtil.REDIS_TAG_GROUP + ":", ""));
+					}
+				}
+			}
+		}
+
+		return eventKeyList;
+	}
+
+	public List<String> searchPostByHashTagSet(Set<String> querySet, List<String> eventTypeList) {
+		List<String> eventKeyList = new ArrayList<>();
+
+		for (String query : querySet) {
+			Set<String> keyList = queryKeySet(ConstantsUtil.REDIS_TAG_GROUP, query);
+			for (String key : keyList) {
+				Set<String> itemSet = getMembers(key);
+				for (String itemString : itemSet) {
+
+					String[] idArr = itemString.split(":");
+
+					if (idArr.length > 1) {
+						String typeItem = idArr[0];
+						String idString = idArr[1];
+
+						if (eventTypeList.contains(typeItem)) {
+							eventKeyList.add(idString);
+						}
+					}
+				}
+			}
+
+		}
+
+		return eventKeyList;
 	}
 }

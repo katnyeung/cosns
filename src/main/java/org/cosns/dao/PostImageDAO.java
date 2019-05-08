@@ -11,8 +11,8 @@ import org.springframework.data.repository.query.Param;
 public interface PostImageDAO extends JpaRepository<PostImage, Long> {
 
 	@Query("SELECT i FROM PostImage i WHERE i.filename = :filename and i.status = '" + ConstantsUtil.IMAGE_PEND + "'")
-	public List<PostImage> findPendImageByFilename(@Param("filename") String filename);
+	public List<PostImage> findPendPostImageByFilename(@Param("filename") String filename);
 
 	@Query("SELECT i FROM PostImage i WHERE i.filename = :filename and i.status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
-	public List<PostImage> findActiveImageByFilename(@Param("filename") String file);
+	public List<PostImage> findActivePostImageByFilename(@Param("filename") String file);
 }

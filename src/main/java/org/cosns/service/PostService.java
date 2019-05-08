@@ -544,7 +544,7 @@ public class PostService {
 		return null;
 	}
 
-	private List<Post> getPostByIds(List<String> keys) {
+	public List<Post> getPostByIds(List<String> keys) {
 		Set<Long> idList = keys.stream().limit(10).mapToLong(Long::parseLong).boxed().collect(Collectors.toSet());
 		return postDAO.findPostByPostIdSet(idList);
 	}

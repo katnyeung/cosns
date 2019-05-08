@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 public interface ProfileImageDAO extends JpaRepository<ProfileImage, Long> {
 
 	@Query("SELECT i FROM ProfileImage i WHERE i.filename = :filename and i.status = '" + ConstantsUtil.IMAGE_PEND + "'")
-	public List<ProfileImage> findPendImageByFilename(@Param("filename") String filename);
+	public List<ProfileImage> findPendProfileImageByFilename(@Param("filename") String filename);
 
 	@Query("SELECT i FROM ProfileImage i WHERE i.user.userId = :userId and i.status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
 	public List<ProfileImage> findActiveProfileImageByUserId(@Param("userId") Long userId);

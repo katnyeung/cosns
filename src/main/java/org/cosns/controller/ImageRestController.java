@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tomcat.util.http.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.cosns.repository.User;
+import org.cosns.repository.extend.EventImage;
 import org.cosns.repository.extend.PostImage;
 import org.cosns.repository.extend.ProfileImage;
 import org.cosns.service.ImageService;
@@ -63,6 +64,7 @@ public class ImageRestController {
 		}
 
 		List<PostImage> postImageSet = imageService.findActivePostImageByFilename(imageFile);
+		logger.info("postMessageSet : " + postImageSet);
 		if (postImageSet.iterator().hasNext()) {
 			PostImage postImage = postImageSet.iterator().next();
 
@@ -73,7 +75,32 @@ public class ImageRestController {
 		} else {
 			return null;
 		}
+	}
 
+	@GetMapping(path = "eimages/{imageFile}", produces = MediaType.IMAGE_JPEG_VALUE)
+	public ResponseEntity<byte[]> getEventImage(@PathVariable("imageFile") String imageFile, HttpSession session, Model model) throws IOException {
+		boolean isThumbnail = false;
+
+		Pattern pattern = Pattern.compile("([a-zA-Z0-9]*)" + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "\\.([a-zA-Z0-9]*)");
+		Matcher matcher = pattern.matcher(imageFile);
+
+		if (matcher.matches()) {
+			isThumbnail = true;
+			imageFile = matcher.group(1) + "." + matcher.group(2);
+		}
+
+		List<EventImage> eventImageSet = imageService.findActiveEventImageByFilename(imageFile);
+		logger.info("eventImageSet : " + eventImageSet);
+		if (eventImageSet.iterator().hasNext()) {
+			EventImage postImage = eventImageSet.iterator().next();
+
+			File img = new File(postImage.getStoredPath() + (isThumbnail ? postImage.getThumbnailFilename() : postImage.getFilename()));
+
+			return ResponseEntity.ok().contentType(MediaType.valueOf(FileTypeMap.getDefaultFileTypeMap().getContentType(img))).body(Files.readAllBytes(img.toPath()));
+
+		} else {
+			return null;
+		}
 	}
 
 	@GetMapping(path = "pimages/{imageFile}", produces = MediaType.IMAGE_JPEG_VALUE)
@@ -89,7 +116,6 @@ public class ImageRestController {
 		} else {
 			return null;
 		}
-
 	}
 
 	@PostMapping(value = "post/uploadImage", consumes = { "multipart/form-data" })
@@ -185,4 +211,51 @@ public class ImageRestController {
 		return result;
 	}
 
+	@PostMapping(value = "event/uploadImage", consumes = { "multipart/form-data" })
+	public DefaultResult uploadEventImageContent(ImageUploadDTO imageInfo, HttpSession session) throws IOException, NullPointerException, SizeLimitExceededException {
+		UploadImageResult result = new UploadImageResult();
+		User user = (User) session.getAttribute("user");
+
+		if (user != null) {
+			try {
+				String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
+
+				logger.info("user : " + user.getUserId() + " upload image");
+
+				MultipartFile fromFile = imageInfo.getFile();
+
+				String ext = FilenameUtils.getExtension(fromFile.getOriginalFilename());
+
+				String filename = uuidPrefix + "." + ext;
+				String thumbnailFilename = uuidPrefix + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "." + ext;
+
+				String targetFullPath = uploadFolder + filename;
+				logger.info("targetFullPath : " + targetFullPath);
+
+				File targetFile = imageService.uploadImage(fromFile, targetFullPath);
+				File thumbnailFile = new File(uploadFolder + thumbnailFilename);
+
+				imageService.resizeImage(targetFile, targetFile, ext, 2048);
+				imageService.resizeImage(targetFile, thumbnailFile, ext, 512);
+
+				imageService.saveEventImage(uploadFolder, filename, thumbnailFilename, targetFile.getTotalSpace(), user);
+
+				result.setFilePath(filename);
+				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+			} catch (Exception ex) {
+				ex.printStackTrace();
+
+				result.setStatus(ConstantsUtil.RESULT_ERROR);
+				result.setRemarks(ex.getLocalizedMessage());
+
+			}
+
+		} else {
+			result.setStatus(ConstantsUtil.RESULT_ERROR);
+			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+		}
+
+		return result;
+	}
 }

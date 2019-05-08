@@ -9,7 +9,9 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -52,6 +54,19 @@ public abstract class Image extends Auditable<String> {
 	@NotNull
 	@Size(max = 1)
 	private String status;
+
+	@JsonIgnore
+	@ManyToOne(optional = true)
+	@JoinColumn(name = "user_id", referencedColumnName = "userId")
+	private User user;
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 
 	public Long getImageId() {
 		return imageId;

@@ -1,9 +1,12 @@
 package org.cosns.web.DTO;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
-public class EventDetailDTO {
+public class EventFormDTO {
 	String eventName;
+	List<Map<String, String>> keyHashTag;
 
 	String description;
 
@@ -13,6 +16,8 @@ public class EventDetailDTO {
 
 	Date startDate;
 	Date endDate;
+
+	List<String> fileList;
 
 	public String getEventName() {
 		return eventName;
@@ -60,6 +65,22 @@ public class EventDetailDTO {
 
 	public void setLocation(String location) {
 		this.location = location;
+	}
+
+	public List<Map<String, String>> getKeyHashTag() {
+		return keyHashTag;
+	}
+
+	public void setKeyHashTag(List<Map<String, String>> keyHashTag) {
+		this.keyHashTag = keyHashTag;
+	}
+
+	public List<String> getFileList() {
+		return fileList;
+	}
+
+	public void setFileList(List<String> fileList) {
+		this.fileList = fileList;
 	}
 
 }

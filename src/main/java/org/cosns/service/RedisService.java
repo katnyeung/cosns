@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.cosns.repository.Event;
 import org.cosns.repository.Post;
 import org.cosns.util.ConstantsUtil;
 import org.slf4j.Logger;
@@ -174,6 +175,11 @@ public class RedisService {
 			keySet.add(new String(byteArr));
 		}
 		return keySet;
+	}
+
+	public void saveEventKeyToRedis(Event event) {
+		setHashValue(ConstantsUtil.REDIS_EVENT_NAME_GROUP + ":" + event.getEventKey(), ConstantsUtil.REDIS_EVENT_ID, "" + event.getEventId());
+		
 	}
 
 }

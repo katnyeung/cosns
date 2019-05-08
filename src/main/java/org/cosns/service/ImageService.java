@@ -5,16 +5,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import org.slf4j.Logger;
 
 import javax.imageio.ImageIO;
 
+import org.cosns.dao.EventImageDAO;
 import org.cosns.dao.PostImageDAO;
 import org.cosns.dao.ProfileImageDAO;
 import org.cosns.repository.User;
+import org.cosns.repository.extend.EventImage;
 import org.cosns.repository.extend.PostImage;
 import org.cosns.repository.extend.ProfileImage;
 import org.cosns.util.ConstantsUtil;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,9 @@ public class ImageService {
 	@Autowired
 	ProfileImageDAO profileImageDAO;
 
+	@Autowired
+	EventImageDAO eventImageDAO;
+
 	public void savePostImage(String storedPath, String targetFilename, String thumbnailFilename, Long fileSize, User user) {
 		PostImage image = new PostImage();
 		image.setStoredPath(storedPath);
@@ -42,6 +47,7 @@ public class ImageService {
 		image.setThumbnailFilename(thumbnailFilename);
 		image.setSize(fileSize);
 		image.setStatus(ConstantsUtil.IMAGE_PEND);
+		image.setUser(user);
 
 		postImageDAO.save(image);
 	}
@@ -56,6 +62,18 @@ public class ImageService {
 		image.setUser(user);
 
 		profileImageDAO.save(image);
+	}
+
+	public void saveEventImage(String storedPath, String targetFileName, String thumbnailFilename, Long fileSize, User user) {
+		EventImage image = new EventImage();
+		image.setStoredPath(storedPath);
+		image.setFilename(targetFileName);
+		image.setThumbnailFilename(thumbnailFilename);
+		image.setSize(fileSize);
+		image.setStatus(ConstantsUtil.IMAGE_PEND);
+		image.setUser(user);
+
+		eventImageDAO.save(image);
 	}
 
 	public File uploadImage(MultipartFile file, String targetPath) throws IllegalStateException, IOException, NullPointerException {
@@ -91,8 +109,16 @@ public class ImageService {
 
 	}
 
+	public List<EventImage> findPendEventImageByFilename(String file) {
+		return eventImageDAO.findPendEventImageByFilename(file);
+	}
+
+	public List<EventImage> findActiveEventImageByFilename(String file) {
+		return eventImageDAO.findActiveEventImageByFilename(file);
+	}
+
 	public List<ProfileImage> findPendProfileImageByFilename(String file) {
-		return profileImageDAO.findPendImageByFilename(file);
+		return profileImageDAO.findPendProfileImageByFilename(file);
 	}
 
 	public List<ProfileImage> findActiveProfileImageByUserId(Long userId) {
@@ -100,11 +126,11 @@ public class ImageService {
 	}
 
 	public List<PostImage> findPendPostImageByFilename(String file) {
-		return postImageDAO.findPendImageByFilename(file);
+		return postImageDAO.findPendPostImageByFilename(file);
 	}
 
 	public List<PostImage> findActivePostImageByFilename(String file) {
-		return postImageDAO.findActiveImageByFilename(file);
+		return postImageDAO.findActivePostImageByFilename(file);
 	}
 
 	public void saveProfileImage(ProfileImage image) {
@@ -113,6 +139,10 @@ public class ImageService {
 
 	public void savePostImage(PostImage image) {
 		postImageDAO.save(image);
+	}
+
+	public void saveEventImage(EventImage image) {
+		eventImageDAO.save(image);
 	}
 
 	public void disableAllProfileImageByUserId(Long userId) {

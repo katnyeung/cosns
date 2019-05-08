@@ -14,4 +14,5 @@ public interface HashTagDAO extends JpaRepository<HashTag, Long> {
 	@Query("UPDATE HashTag ht SET totalCount = totalCount + 1 WHERE hashTag IN :keyContentList")
 	void updateHitRateByKeys(@Param("keyContentList") List<String> keyContentList);
 
+
 }

@@ -17,10 +17,9 @@
 			$scope.sharedUser = messageService.getSharedUser();
 
 			$scope.eventName = '[[${eventName}]]';
-
 			$http({
 				url : "/event/getEventDetail",
-				method : "GET",
+				method : "POST",
 				headers : {
 					'Content-Type' : 'application/json'
 				},
@@ -28,8 +27,9 @@
 					eventName : $scope.eventName
 				}
 			}).then(function(response) {
+				console.log(response.data);
 				if (response.data.status === 'success') {
-					$scope.event = response.data.event
+					$scope.events = response.data.events
 				}
 			});
 
@@ -44,13 +44,35 @@
 
 		<div class="form-inline row m-1">
 			<h3>event</h3>
-			{{event}}
 		</div>
 		<hr class="row" />
 
+		<section class="row" ng-repeat="event in events">
+			<h3 class="col-md-12">{{event.eventName}}</h3>
+			<div class="col-md-12 m-1">{{event.start}} - {{event.end}}</div>
+			<div class="col-md-6 m-1" ng-repeat="image in event.eventImages">
+				<img ng-src="/eimages/{{::image.filename}}" class="img-fluid m-1 rounded" />
+			</div>
+
+			<div class="col-md-12 m-3">
+				<pre class=" m-1">{{event.description}}</pre>
+				<a href="{{event.url}}">{{event.url}}</a>
+			</div>
+			<div class="col-md-12 m-1" ng-repeat="hashTag in event.hashtags">
+				<a href="/h/{{::hashTag.hashTag}}" class="badge badge-info">{{::hashTag.hashTag}}</a>
+			</div>
+			{{event}}
+
+			<div class="row">
+				<div ng-repeat="post in event.postList | filter: {removed : false}" class="col-md-3">
+					<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
+				</div>
+			</div>
+		</section>
 	</div>
 
 	<hr>
+
 
 	<footer>
 		<p>&copy; Company 2013</p>

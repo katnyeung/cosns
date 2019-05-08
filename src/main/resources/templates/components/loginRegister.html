@@ -40,7 +40,7 @@
 		<a class="p-2 text-dark" href="/c">Calendar</a> <a class="p-2 text-dark" href="/t" ng-show="sharedUser.user">Timeline</a> <a class="p-2 text-dark" href="/w" ng-show="sharedUser.user">Write</a>
 	</nav>
 
-	<div ng-if="!sharedUser.user" class="ml-auto">
+	<div ng-show="!sharedUser.user" class="ml-auto">
 		<form ng-submit="login()" class="form-inline">
 			<input class="form-control mr-sm-2" type="text" ng-model="login.email" name="email" placeholder="Email"> <input class="form-control mr-sm-2" type="password" ng-model="login.password" name="password" placeholder="Password">
 
