@@ -39,7 +39,7 @@ public interface PostDAO extends PagingAndSortingRepository<Post, Long> {
 	@Query("SELECT p FROM Post p WHERE TYPE(p) = PhotoPost AND p.postId IN :postIdSet AND p.status = '" + ConstantsUtil.POST_ACTIVE + "'")
 	public List<Post> findPostByPostIdSet(@Param("postIdSet") Set<Long> postIdSet, Sort sort);
 
-	@Query("SELECT p FROM Post p WHERE TYPE(p) = PhotoPost AND p.postId IN :postIdSet AND p.status = '" + ConstantsUtil.POST_ACTIVE + "'")
+	@Query("SELECT p FROM Post p WHERE TYPE(p) = PhotoPost AND p.postId IN :postIdSet AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' ORDER BY p.createdate DESC")
 	public List<Post> findPostByPostIdSet(@Param("postIdSet") Set<Long> postIdSet);
 
 	@Query("SELECT p FROM Post p WHERE p.postId = :postId")

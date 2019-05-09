@@ -65,9 +65,14 @@ public class User extends Auditable<String> {
 	@Column(nullable = true)
 	private String message;
 
+	@OneToMany(mappedBy = "profileUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@Where(clause = "status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
+	private Set<ProfileImage> profileImages;
+
+	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@Where(clause = "status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
-	private Set<ProfileImage> profileImage;
+	private Set<Image> images;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -187,12 +192,20 @@ public class User extends Auditable<String> {
 		this.message = message;
 	}
 
-	public Set<ProfileImage> getProfileImage() {
-		return profileImage;
+	public Set<ProfileImage> getProfileImages() {
+		return profileImages;
 	}
 
-	public void setProfileImage(Set<ProfileImage> profileImage) {
-		this.profileImage = profileImage;
+	public void setProfileImages(Set<ProfileImage> profileImages) {
+		this.profileImages = profileImages;
+	}
+
+	public Set<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(Set<Image> images) {
+		this.images = images;
 	}
 
 	public Date getLastUpdateUniqueNameDate() {

@@ -277,11 +277,11 @@ public class PostService {
 		return post.stream().sorted(Comparator.comparing(Post::getCreatedate).reversed()).collect(Collectors.toList());
 	}
 
-	private List<Post> setLikeRetweetCount(List<Post> postList) {
+	public List<Post> setLikeRetweetCount(List<Post> postList) {
 		return postList.stream().map(p -> setLikeRetweetCount(p)).collect(Collectors.toList());
 	}
 
-	private List<Post> setLikeRetweetedAndCount(List<Post> postList, Long userId) {
+	public List<Post> setLikeRetweetedAndCount(List<Post> postList, Long userId) {
 		return postList.stream().map(p -> setLikeRetweetCount(p)).map(p -> setLikedRetweeted(p, userId)).collect(Collectors.toList());
 	}
 

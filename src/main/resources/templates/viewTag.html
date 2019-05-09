@@ -80,7 +80,9 @@
 			<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-3">
 				<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
 			</div>
-			<div ng-repeat="event in eventList" class="col-md-3">{{event}}</div>
+			<div ng-repeat="event in eventList" class="col-md-3">
+				<div th:include="components/event :: event" th:remove="tag"></div>
+			</div>
 			<div ng-repeat="user in userList" class="col-md-3">{{user}}</div>
 		</div>
 	</div>

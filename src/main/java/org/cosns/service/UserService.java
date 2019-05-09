@@ -244,6 +244,7 @@ public class UserService {
 			List<ProfileImage> imageSet = imageService.findPendProfileImageByFilename(userSettingDTO.getImage());
 			for (ProfileImage image : imageSet) {
 				image.setStatus(ConstantsUtil.IMAGE_ACTIVE);
+				image.setProfileUser(user);
 				image.setUser(user);
 				image.setSeq(1);
 				imageService.saveProfileImage(image);

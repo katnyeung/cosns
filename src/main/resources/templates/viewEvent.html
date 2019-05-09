@@ -12,9 +12,24 @@
 	<script>
 		var main = angular.module('application', [ 'ngSanitize' ]);
 
-		main.controller('eventController', function($scope, $http, messageService) {
+		main.controller('eventController', function($scope, $http, messageService, postService) {
 			$scope.shared = messageService.getShared();
 			$scope.sharedUser = messageService.getSharedUser();
+
+			postService.setMessageService(messageService);
+
+			$scope.likePost = function(post) {
+				postService.likePost(post, 'viewPost');
+			}
+			$scope.retweetPost = function(post) {
+				postService.retweetPost(post, 'viewPost');
+			}
+			$scope.removePost = function(post) {
+				postService.removePost(post, 'viewPost');
+			}
+			$scope.loadPost = function(handler) {
+				postService.loadPosts("getUserPosts/[[${targetUser?.userId}]]", handler);
+			}
 
 			$scope.eventName = '[[${eventName}]]';
 			$http({
@@ -48,21 +63,9 @@
 		<hr class="row" />
 
 		<section class="row" ng-repeat="event in events">
-			<h3 class="col-md-12">{{event.eventName}}</h3>
-			<div class="col-md-12 m-1">{{event.start}} - {{event.end}}</div>
-			<div class="col-md-6 m-1" ng-repeat="image in event.eventImages">
-				<img ng-src="/eimages/{{::image.filename}}" class="img-fluid m-1 rounded" />
-			</div>
 
-			<div class="col-md-12 m-3">
-				<pre class=" m-1">{{event.description}}</pre>
-				<a href="{{event.url}}">{{event.url}}</a>
-			</div>
-			<div class="col-md-12 m-1" ng-repeat="hashTag in event.hashtags">
-				<a href="/h/{{::hashTag.hashTag}}" class="badge badge-info">{{::hashTag.hashTag}}</a>
-			</div>
-			{{event}}
-
+			<div th:include="components/event :: event" th:remove="tag"></div>
+			<hr class="col-md-12" />
 			<div class="row">
 				<div ng-repeat="post in event.postList | filter: {removed : false}" class="col-md-3">
 					<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>

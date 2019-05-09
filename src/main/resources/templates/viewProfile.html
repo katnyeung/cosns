@@ -64,8 +64,8 @@
 				$scope.user = response.data.user;
 				$scope.userMap = response.data.userMap;
 
-				if (response.data.user.profileImage[0]) {
-					$scope.profileImage = response.data.user.profileImage[0].filename;
+				if (response.data.user.profileImages[0]) {
+					$scope.profileImage = response.data.user.profileImages[0].filename;
 				}
 
 				angular.forEach($scope.followedList, function(followedUser) {

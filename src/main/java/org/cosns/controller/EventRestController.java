@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import org.cosns.repository.Event;
 import org.cosns.repository.HashTag;
 import org.cosns.repository.Post;
+import org.cosns.repository.User;
 import org.cosns.service.EventService;
 import org.cosns.service.HashTagService;
 import org.cosns.service.PostService;
@@ -70,13 +71,21 @@ public class EventRestController {
 	@PostMapping(path = "/getEventDetail")
 	public DefaultResult getEvents(@RequestBody EventFormDTO eventDTO, HttpSession session) throws ParseException {
 		List<String> postTypeList = Arrays.asList(ConstantsUtil.REDIS_TAG_TYPE_ALL_POST.split(","));
+		User user = (User) session.getAttribute("user");
+
 		EventResult er = new EventResult();
 
 		Set<Event> eventSet = eventService.getEventByEventKey(eventDTO.getEventName());
 		for (Event event : eventSet) {
 			List<String> postIdSet = hashTagService.searchPostByHashTagSet(event.getHashtags().stream().map(HashTag::getHashTag).collect(Collectors.toSet()), postTypeList);
 			if (postIdSet.size() > 0) {
-				List<Post> postList = postService.getPostByIds(postIdSet);
+
+				List<Post> postList = null;
+				if (user != null) {
+					postList = postService.setLikeRetweetedAndCount(postService.getPostByIds(postIdSet), user.getUserId());
+				} else {
+					postList = postService.setLikeRetweetCount(postService.getPostByIds(postIdSet));
+				}
 				event.setPostList(postList);
 			}
 		}
