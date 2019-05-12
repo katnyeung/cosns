@@ -1,6 +1,9 @@
 package org.cosns.controller;
 
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -121,12 +124,12 @@ public class PostRestController {
 
 		if (user != null) {
 			postList = postService.searchPosts(masterHitbox.get("post"), searchPost.getOrderBy(), user);
-			eventList = eventService.searchEvents(masterHitbox.get("event"));
-			userList = userService.searchUsers(masterHitbox.get("user"));
+			eventList = eventService.searchEvents(masterHitbox.get("event"), searchPost.getOrderBy());
+			userList = userService.searchUsers(masterHitbox.get("user"), searchPost.getOrderBy());
 		} else {
 			postList = postService.searchPosts(masterHitbox.get("post"), searchPost.getOrderBy());
-			eventList = eventService.searchEvents(masterHitbox.get("event"));
-			userList = userService.searchUsers(masterHitbox.get("user"));
+			eventList = eventService.searchEvents(masterHitbox.get("event"), searchPost.getOrderBy());
+			userList = userService.searchUsers(masterHitbox.get("user"), searchPost.getOrderBy());
 		}
 
 		puelr.setPostList(postList);
@@ -321,5 +324,22 @@ public class PostRestController {
 		}
 
 		return prr;
+	}
+
+	@GetMapping(path = "/getRelatedTag/{query}")
+	public List<Map<String, String>> getRelatedTag(@PathVariable("query") String query, HttpSession session) throws ParseException {
+
+		List<String> eventTypeList = Arrays.asList(ConstantsUtil.REDIS_TAG_TYPE_EVENT.split(","));
+
+		Set<String> resultSet = hashTagService.getRelatedTag(query, eventTypeList);
+
+		List<Map<String, String>> returnMapList = new ArrayList<Map<String, String>>();
+		for (String result : resultSet) {
+			HashMap<String, String> returnMap = new HashMap<>();
+			returnMap.put("label", result);
+			returnMapList.add(returnMap);
+		}
+
+		return returnMapList;
 	}
 }

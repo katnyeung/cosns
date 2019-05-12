@@ -10,7 +10,7 @@
 </head>
 <body ng-app="application">
 	<script>
-		var main = angular.module('application', [ 'infinite-scroll', 'ngSanitize' ]);
+		var main = angular.module('application', [ 'ngSanitize' ]);
 
 		main.controller('searchController', function($scope, $http, messageService, postService) {
 			$scope.shared = messageService.getShared();
@@ -18,6 +18,7 @@
 
 			$scope.keyword = '[[${hashTag}]]';
 			$scope.orderByType = '[[${orderByType}]]';
+			$scope.viewBy = 'all';
 
 			$scope.search = function() {
 				if ($scope.keyword) {
@@ -54,6 +55,15 @@
 			});
 
 			$scope.search();
+
+			$scope.viewByCheck = function(type) {
+				if ($scope.viewBy == type || $scope.viewBy == 'all') {
+					return true;
+				} else {
+					return false;
+				}
+
+			}
 		});
 	</script>
 	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
@@ -73,17 +83,26 @@
 				</div>
 				<input class="form-control mr-sm-2" type="text" ng-model="keyword" />
 				<button class="form-control mr-sm-2" type="submit">Search</button>
+				<div class="btn-group btn-group-sm  btn-light form-inline" role="group" aria-label="Basic example">
+					<button type="button" class="btn" ng-class="{'btn-warning' : viewBy == 'all'}" ng-click="viewBy = 'all'">all</button>
+					<button type="button" class="btn " ng-class="{'btn-warning' : viewBy == 'post'}" ng-click="viewBy = 'post'">post</button>
+					<button type="button" class="btn " ng-class="{'btn-warning' : viewBy == 'event'}" ng-click="viewBy = 'event'">event</button>
+					<button type="button" class="btn " ng-class="{'btn-warning' : viewBy == 'user'}" ng-click="viewBy = 'user'">user</button>
+
+				</div>
 			</form>
 		</div>
 		<hr class="row" />
 		<div class="row">
-			<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-3">
+			<div ng-show="viewByCheck('post')" ng-repeat="post in postList | filter: {removed : false}" class="col-md-3">
 				<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
 			</div>
-			<div ng-repeat="event in eventList" class="col-md-3">
+			<div ng-show="viewByCheck('event')" ng-repeat="event in eventList" class="col-md-3">
 				<div th:include="components/event :: event" th:remove="tag"></div>
 			</div>
-			<div ng-repeat="user in userList" class="col-md-3">{{user}}</div>
+			<div ng-show="viewByCheck('user')" ng-repeat="user in userList" class="col-md-3">
+				<a href="/@{{user.uniqueName ? user.uniqueName : user.userId}}" style="font-size: 14px"><div th:include="components/user :: user" th:remove="tag"></div></a>
+			</div>
 		</div>
 	</div>
 

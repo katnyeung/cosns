@@ -223,14 +223,14 @@ public class RouteController {
 		return "viewSetting";
 	}
 
-	@GetMapping(path = "e/{eventName}")
-	public String viewEvent(@PathVariable("eventName") String eventName, HttpSession session, Model model) {
+	@GetMapping(path = "e/{eventKey}")
+	public String viewEvent(@PathVariable("eventKey") String eventKey, HttpSession session, Model model) {
 		User loggedUser = (User) session.getAttribute("user");
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
 		}
 
-		model.addAttribute("eventName", eventName);
+		model.addAttribute("eventKey", eventKey);
 
 		return "viewEvent";
 	}

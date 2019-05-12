@@ -18,6 +18,7 @@ import org.cosns.web.DTO.UserFormDTO;
 import org.cosns.web.DTO.UserSettingDTO;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -275,9 +276,16 @@ public class UserService {
 		return followerMap;
 	}
 
-	public List<User> searchUsers(Map<Long, Integer> map) {
+	public List<User> searchUsers(Map<Long, Integer> map, String orderBy) {
+
 		if (map.keySet().size() > 0) {
-			return userDAO.findActiveUserByIdList(map.keySet());
+			if (orderBy.equals("view")) {
+				return userDAO.findActiveUserByIdListOrderByView(map.keySet());
+			} else if (orderBy.equals("date")) {
+				return userDAO.findActiveUserByIdListOrderByDate(map.keySet());
+			} else {
+				return null;
+			}
 		} else {
 			return null;
 		}

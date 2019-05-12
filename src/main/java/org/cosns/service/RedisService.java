@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.cosns.repository.Event;
 import org.cosns.repository.Post;
 import org.cosns.util.ConstantsUtil;
+import org.cosns.util.EventMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.query.SortQuery;
 import org.springframework.data.redis.core.query.SortQueryBuilder;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class RedisService {
@@ -179,7 +183,29 @@ public class RedisService {
 
 	public void saveEventKeyToRedis(Event event) {
 		setHashValue(ConstantsUtil.REDIS_EVENT_NAME_GROUP + ":" + event.getEventKey(), ConstantsUtil.REDIS_EVENT_ID, "" + event.getEventId());
-		
+
+	}
+
+	public void addEventMessage(String key, String message) {
+		logger.info("adding message key : " + key + ", message : " + message);
+		stringRedisTemplate.opsForList().rightPush(key, message);
+	}
+
+	public List<EventMessage> getMessageList(String key) {
+		ObjectMapper mapper = new ObjectMapper();
+		return stringRedisTemplate.opsForList().range(key, 0, -1).stream().map(u -> {
+			try {
+				return mapper.readValue(u, EventMessage.class);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}).collect(Collectors.toList());
+	}
+
+	public void removeSetItem(String key, String value) {
+		stringRedisTemplate.opsForSet().remove(key, value);
 	}
 
 }

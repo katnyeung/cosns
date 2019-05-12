@@ -1,13 +1,16 @@
 package org.cosns.controller;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
 import org.cosns.repository.FriendRequest;
 import org.cosns.repository.User;
+import org.cosns.service.HashTagService;
 import org.cosns.service.ImageService;
 import org.cosns.service.PostService;
 import org.cosns.service.RedisService;
@@ -18,9 +21,11 @@ import org.cosns.web.DTO.UserFormDTO;
 import org.cosns.web.DTO.UserSettingDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.UserResult;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,6 +49,9 @@ public class UserRestController {
 
 	@Autowired
 	ImageService imageService;
+
+	@Autowired
+	HashTagService hashTagService;
 
 	@Value("${cosns.image.profile.uploadFolder}")
 	String uploadFolder;
@@ -103,6 +111,7 @@ public class UserRestController {
 		return ur;
 	}
 
+	@Transactional
 	@PostMapping(path = "/updateSetting")
 	public DefaultResult updateSetting(@RequestBody UserSettingDTO userSettingDTO, HttpSession session) {
 		User loggedUser = (User) session.getAttribute("user");
@@ -114,7 +123,17 @@ public class UserRestController {
 
 			if (user.getPassword().equals(userSettingDTO.getPassword())) {
 
+				Set<String> hashTagSet = mapToKeySet(userSettingDTO.getKeyHashTag());
+
 				Object returnValue = userService.updateSetting(user, userSettingDTO);
+
+				hashTagService.deleteUserHashTagInRedis(user);
+
+				hashTagService.deleteUserHashTagByUserId(user.getUserId());
+
+				hashTagService.saveUserHash(user, hashTagSet);
+
+				hashTagService.saveUserHashToRedis(user, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_USER);
 
 				if (returnValue instanceof User) {
 
@@ -332,5 +351,9 @@ public class UserRestController {
 		}
 
 		return false;
+	}
+
+	private Set<String> mapToKeySet(List<Map<String, String>> keyHashTag) {
+		return keyHashTag.stream().map(Map::values).flatMap(Collection::stream).collect(Collectors.toSet());
 	}
 }

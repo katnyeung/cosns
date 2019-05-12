@@ -6,6 +6,7 @@
 
 <script src="/js/ng-flow-standalone.min.js"></script>
 <script src="/js/angular-sortable-view.min.js"></script>
+<script src="/js/mentio.min.js"></script>
 
 <style>
 .thumbnail {
@@ -19,12 +20,12 @@
 <body ng-app="application">
 
 	<script>
-		var main = angular.module('application', [ 'flow', 'angular-sortable-view' ])
+		var main = angular.module('application', [ 'mentio', 'flow', 'angular-sortable-view' ])
 
 		main.controller('writePostController', function($scope, $http, $timeout, $window, messageService) {
 			$scope.obj = {};
 			$scope.uploading = false;
-			
+
 			var releaseDateString = '[[${releaseDate}]]';
 
 			if (releaseDateString === '') {
@@ -34,15 +35,18 @@
 			}
 
 			$scope.validate = function(file) {
+				$scope.uploading = true;
+				$scope.message("Uploading");
 				if (file.size > 5000000) {
+
+					$scope.uploading = false;
 					$scope.message("file is too big");
+					alert("file is too big");
 					return false;
 				}
 				return true;
 			}
 			$scope.uploading = function() {
-				$scope.uploading = true;
-				$scope.message("Uploading");
 				return true;
 			}
 			$scope.uploaded = function() {
@@ -93,7 +97,16 @@
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
+			$scope.hashTags = [];
 
+			$scope.searchHashTag = function(term) {
+				if (term.length > 0) {
+					$http.get('/post/getRelatedTag/' + term).then(function(response) {
+						console.log(response.data);
+						$scope.hashTags = response.data;
+					});
+				}
+			}
 		});
 	</script>
 
@@ -109,7 +122,7 @@
 			</div>
 
 			<div class="form-group">
-				<textarea ng-model="postMessage" rows="10" class="form-control" style="min-width: 100%" placeholder="(message)"></textarea>
+				<textarea ng-model="postMessage" rows="10" class="form-control" style="min-width: 100%" placeholder="(message)" mentio mentio-typed-term="typedTerm" mentio-items="hashTags | filter:label:typedTerm" mentio-trigger-char="'#'" mentio-search="searchHashTag(term)"></textarea>
 			</div>
 
 			<div class="form-group">
@@ -119,15 +132,7 @@
 
 			<div class="form-group">
 				<h4>Images</h4>
-				<div 
-					flow-init="{target: '/post/uploadImage', testChunks:false,  chunkSize:10000000}" 
-					flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file);uploading();" 
-					flow-files-submitted="$flow.upload()" 
-					flow-file-success="$file.msg = $message;uploaded();" 
-					
-					flow-name="obj.flow"
-					
-					>
+				<div flow-init="{target: '/post/uploadImage', testChunks:false,  chunkSize:10000000}" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file);" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message;uploaded();" flow-name="obj.flow">
 					<div flow-drop flow-btn flow-drag-enter="style={border:'4px solid green'}" flow-drag-leave="style={}" ng-style="style" class="btn btn-danger">Click or Drop image here</div>
 					<div class="mt-2"></div>
 					<div sv-root sv-part="$flow.files" class="row">

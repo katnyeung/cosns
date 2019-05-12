@@ -3,6 +3,7 @@ package org.cosns.controller;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 
 import org.cosns.repository.Event;
 import org.cosns.repository.HashTag;
@@ -21,7 +23,9 @@ import org.cosns.service.HashTagService;
 import org.cosns.service.PostService;
 import org.cosns.service.RedisService;
 import org.cosns.util.ConstantsUtil;
+import org.cosns.util.EventMessage;
 import org.cosns.web.DTO.EventFormDTO;
+import org.cosns.web.DTO.EventMessageDTO;
 import org.cosns.web.result.DefaultResult;
 import org.cosns.web.result.EventResult;
 import org.slf4j.Logger;
@@ -34,6 +38,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/event")
@@ -68,6 +75,7 @@ public class EventRestController {
 		return eventSet;
 	}
 
+	@Transactional
 	@PostMapping(path = "/getEventDetail")
 	public DefaultResult getEvents(@RequestBody EventFormDTO eventDTO, HttpSession session) throws ParseException {
 		List<String> postTypeList = Arrays.asList(ConstantsUtil.REDIS_TAG_TYPE_ALL_POST.split(","));
@@ -75,7 +83,7 @@ public class EventRestController {
 
 		EventResult er = new EventResult();
 
-		Set<Event> eventSet = eventService.getEventByEventKey(eventDTO.getEventName());
+		Set<Event> eventSet = eventService.getEventByEventKey(eventDTO.getEventKey());
 		for (Event event : eventSet) {
 			List<String> postIdSet = hashTagService.searchPostByHashTagSet(event.getHashtags().stream().map(HashTag::getHashTag).collect(Collectors.toSet()), postTypeList);
 			if (postIdSet.size() > 0) {
@@ -87,7 +95,10 @@ public class EventRestController {
 					postList = postService.setLikeRetweetCount(postService.getPostByIds(postIdSet));
 				}
 				event.setPostList(postList);
+
+				event.setMessageList(redisService.getMessageList(ConstantsUtil.REDIS_EVENT_NAME_GROUP + ":" + eventDTO.getEventKey() + ":message"));
 			}
+			eventService.incrViewCount(event.getEventId());
 		}
 
 		logger.info("getting event : " + eventSet.size());
@@ -111,17 +122,19 @@ public class EventRestController {
 	public DefaultResult addEvent(@RequestBody EventFormDTO eventDTO, HttpSession session) throws ParseException {
 		DefaultResult dr = new DefaultResult();
 
-		Set<Event> eventSet = eventService.getEventByEventKey(eventDTO.getEventName());
+		Set<String> hashTagSet = mapToKeySet(eventDTO.getKeyHashTag());
+
+		String eventKey = eventService.genEventKey(eventDTO, hashTagSet);
+
+		Set<Event> eventSet = eventService.getEventByEventKey(eventKey);
 
 		if (eventSet.size() > 0) {
 			dr.setStatus(ConstantsUtil.RESULT_ERROR);
 			dr.setRemarks("Event already exist");
 		} else {
 
-			Set<String> hashTagSet = mapToKeySet(eventDTO.getKeyHashTag());
-
 			logger.info("writing hash : " + hashTagSet);
-			Event event = eventService.createEvent(eventDTO, hashTagSet);
+			Event event = eventService.createEvent(eventKey, eventDTO, hashTagSet);
 
 			hashTagService.saveEventHash(event, hashTagSet);
 
@@ -130,6 +143,30 @@ public class EventRestController {
 			redisService.saveEventKeyToRedis(event);
 
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		}
+		return dr;
+	}
+
+	@PostMapping(path = "/addMessage")
+	public DefaultResult addMessage(@RequestBody EventMessageDTO messageDTO, HttpSession session) throws ParseException, JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+
+		DefaultResult dr = new DefaultResult();
+
+		Set<Event> eventSet = eventService.getEventByEventKey(messageDTO.getEventKey());
+
+		if (eventSet.size() > 0) {
+
+			EventMessage em = new EventMessage();
+			em.setDate(Calendar.getInstance().getTime());
+			em.setMessage(messageDTO.getMessage());
+
+			redisService.addEventMessage(ConstantsUtil.REDIS_EVENT_NAME_GROUP + ":" + messageDTO.getEventKey() + ":message", mapper.writeValueAsString(em));
+
+			dr.setRemarks(mapper.writeValueAsString(em));
+			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		} else {
+			dr.setStatus(ConstantsUtil.RESULT_ERROR);
 		}
 		return dr;
 	}

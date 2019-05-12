@@ -6,6 +6,7 @@ import java.util.Map;
 
 public class EventFormDTO {
 	String eventName;
+	String eventKey;
 	List<Map<String, String>> keyHashTag;
 
 	String description;
@@ -18,6 +19,14 @@ public class EventFormDTO {
 	Date endDate;
 
 	List<String> fileList;
+
+	public String getEventKey() {
+		return eventKey;
+	}
+
+	public void setEventKey(String eventKey) {
+		this.eventKey = eventKey;
+	}
 
 	public String getEventName() {
 		return eventName;

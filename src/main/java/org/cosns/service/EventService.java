@@ -20,6 +20,7 @@ import org.cosns.web.DTO.EventFormDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -111,7 +112,7 @@ public class EventService {
 		return eventSet;
 	}
 
-	public Event createEvent(EventFormDTO eventDTO, Set<String> hashTagSet) {
+	public Event createEvent(String eventKey, EventFormDTO eventDTO, Set<String> hashTagSet) {
 		Event event = new PhotoEvent();
 		event.setEventName(eventDTO.getEventName());
 		event.setDescription(eventDTO.getDescription());
@@ -121,20 +122,7 @@ public class EventService {
 		event.setLocation(eventDTO.getLocation());
 		event.setStatus(ConstantsUtil.EVENT_ACTIVE);
 
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(eventDTO.getStartDate());
-		// create eventKey
-		StringBuilder extendedProps = new StringBuilder();
-		if (hashTagSet.size() > 0) {
-			String prepend = "";
-			for (String hashTag : hashTagSet) {
-				extendedProps.append(prepend);
-				extendedProps.append(hashTag);
-				prepend = "-";
-			}
-		}
-
-		event.setEventKey(cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1) + "-" + (cal.get(Calendar.DAY_OF_MONTH) + "-" + eventDTO.getEventName()) + extendedProps.toString());
+		event.setEventKey(eventKey);
 
 		event = eventDAO.save(event);
 
@@ -152,12 +140,55 @@ public class EventService {
 		return event;
 	}
 
-	public List<Event> searchEvents(Map<Long, Integer> map) {
+	public String genEventKey(EventFormDTO eventDTO, Set<String> hashTagSet) {
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(eventDTO.getStartDate());
+		// create eventKey
+		StringBuilder extendedProps = new StringBuilder();
+		if (hashTagSet.size() > 0) {
+			String prepend = "";
+			for (String hashTag : hashTagSet) {
+				extendedProps.append(prepend);
+				extendedProps.append(hashTag);
+				prepend = "-";
+			}
+		}
+
+		return cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1) + "-" + (cal.get(Calendar.DAY_OF_MONTH) + "-" + eventDTO.getEventName()) + extendedProps.toString();
+
+	}
+
+	public List<Event> searchEvents(Map<Long, Integer> map, String orderBy) {
+		String orderByString = getOrderByString(orderBy);
+
 		if (map.keySet().size() > 0) {
-			return eventDAO.getEventByIdList(map.keySet());
+			return eventDAO.getEventByIdList(map.keySet(), Sort.by(orderByString).descending());
 		} else {
 			return null;
 		}
 
+	}
+
+	private String getOrderByString(String orderBy) {
+		String orderByString = "createdate";
+
+		if (orderBy != null) {
+			switch (orderBy) {
+			case "date":
+				orderByString = "createdate";
+				break;
+			case "view":
+				orderByString = "totalViewCount";
+				break;
+			}
+		}
+
+		return orderByString;
+
+	}
+
+	public void incrViewCount(Long eventId) {
+		eventDAO.incrEventViewCount(eventId);
 	}
 }

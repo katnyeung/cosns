@@ -4,18 +4,22 @@
 
 <script th:include="components/header :: headerLibrary" th:remove="tag"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ng-tags-input/3.2.0/ng-tags-input.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ng-tags-input/3.2.0/ng-tags-input.min.css"></link>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ng-tags-input/3.2.0/ng-tags-input.bootstrap.min.css"></link>
 <script src="/js/ng-flow-standalone.min.js"></script>
 
 </head>
 <body ng-app="application">
 	<script>
-		var main = angular.module('application', [ 'flow' ]);
+		var main = angular.module('application', [ 'flow', 'ngTagsInput' ]);
 
 		main.controller('settingController', function($scope, $http, messageService) {
 			$scope.shared = messageService.getShared();
 			$scope.obj = {};
 			$scope.checkedUniqueName = false;
-
+			$scope.keyHashTag = [];
+			
 			$http({
 				url : "/user/getUser/[[${targetUser?.userId}]]",
 				method : "GET",
@@ -24,16 +28,18 @@
 				}
 			}).then(function(response) {
 				if (response.data.status == 'success') {
-					if (response.data.user.profileImage[0]) {
-						$scope.profileImage = response.data.user.profileImage[0].filename;
+					if (response.data.user.profileImages[0]) {
+						$scope.profileImage = response.data.user.profileImages[0].filename;
 					}
 
 					$scope.uniqueName = response.data.user.uniqueName;
 					$scope.checkName = response.data.user.uniqueName;
-
 					$scope.displayName = response.data.user.displayName;
-
 					$scope.profileMessage = response.data.user.message;
+					if(response.data.user.hashtags){
+						$scope.keyHashTag = response.data.user.hashtags.map(function(hashTag){return {text:hashTag.hashTag}});
+					}
+					
 				} else {
 					$scope.message("Load User Failed");
 				}
@@ -102,6 +108,7 @@
 							uniqueName : $scope.uniqueName,
 							displayName : $scope.displayName,
 							message : $scope.profileMessage,
+							keyHashTag : $scope.keyHashTag,
 							image : image
 						}
 					}).then(function(response) {
@@ -116,9 +123,27 @@
 				}
 			}
 
+			$scope.loadTags = function(query) {
+				return $http.get('/event/getRelatedTag/' + query);
+			};
+
 			$scope.message = function(message) {
 				messageService.setMessage(message);
-			}
+			};
+			
+			$scope.addTitle = function(title) {
+				var newTitle = {
+					'text' : title
+				};
+				console.log($scope.keyHashTag);
+				const found = $scope.keyHashTag.some(el => el.text === title);
+				if(!found){
+					$scope.keyHashTag.push(newTitle);	
+				}
+				console.log($scope.keyHashTag);
+			};
+			
+
 		});
 	</script>
 
@@ -143,14 +168,14 @@
 
 								<div class="span2">
 									<div class="thumbnail" ng-show="!$flow.files.length">
-										<img ng-src="{{profileImage ? '/pimages/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" style="width: 150px; height: 150px" flow-btn /> <span style="color: #CFCFCF">(Optional)</span>
+										<img ng-src="{{profileImage ? '/pimages/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" style="height: 150px" flow-btn /> <span style="color: #CFCFCF">(Optional)</span>
 									</div>
 									<div class="thumbnail" ng-show="$flow.files.length">
-										<img flow-img="$flow.files[0]" style="width: 150px; height: 150px" flow-btn />
+										<img flow-img="$flow.files[0]" style="height: 150px" flow-btn />
 									</div>
 									<div ng-repeat="file in $flow.files">
 										<div class="progress" style="width: auto" ng-class="{'progress-success':file.isComplete() ,'progress-bar-info': file.isUploading()}">
-											<div class="bar" style="width: {{file.progress()* 100">
+											<div class="bar" style="width: {{file.progress()* 100}}%">
 												<span>{{(file.progress() * 100).toFixed(0)}}%</span>
 											</div>
 										</div>
@@ -174,6 +199,14 @@
 						<td><div class="form-inline">
 								<input type="text" ng-model="displayName" name="displayName" placeholder="(Optional)" class="form-control" />
 							</div></td>
+					</tr>
+					<tr>
+						<td>User Tag</td>
+						<td><a href="#" class="badge" ng-click="addTitle('攝影師')">攝影師</a><a href="#" class="badge" ng-click="addTitle('Coser')">Coser</a><a href="#" class="badge" ng-click="addTitle('CD-ROM')">CD-ROM</a>
+							<div class="form-inline">
+								<tags-input ng-model="keyHashTag" add-on-paste="true" track-by-expr="$index" style="width:500px"> <auto-complete source="loadTags($query)"></auto-complete> </tags-input>
+							</div></td>
+
 					</tr>
 					<tr>
 						<td>Profile Message :</td>

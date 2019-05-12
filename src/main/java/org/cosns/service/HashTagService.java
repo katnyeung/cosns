@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.cosns.dao.HashTagDAO;
+import org.cosns.dao.UserHashTagDAO;
 import org.cosns.repository.Event;
 import org.cosns.repository.Post;
 import org.cosns.repository.User;
@@ -29,6 +30,9 @@ public class HashTagService {
 
 	@Autowired
 	HashTagDAO hashTagDAO;
+
+	@Autowired
+	UserHashTagDAO userHashTagDAO;
 
 	@Autowired
 	private RedisService redisService;
@@ -91,6 +95,7 @@ public class HashTagService {
 			hashObject.setUser(user);
 
 			hashTagDAO.save(hashObject);
+
 		}
 	}
 
@@ -248,5 +253,17 @@ public class HashTagService {
 		}
 
 		return eventKeyList;
+	}
+
+	public void deleteUserHashTagByUserId(Long userId) {
+		userHashTagDAO.deleteHashTagByUserId(userId);
+	}
+
+	public void deleteUserHashTagInRedis(User user) {
+		List<UserHashTag> hashTagList = user.getHashtags();
+		for (UserHashTag hashTag : hashTagList) {
+			logger.info("removing hash : " + hashTag.getHashTag() + " from user : " + user.getUserId());
+			redisService.removeSetItem(ConstantsUtil.REDIS_TAG_GROUP + ":" + hashTag.getHashTag(), ConstantsUtil.REDIS_USER_GROUP + ":" + user.getUserId());
+		}
 	}
 }

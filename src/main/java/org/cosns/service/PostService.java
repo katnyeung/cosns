@@ -319,6 +319,21 @@ public class PostService {
 
 	public List<Post> searchPosts(Map<Long, Integer> hitBox, String orderBy, User user) {
 
+		String orderByString = getOrderByString(orderBy);
+
+		if (hitBox.size() > 0) {
+			if (user != null) {
+				return setLikeRetweetedAndCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet(), Sort.by(orderByString).descending()), user.getUserId());
+			} else {
+				return setLikeRetweetCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet(), Sort.by(orderByString).descending()));
+			}
+		} else {
+			return null;
+		}
+
+	}
+
+	private String getOrderByString(String orderBy) {
 		String orderByString = "createdate";
 
 		if (orderBy != null) {
@@ -332,15 +347,7 @@ public class PostService {
 			}
 		}
 
-		if (hitBox.size() > 0) {
-			if (user != null) {
-				return setLikeRetweetedAndCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet(), Sort.by(orderByString).descending()), user.getUserId());
-			} else {
-				return setLikeRetweetCount(postDAO.findPostByPostIdSet(sortByValue(hitBox, true).keySet(), Sort.by(orderByString).descending()));
-			}
-		} else {
-			return null;
-		}
+		return orderByString;
 
 	}
 

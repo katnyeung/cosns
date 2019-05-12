@@ -1,0 +1,15 @@
+
+<body th:fragment="user">
+	<div class="col-12">
+		<img ng-src="{{user.profileImages[0].filename ? '/pimages/' + user.profileImages[0].filename : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" class="rounded img-fluid" />
+	</div>
+	<div class="col-12">{{user.uniqueName}} ( {{user.email}} )</div>
+	<div class="col-12">
+		<pre>{{user.message}}</pre>
+	</div>
+	<div class="col-12">
+		<div ng-repeat="hashTag in user.hashtags">
+			<a href="/h/{{hashTag.hashTag}}" class="badge badge-info">#{{hashTag.hashTag}}</a>
+		</div>
+	</div>
+</body>

@@ -1,5 +1,8 @@
 package org.cosns.web.DTO;
 
+import java.util.List;
+import java.util.Map;
+
 public class UserSettingDTO {
 	String password;
 
@@ -8,6 +11,8 @@ public class UserSettingDTO {
 	String uniqueName;
 
 	String displayName;
+
+	List<Map<String, String>> keyHashTag;
 
 	String message;
 
@@ -49,6 +54,14 @@ public class UserSettingDTO {
 
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
+	}
+
+	public List<Map<String, String>> getKeyHashTag() {
+		return keyHashTag;
+	}
+
+	public void setKeyHashTag(List<Map<String, String>> keyHashTag) {
+		this.keyHashTag = keyHashTag;
 	}
 
 }

@@ -64,10 +64,6 @@
 				$scope.user = response.data.user;
 				$scope.userMap = response.data.userMap;
 
-				if (response.data.user.profileImages[0]) {
-					$scope.profileImage = response.data.user.profileImages[0].filename;
-				}
-
 				angular.forEach($scope.followedList, function(followedUser) {
 					if (followedUser == response.data.user.userId) {
 						$scope.isFollowed = true;
@@ -121,13 +117,7 @@
 
 	<div class="container" ng-controller="viewUserController">
 		<div class="row m-3">
-			<div class="col-12">
-				<img ng-src="{{profileImage ? '/pimages/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" class="rounded img-fluid" />
-			</div>
-			<div class="col-12">{{user.uniqueName}} ( {{user.email}} )</div>
-			<div class="col-12">
-				<pre>{{user.message}}</pre>
-			</div>
+			<div th:include="components/user :: user" th:remove="tag"></div>
 			<div class="col-12" ng-show="user.followers > 0">
 				<br /> Following
 				<ul>

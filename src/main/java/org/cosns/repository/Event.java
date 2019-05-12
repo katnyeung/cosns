@@ -24,6 +24,7 @@ import javax.validation.constraints.Size;
 import org.cosns.repository.extend.EventHashTag;
 import org.cosns.repository.extend.EventImage;
 import org.cosns.util.Auditable;
+import org.cosns.util.EventMessage;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -79,6 +80,8 @@ public abstract class Event extends Auditable<String> {
 	@Transient
 	String title;
 
+	Long totalViewCount = (long)0;
+
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
 	private List<EventHashTag> hashtags;
 
@@ -88,6 +91,9 @@ public abstract class Event extends Auditable<String> {
 
 	@Transient
 	private List<Post> postList;
+
+	@Transient
+	private List<EventMessage> messageList;
 
 	public Long getEventId() {
 		return eventId;
@@ -207,6 +213,22 @@ public abstract class Event extends Auditable<String> {
 
 	public void setPostList(List<Post> postList) {
 		this.postList = postList;
+	}
+
+	public List<EventMessage> getMessageList() {
+		return messageList;
+	}
+
+	public void setMessageList(List<EventMessage> messageList) {
+		this.messageList = messageList;
+	}
+
+	public Long getTotalViewCount() {
+		return totalViewCount;
+	}
+
+	public void setTotalViewCount(Long totalViewCount) {
+		this.totalViewCount = totalViewCount;
 	}
 
 }
