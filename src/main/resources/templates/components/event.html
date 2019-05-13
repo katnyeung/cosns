@@ -1,9 +1,9 @@
-
 <body th:fragment="event">
-
-	<h3 class="col-md-12"><a href="/e/{{event.eventKey}}">{{event.eventName}}</a></h3>
+	<h3 class="col-md-12">
+		<a href="/e/{{event.eventKey}}">{{event.eventName}}</a>
+	</h3>
 	<div class="col-md-12 m-1">{{event.start}} - {{event.end}}</div>
-	<div class="col-md-6 m-1" ng-repeat="image in event.eventImages">
+	<div class="col-md-10 m-1" ng-repeat="image in event.eventImages">
 		<img ng-src="/eimages/{{::image.filename}}" class="img-fluid m-1 rounded" />
 	</div>
 
@@ -11,8 +11,8 @@
 		<pre class=" m-1">{{event.description}}</pre>
 		<a href="{{event.url}}">{{event.url}}</a>
 	</div>
-	<div class="row">
-		<div class="col-md-2 m-1" ng-repeat="hashTag in event.hashtags">
+	<div class="row m-3">
+		<div class="col-md-3" ng-repeat="hashTag in event.hashtags">
 			<a href="/h/{{::hashTag.hashTag}}" class="badge badge-info">#{{::hashTag.hashTag}}</a>
 		</div>
 	</div>

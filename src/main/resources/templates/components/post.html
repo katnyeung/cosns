@@ -25,7 +25,7 @@
 
 	<div th:include="components/post :: CreatorAndCreateDate()" th:remove="tag"></div>
 
-	<div th:include="components/post :: LikeAndRetweet()" th:remove="tag"></div>
+	<div th:include="components/post :: LikeAndRetweetWithLikeCoin()" th:remove="tag"></div>
 
 	<div class="well" ng-bind-html="::post.message | hashTag"></div>
 
@@ -42,8 +42,7 @@
 
 	<div th:include="components/post :: CreatorAndCreateDate()" th:remove="tag"></div>
 
-	<div th:include="components/post :: LikeAndRetweet()" th:remove="tag"></div>
-
+	<div th:include="components/post :: LikeAndRetweetWithLikeCoin()" th:remove="tag"></div>
 
 	<a href="/@{{::post.postKey}}">
 		<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
@@ -101,7 +100,6 @@
 		<div class="col">
 			<i class="fas fa-id-card"></i> {{::post.postId}} &nbsp;<i class="fas fa-user"></i>&nbsp;<a href="/@{{post.user.uniqueName ? post.user.uniqueName : post.user.userId}}" style="font-size: 14px">{{post.user.displayName ? post.user.displayName : (post.user.uniqueName ? post.user.uniqueName : post.user.userId)}}</a>
 		</div>
-
 		<div class="col-ml-auto">
 			<a href="/@{{post.postKey ? post.postKey : post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'dd/MM/yyyy'}}</a> &nbsp; <a href="#" ng-if="sharedUser.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()"><i class="far fa-trash-alt"></i></a>
 		</div>
@@ -116,7 +114,7 @@
 
 <body th:fragment="LikeAndRetweet()">
 	<div ng-if="sharedUser.user" class='mr-auto d-inline-flex'>
-		<span> <a href="#" class="btn" ng-click="likePost(post); $event.preventDefault();"> <span ng-if="post.liked"><i class="fas fa-heart fa-1x" style="color: red"></i></span> <span ng-if="!post.liked"><i class="far fa-heart fa-1x"></i> </span> <span ng-if="post.likeCount > 0">{{post.likeCount}}</span>
+		<span> <a href="#" class="btn" ng-click="likePost(post); $event.preventDefault();"> <span ng-if="post.liked"><i class="fas fa-arrow-up fa-1x" style="color: red"></i></span> <span ng-if="!post.liked"><i class="fas fa-arrow-up fa-1x"></i> </span> <span ng-if="post.likeCount > 0">{{post.likeCount}}</span>
 		</a>
 		</span> <span ng-if="post.retweeted" class="btn"> <i class="fas fa-retweet" style="color: #CCCCCC"></i> <span ng-if="post.retweetCount > 0">{{post.retweetCount}}</span>
 		</span> <span ng-if="!post.retweeted && sharedUser.user.userId != post.user.userId"> <a href="#" class="btn" ng-click="retweetPost(post); $event.preventDefault();"> <i class="fas fa-retweet"></i> <span ng-if="post.retweetCount > 0">{{post.retweetCount}}</span>
@@ -124,6 +122,32 @@
 		</span>
 	</div>
 	<div ng-if="!sharedUser.user" class='mr-auto'>
-		<span class="btn"><i class="far fa-heart fa-1x"></i><span ng-if="post.likeCount > 0"> {{post.likeCount}}</span> <span ng-if="post.retweetCount > 0"><i class="fas fa-share"></i> {{post.retweetCount}}</span> </span>
+		<span class="btn"><i class="fas fa-arrow-up fa-1x"></i><span ng-if="post.likeCount > 0"> {{post.likeCount}}</span> <span ng-if="post.retweetCount > 0"><i class="fas fa-share"></i> {{post.retweetCount}}</span> </span>
 	</div>
 </body>
+
+
+<body th:fragment="LikeAndRetweetWithLikeCoin()">
+	<div ng-if="sharedUser.user" class='mr-auto d-inline-flex'>
+		<div ng-if="post.user.likeCoinId">
+			<iframe scrolling="no" frameborder="0" id="player" ng-init="getLikeCoinURL(post.user.likeCoinId)" ng-src="{{likeCoinURL}}" allowfullscreen="true"></iframe>
+		</div>
+		<div>
+			<span> <a href="#" class="btn" ng-click="likePost(post); $event.preventDefault();"> <span ng-if="post.liked"><i class="fas fa-arrow-up fa-1x" style="color: red"></i></span> <span ng-if="!post.liked"><i class="fas fa-arrow-up fa-1x"></i> </span> <span ng-if="post.likeCount > 0">{{post.likeCount}}</span>
+			</a>
+			</span> <span ng-if="post.retweeted" class="btn"> <i class="fas fa-retweet" style="color: #CCCCCC"></i> <span ng-if="post.retweetCount > 0">{{post.retweetCount}}</span>
+			</span> <span ng-if="!post.retweeted && sharedUser.user.userId != post.user.userId"> <a href="#" class="btn" ng-click="retweetPost(post); $event.preventDefault();"> <i class="fas fa-retweet"></i> <span ng-if="post.retweetCount > 0">{{post.retweetCount}}</span>
+			</a>
+			</span>
+		</div>
+	</div>
+	<div ng-if="!sharedUser.user" class='mr-auto d-inline-flex'>
+		<div ng-if="post.user.likeCoinId">
+			<iframe scrolling="no" frameborder="0" id="player" ng-init="getLikeCoinURL(post.user.likeCoinId)" ng-src="{{likeCoinURL}}" allowfullscreen="true"></iframe>
+		</div>
+		<div>
+			<span class="btn"><i class="fas fa-arrow-up fa-1x"></i><span ng-if="post.likeCount > 0"> {{post.likeCount}}</span> <span ng-if="post.retweetCount > 0"><i class="fas fa-share"></i> {{post.retweetCount}}</span> </span>
+		</div>
+	</div>
+</body>
+

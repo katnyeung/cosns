@@ -94,13 +94,13 @@
 		</div>
 		<hr class="row" />
 		<div class="row">
-			<div ng-show="viewByCheck('post')" ng-repeat="post in postList | filter: {removed : false}" class="col-md-3">
-				<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
+			<div ng-show="viewByCheck('post')" ng-repeat="post in postList | filter: {removed : false}" class="col-md-3 m-3">
+				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 			</div>
-			<div ng-show="viewByCheck('event')" ng-repeat="event in eventList" class="col-md-3">
+			<div ng-show="viewByCheck('event')" ng-repeat="event in eventList" class="col-md-3 m-1">
 				<div th:include="components/event :: event" th:remove="tag"></div>
 			</div>
-			<div ng-show="viewByCheck('user')" ng-repeat="user in userList" class="col-md-3">
+			<div ng-show="viewByCheck('user')" ng-repeat="user in userList" class="col-md-3 m-3">
 				<a href="/@{{user.uniqueName ? user.uniqueName : user.userId}}" style="font-size: 14px"><div th:include="components/user :: user" th:remove="tag"></div></a>
 			</div>
 		</div>

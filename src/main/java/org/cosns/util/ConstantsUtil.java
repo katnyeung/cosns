@@ -67,4 +67,8 @@ public class ConstantsUtil {
 
 	public static final String REDIS_EVENT_NAME_GROUP = "eventname";
 	public static final String REDIS_EVENT_ID = "id";
+
+	public static final String USER_ROLE_NORMAL = "NORMAL";
+	public static final String USER_ROLE_ADMIN = "ADMIN";
+
 }

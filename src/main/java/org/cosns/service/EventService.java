@@ -13,6 +13,7 @@ import org.cosns.repository.Event;
 import org.cosns.repository.HashTag;
 import org.cosns.repository.Image;
 import org.cosns.repository.Post;
+import org.cosns.repository.User;
 import org.cosns.repository.extend.EventImage;
 import org.cosns.repository.extend.PhotoEvent;
 import org.cosns.util.ConstantsUtil;
@@ -112,7 +113,7 @@ public class EventService {
 		return eventSet;
 	}
 
-	public Event createEvent(String eventKey, EventFormDTO eventDTO, Set<String> hashTagSet) {
+	public Event createEvent(String eventKey, EventFormDTO eventDTO, Set<String> hashTagSet, User user) {
 		Event event = new PhotoEvent();
 		event.setEventName(eventDTO.getEventName());
 		event.setDescription(eventDTO.getDescription());
@@ -120,7 +121,15 @@ public class EventService {
 		event.setStart(eventDTO.getStartDate());
 		event.setEnd(eventDTO.getEndDate());
 		event.setLocation(eventDTO.getLocation());
-		event.setStatus(ConstantsUtil.EVENT_ACTIVE);
+
+		if (user.getUserRole().equalsIgnoreCase(ConstantsUtil.USER_ROLE_ADMIN)) {
+			event.setStatus(ConstantsUtil.EVENT_ACTIVE);
+			event.setCreatedBy(user);
+			event.setApprovedBy(user);
+		} else {
+			event.setStatus(ConstantsUtil.EVENT_PEND);
+			event.setCreatedBy(user);
+		}
 
 		event.setEventKey(eventKey);
 

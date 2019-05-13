@@ -16,6 +16,8 @@ public class UserSettingDTO {
 
 	String message;
 
+	String likeCoinId;
+
 	public String getPassword() {
 		return password;
 	}
@@ -62,6 +64,14 @@ public class UserSettingDTO {
 
 	public void setKeyHashTag(List<Map<String, String>> keyHashTag) {
 		this.keyHashTag = keyHashTag;
+	}
+
+	public String getLikeCoinId() {
+		return likeCoinId;
+	}
+
+	public void setLikeCoinId(String likeCoinId) {
+		this.likeCoinId = likeCoinId;
 	}
 
 }

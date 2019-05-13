@@ -7,13 +7,16 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -80,7 +83,7 @@ public abstract class Event extends Auditable<String> {
 	@Transient
 	String title;
 
-	Long totalViewCount = (long)0;
+	Long totalViewCount = (long) 0;
 
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
 	private List<EventHashTag> hashtags;
@@ -88,6 +91,14 @@ public abstract class Event extends Auditable<String> {
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
 	@OrderBy("seq ASC")
 	private List<EventImage> eventImages;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "created_by_user_id", referencedColumnName = "userId")
+	private User createdBy;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "approved_by_user_id", referencedColumnName = "userId")
+	private User approvedBy;
 
 	@Transient
 	private List<Post> postList;
@@ -229,6 +240,22 @@ public abstract class Event extends Auditable<String> {
 
 	public void setTotalViewCount(Long totalViewCount) {
 		this.totalViewCount = totalViewCount;
+	}
+
+	public User getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(User createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public User getApprovedBy() {
+		return approvedBy;
+	}
+
+	public void setApprovedBy(User approvedBy) {
+		this.approvedBy = approvedBy;
 	}
 
 }

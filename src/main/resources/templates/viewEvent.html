@@ -29,7 +29,7 @@
 			}
 
 			$scope.eventKey = '[[${eventKey}]]';
-			$scope.loadEvent = function(){
+			$scope.loadEvent = function() {
 				$http({
 					url : "/event/getEventDetail",
 					method : "POST",
@@ -41,11 +41,13 @@
 					}
 				}).then(function(response) {
 					if (response.data.status === 'success') {
-						$scope.events = response.data.events
+						$scope.events = response.data.events;
+						$scope.userList = response.data.userList;
+						console.log($scope.userList);
 					}
 				});
 			}
-			
+
 			$scope.loadEvent();
 
 			$scope.addMessage = function(message) {
@@ -81,20 +83,25 @@
 		<hr class="row" />
 
 		<section class="row" ng-repeat="event in events">
-			<div class="col-md-6">
+			<div class="col-md-8">
 				<div th:include="components/event :: event" th:remove="tag"></div>
 			</div>
-			<div class="col-md-6">
-				<div ng-repeat="message in event.messageList">{{message.message}} <small>{{message.date}}</small></div>
-				<div class="form-inline">
-					<input type="text" ng-model="eventMessage" />
-					<button type="button" ng-click="addMessage(eventMessage)">Add</button>
+			<div class="col-md-4" ng-if="sharedUser.user">
+				<div ng-repeat="message in event.messageList">
+					<a href="/@{{(userList | filter : {'userId':message.userId})[0].uniqueName ? (userList | filter : {'userId':message.userId})[0].uniqueName : (userList | filter : {'userId':message.userId})[0].userId}}">
+					{{(userList | filter : {'userId':message.userId})[0].displayName ? (userList | filter : {'userId':message.userId})[0].displayName : (userList | filter : {'userId':message.userId})[0].uniqueName ? (userList | filter : {'userId':message.userId})[0].uniqueName : (userList | filter : {'userId':message.userId})[0].email }}
+					</a>
+					 : {{message.message}} <small>{{message.date}}</small>
 				</div>
+				<form class="form-inline" ng-submit="addMessage(eventMessage)">
+					<input type="text" ng-model="eventMessage" />
+					<button type="submit">Add</button>
+				</form>
 			</div>
 			<hr class="col-md-12" />
 			<div class="row">
-				<div ng-repeat="post in event.postList | filter: {removed : false}" class="col-md-3">
-					<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
+				<div ng-repeat="post in event.postList | filter: {removed : false}" class="col-md-3 m-3">
+					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
 			</div>
 		</section>

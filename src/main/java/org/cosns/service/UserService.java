@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.slf4j.Logger;
 
 import org.cosns.dao.FriendRequestDAO;
 import org.cosns.dao.UserDAO;
@@ -16,9 +15,11 @@ import org.cosns.repository.extend.ProfileImage;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.UserFormDTO;
 import org.cosns.web.DTO.UserSettingDTO;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,11 @@ public class UserService {
 	@Autowired
 	RedisService redisService;
 
+	@Bean
+	public BCryptPasswordEncoder bCryptPasswordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
 	@Transactional
 	public User registerUser(UserFormDTO userDTO) {
 		User registeredUser = null;
@@ -48,8 +54,9 @@ public class UserService {
 
 			User user = new User();
 			user.setEmail(userDTO.getEmail());
-			user.setPassword(userDTO.getPassword());
+			user.setPassword(bCryptPasswordEncoder().encode(userDTO.getPassword()));
 			user.setStatus(ConstantsUtil.USER_STATUS_ACTIVE);
+			user.setUserRole(ConstantsUtil.USER_ROLE_NORMAL);
 
 			registeredUser = userDAO.save(user);
 		}
@@ -62,12 +69,17 @@ public class UserService {
 		User loggedUser = null;
 
 		for (User user : userList) {
-			if (userDTO.getPassword().equals(user.getPassword())) {
+			if (passwordCheck(userDTO.getPassword(), user.getPassword())) {
 				loggedUser = user;
+				break;
 			}
 		}
 
 		return loggedUser;
+	}
+
+	public boolean passwordCheck(String inputPassword, String databasePassword) {
+		return bCryptPasswordEncoder().matches(inputPassword, databasePassword);
 	}
 
 	public List<Post> getPosts(User user) {
@@ -251,7 +263,9 @@ public class UserService {
 				imageService.saveProfileImage(image);
 			}
 		}
-
+		
+		user.setLikeCoinId(userSettingDTO.getLikeCoinId());
+		
 		// message
 		if (userSettingDTO.getMessage() != null) {
 			user.setMessage(userSettingDTO.getMessage());
@@ -289,6 +303,15 @@ public class UserService {
 		} else {
 			return null;
 		}
+	}
+
+	public List<User> getUserByUserIdList(Set<Long> userIdList) {
+		if (userIdList.size() > 0) {
+			return userDAO.findActiveUserByIdListOrderByDate(userIdList);
+		} else {
+			return null;
+		}
+
 	}
 
 }

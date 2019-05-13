@@ -41,7 +41,7 @@
 
 		});
 
-		main.controller('viewUserController', function($scope, $http, messageService) {
+		main.controller('viewUserController', function($scope, $http, $sce, messageService) {
 			$scope.shared = messageService.getShared();
 			$scope.sharedUser = messageService.getSharedUser();
 
@@ -108,6 +108,11 @@
 			$scope.message = function(message) {
 				messageService.setMessage(message);
 			}
+			$scope.likeCoinURL = "";
+
+			$scope.getLikeCoinURL = function(likeCoinId) {
+				$scope.likeCoinURL = $sce.trustAsResourceUrl("https://button.like.co/in/embed/" + likeCoinId + "/button/?referrer=[[${referrer}]]");
+			}
 		});
 	</script>
 
@@ -117,7 +122,11 @@
 
 	<div class="container" ng-controller="viewUserController">
 		<div class="row m-3">
+
 			<div th:include="components/user :: user" th:remove="tag"></div>
+			<div class="col-12 mt-2" ng-if="user.likeCoinId">
+				<iframe scrolling="no" frameborder="0" id="player" ng-init="getLikeCoinURL(user.likeCoinId)" ng-src="{{likeCoinURL}}" allowfullscreen="true"></iframe>
+			</div>
 			<div class="col-12" ng-show="user.followers > 0">
 				<br /> Following
 				<ul>
@@ -128,9 +137,9 @@
 			</div>
 		</div>
 		<div ng-controller="viewPostController" class="row ml-4 mr-4">
-			<div ng-repeat="post in postList | filter: {removed : false} " class="col-md-3 m-0">
-				<hr />
-				<div th:include="components/post :: viewPosts('thumbnail-mid')" th:remove="tag"></div>
+			<hr class="col-12" />
+			<div ng-repeat="post in postList | filter: {removed : false} " class="col-md-3 m-3">
+				<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 			</div>
 		</div>
 	</div>

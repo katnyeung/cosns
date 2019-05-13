@@ -180,8 +180,12 @@
 				<div ng-repeat="post in postList | filter: {removed : false}" class="col-md-2 m-4">
 					<div th:include="components/post :: viewPosts('thumbnail')" th:remove="tag"></div>
 				</div>
-				<div ng-repeat="event in eventList" class="col-md-3">{{event}}</div>
-				<div ng-repeat="user in userList" class="col-md-3">{{user}}</div>
+				<div ng-repeat="event in eventList" class="col-md-3 m-1">
+					<div th:include="components/event :: event" th:remove="tag"></div>
+				</div>
+				<div ng-repeat="user in userList" class="col-md-3 m-3">
+					<a href="/@{{user.uniqueName ? user.uniqueName : user.userId}}" style="font-size: 14px"><div th:include="components/user :: user" th:remove="tag"></div></a>
+				</div>
 			</div>
 		</div>
 

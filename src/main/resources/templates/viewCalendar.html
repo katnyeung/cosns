@@ -20,7 +20,9 @@
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-<script>
+<script th:inline="javascript">
+	var user = /*[[${user}]]*/{};
+
 	document.addEventListener('DOMContentLoaded', function() {
 		$('#dialogCalendar').hide();
 		var calendarEl = document.getElementById('calendar');
@@ -54,20 +56,23 @@
 			},
 			selectable : true,
 			select : function(info) {
-				info.jsEvent.preventDefault();
+				if (user != null) {
+					info.jsEvent.preventDefault();
 
-				var endDate = new Date(info.end.setDate(info.end.getDate() - 1));
-				var endDateString = endDate.getFullYear() + "-" + (endDate.getMonth() + 1) + "-" + endDate.getDate();
+					var endDate = new Date(info.end.setDate(info.end.getDate() - 1));
+					var endDateString = endDate.getFullYear() + "-" + (endDate.getMonth() + 1) + "-" + endDate.getDate();
 
-				$("#dialogCalendar .message").html("<a href ='w/" + info.startStr + "' class='btn'> Write Post </a><br/><a href='/writeEvent/"+ info.startStr + "&" + endDateString + "' class='btn'>Regist Event</a>");
-				$('#dialogCalendar').dialog({
-					position : {
-						my : "center",
-						at : "left+" + info.jsEvent.clientX + "px top+" + (info.jsEvent.clientY + 60) + "px ",
-						of : window
-					},
-				});
-				$(".ui-dialog-titlebar").hide();
+					$("#dialogCalendar .message").html("<a href ='w/" + info.startStr + "' class='btn'> Write Post </a><br/><a href='/writeEvent/"+ info.startStr + "&" + endDateString + "' class='btn'>Regist Event</a>");
+					$('#dialogCalendar').dialog({
+						position : {
+							my : "center",
+							at : "left+" + info.jsEvent.clientX + "px top+" + (info.jsEvent.clientY + 60) + "px ",
+							of : window
+						},
+					});
+					$(".ui-dialog-titlebar").hide();
+				}
+
 			},
 
 			events : '/event/getEvents/'

@@ -65,6 +65,15 @@ public class User extends Auditable<String> {
 	@Column(nullable = true)
 	private String message;
 
+	@JsonIgnore
+	@NotNull
+	@Size(max = 10)
+	private String userRole;
+
+	@Column(nullable = true)
+	@Size(max = 255)
+	private String likeCoinId;
+
 	@OneToMany(mappedBy = "profileUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@Where(clause = "status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
 	private Set<ProfileImage> profileImages;
@@ -103,6 +112,14 @@ public class User extends Auditable<String> {
 
 	@JsonIgnore
 	private Date lastUpdateUniqueNameDate;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
+	private List<Event> createdEvent;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "approvedBy", cascade = CascadeType.ALL)
+	private List<Event> approvedEvent;
 
 	public Long getUserId() {
 		return userId;
@@ -230,6 +247,38 @@ public class User extends Auditable<String> {
 
 	public void setHashtags(List<UserHashTag> hashtags) {
 		this.hashtags = hashtags;
+	}
+
+	public String getUserRole() {
+		return userRole;
+	}
+
+	public void setUserRole(String userRole) {
+		this.userRole = userRole;
+	}
+
+	public List<Event> getCreatedEvent() {
+		return createdEvent;
+	}
+
+	public void setCreatedEvent(List<Event> createdEvent) {
+		this.createdEvent = createdEvent;
+	}
+
+	public List<Event> getApprovedEvent() {
+		return approvedEvent;
+	}
+
+	public void setApprovedEvent(List<Event> approvedEvent) {
+		this.approvedEvent = approvedEvent;
+	}
+
+	public String getLikeCoinId() {
+		return likeCoinId;
+	}
+
+	public void setLikeCoinId(String likeCoinId) {
+		this.likeCoinId = likeCoinId;
 	}
 
 }

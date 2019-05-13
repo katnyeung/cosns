@@ -9,6 +9,8 @@ public class EventMessage {
 	Date date;
 	String message;
 
+	Long userId;
+
 	public Date getDate() {
 		return date;
 	}
@@ -25,4 +27,11 @@ public class EventMessage {
 		this.message = message;
 	}
 
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 }

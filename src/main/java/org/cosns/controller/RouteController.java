@@ -1,5 +1,9 @@
 package org.cosns.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.cosns.repository.User;
@@ -93,13 +97,20 @@ public class RouteController {
 	}
 
 	@GetMapping(path = "@{userName}/{postKey}")
-	public String viewPost(@PathVariable("userName") String userName, @PathVariable("postKey") String postKey, HttpSession session, Model model) throws DefaultException {
-
+	public String viewPost(@PathVariable("userName") String userName, @PathVariable("postKey") String postKey, HttpSession session, HttpServletRequest request, Model model) throws DefaultException {
 		User loggedUser = (User) session.getAttribute("user");
+
+		try {
+			model.addAttribute("referrer", URLEncoder.encode(request.getRequestURL().toString(), "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
 		}
+
 		logger.info("searching from redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " ->" + ConstantsUtil.REDIS_POST_ID);
 
 		logger.info("hasKey : " + redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey));
@@ -154,7 +165,14 @@ public class RouteController {
 	}
 
 	@GetMapping(path = "@")
-	public String viewProfile(HttpSession session, Model model) {
+	public String viewProfile(HttpSession session, HttpServletRequest request, Model model) {
+		try {
+			model.addAttribute("referrer", URLEncoder.encode(request.getRequestURL().toString(), "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		User loggedUser = (User) session.getAttribute("user");
 		if (loggedUser != null) {
 			model.addAttribute("user", loggedUser);
@@ -167,7 +185,14 @@ public class RouteController {
 	}
 
 	@GetMapping(path = "@{userName}")
-	public String viewProfile(@PathVariable("userName") String userName, HttpSession session, Model model) {
+	public String viewProfile(@PathVariable("userName") String userName, HttpSession session, HttpServletRequest request, Model model) {
+		try {
+			model.addAttribute("referrer", URLEncoder.encode(request.getRequestURL().toString(), "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		try {
 			User loggedUser = (User) session.getAttribute("user");
 			if (loggedUser != null) {

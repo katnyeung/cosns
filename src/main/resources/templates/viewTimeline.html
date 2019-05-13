@@ -9,7 +9,7 @@
 <script>
 	var main = angular.module('application', [ 'infinite-scroll', 'ngSanitize' ]);
 
-	main.controller('viewPostController', function($scope, $http, $window, postService, messageService) {
+	main.controller('viewPostController', function($scope, $http, $window, $sce, postService, messageService) {
 		$scope.shared = messageService.getShared();
 		$scope.sharedUser = messageService.getSharedUser();
 
@@ -61,6 +61,12 @@
 		};
 
 		$scope.loadMore();
+		
+		$scope.likeCoinURL = "";
+
+		$scope.getLikeCoinURL = function(likeCoinId) {
+			$scope.likeCoinURL = $sce.trustAsResourceUrl("https://button.like.co/in/embed/" + likeCoinId + "/button/?referrer=[[${referrer}]]");
+		}
 	});
 </script>
 

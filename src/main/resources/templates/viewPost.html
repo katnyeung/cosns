@@ -7,10 +7,10 @@
 <script>
 	var main = angular.module('application', [ 'ngSanitize' ]);
 
-	main.controller('viewPostController', function($scope, $window, postService, messageService) {
+	main.controller('viewPostController', function($scope, $window, $sce, postService, messageService) {
 		$scope.shared = messageService.getShared();
 		$scope.sharedUser = messageService.getSharedUser();
-		
+
 		postService.setMessageService(messageService);
 
 		$scope.likePost = function(post) {
@@ -20,7 +20,7 @@
 			postService.retweetPost(post, 'viewPost');
 		}
 		$scope.removePost = function(post) {
-			postService.removePost(post, 'viewPost').then(function(response){
+			postService.removePost(post, 'viewPost').then(function(response) {
 				$window.location.href = '/u';
 			});
 		}
@@ -40,6 +40,12 @@
 			}
 		});
 
+		$scope.likeCoinURL = "";
+
+		$scope.getLikeCoinURL = function(likeCoinId) {
+			$scope.likeCoinURL = $sce.trustAsResourceUrl("https://button.like.co/in/embed/" + likeCoinId + "/button/?referrer=[[${referrer}]]");
+		}
+
 	});
 </script>
 </head>
@@ -52,9 +58,13 @@
 	<div class="container">
 		<div ng-controller="viewPostController" class="row">
 			<div ng-repeat="post in postList | filter: {removed : false} ">
+
 				<hr />
 				<div th:include="components/post :: viewPosts('detail')" th:remove="tag"></div>
+
+
 			</div>
+
 		</div>
 	</div>
 	<hr>

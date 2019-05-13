@@ -187,7 +187,6 @@ public class RedisService {
 	}
 
 	public void addEventMessage(String key, String message) {
-		logger.info("adding message key : " + key + ", message : " + message);
 		stringRedisTemplate.opsForList().rightPush(key, message);
 	}
 
@@ -197,7 +196,6 @@ public class RedisService {
 			try {
 				return mapper.readValue(u, EventMessage.class);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return null;

@@ -121,7 +121,7 @@ public class UserRestController {
 		if (loggedUser != null) {
 			User user = userService.getUserById(loggedUser.getUserId());
 
-			if (user.getPassword().equals(userSettingDTO.getPassword())) {
+			if (userService.passwordCheck(userSettingDTO.getPassword(), user.getPassword())) {
 
 				Set<String> hashTagSet = mapToKeySet(userSettingDTO.getKeyHashTag());
 

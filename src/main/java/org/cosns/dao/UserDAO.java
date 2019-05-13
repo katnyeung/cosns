@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.cosns.repository.User;
 import org.cosns.util.ConstantsUtil;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
