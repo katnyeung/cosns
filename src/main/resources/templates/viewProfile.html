@@ -132,6 +132,8 @@
 				<ul>
 					<li ng-repeat="followerId in user.followers"><a href="/@{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].userId}}">{{userMap[followerId].uniqueName ? userMap[followerId].uniqueName : userMap[followerId].email}}</a></li>
 				</ul>
+			</div>
+			<div class="col-12">
 				<button class="btn btn-info" type="button" th:attr="ng-click='follow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && !isFollowed'">Follow</button>
 				<button class="btn btn-warning" type="button" th:attr="ng-click='unfollow('+${targetUser?.userId}+');',ng-show='' + ${user != null && user.userId != targetUser.userId} + ' && isFollowed'">Unfollow</button>
 			</div>
