@@ -30,7 +30,7 @@
 	<div class="well" ng-bind-html="::post.message | hashTag"></div>
 
 	<div th:attr="ng-repeat='image in post.postImages'">
-		<img src="/images/{{::image.filename}}" class="img-fluid m-1 rounded" />
+		<img ng-src="/image/{{::image.filename}}" class="img-fluid m-1 rounded" />
 	</div>
 
 
@@ -46,11 +46,11 @@
 
 	<a href="/@{{::post.postKey}}">
 		<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
-			<img src="/images/{{::image.filename}}" class="img-fluid m-1 rounded" />
+			<img ng-src="/image/{{::image.filename}}" class="img-fluid m-1 rounded" />
 		</div>
 		<div class="row m-0 p-1">
 			<div class="col-md-4 m-0 p-1" th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">
-				<img src="/images/{{::image.filename}}" class="img-fluid m-1 rounded" />
+				<img ng-src="/image/{{::image.filename}}" class="img-fluid m-1 rounded" />
 			</div>
 		</div>
 	</a>
@@ -66,7 +66,7 @@
 
 	<a href="/@{{::post.postKey}}">
 		<div th:attr="ng-repeat='image in post.postImages | limitTo:1'">
-			<img src="/images/{{::image.thumbnailFilename}}" class="img-fluid m-1 rounded" />
+			<img ng-src="/image/{{::image.thumbnailFilename}}" class="img-fluid m-1 rounded" />
 		</div>
 		<div class="row m-0 pb-1" ng-if="post.postImages.length > 1">
 			<div class="col-md-1 m-0 p-1" th:attr="ng-repeat='image in post.postImages | limitTo:5:1'">

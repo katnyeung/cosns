@@ -6,6 +6,7 @@ public class ConstantsUtil {
 
 	public final static String USER_STATUS_ACTIVE = "A";
 	public final static String USER_STATUS_PEND = "P";
+	public final static String USER_STATUS_FB_CREATE = "FB";
 	public final static String USER_STATUS_DISABLED = "D";
 	public final static String USER_STATUS_REMOVED = "X";
 
@@ -70,5 +71,11 @@ public class ConstantsUtil {
 
 	public static final String USER_ROLE_NORMAL = "NORMAL";
 	public static final String USER_ROLE_ADMIN = "ADMIN";
+	
+	public static final String FB_CLIENT_ID = "1189456587890832";
+
+	public static final Object FB_SECRET = "b06e82a6d88b0f92af7b0528387fce16";
+
+	public static final String USER_REDIS_KEY = "userkey";
 
 }

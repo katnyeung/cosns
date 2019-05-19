@@ -18,6 +18,8 @@ public class UserSettingDTO {
 
 	String likeCoinId;
 
+	String fbId;
+
 	public String getPassword() {
 		return password;
 	}
@@ -72,6 +74,14 @@ public class UserSettingDTO {
 
 	public void setLikeCoinId(String likeCoinId) {
 		this.likeCoinId = likeCoinId;
+	}
+
+	public String getFbId() {
+		return fbId;
+	}
+
+	public void setFbId(String fbId) {
+		this.fbId = fbId;
 	}
 
 }

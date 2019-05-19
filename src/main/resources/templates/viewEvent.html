@@ -89,7 +89,7 @@
 			<div class="col-md-4" ng-if="sharedUser.user">
 				<div ng-repeat="message in event.messageList">
 					<a href="/@{{(userList | filter : {'userId':message.userId})[0].uniqueName ? (userList | filter : {'userId':message.userId})[0].uniqueName : (userList | filter : {'userId':message.userId})[0].userId}}">
-					{{(userList | filter : {'userId':message.userId})[0].displayName ? (userList | filter : {'userId':message.userId})[0].displayName : (userList | filter : {'userId':message.userId})[0].uniqueName ? (userList | filter : {'userId':message.userId})[0].uniqueName : (userList | filter : {'userId':message.userId})[0].email }}
+					@{{(userList | filter : {'userId':message.userId})[0].displayName ? (userList | filter : {'userId':message.userId})[0].displayName : (userList | filter : {'userId':message.userId})[0].uniqueName ? (userList | filter : {'userId':message.userId})[0].uniqueName : (userList | filter : {'userId':message.userId})[0].email }}
 					</a>
 					 : {{message.message}} <small>{{message.date}}</small>
 				</div>

@@ -74,6 +74,10 @@ public class User extends Auditable<String> {
 	@Size(max = 255)
 	private String likeCoinId;
 
+	@Column(nullable = true)
+	@Size(max = 100)
+	private String fbId;
+	
 	@OneToMany(mappedBy = "profileUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@Where(clause = "status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
 	private Set<ProfileImage> profileImages;
@@ -279,6 +283,14 @@ public class User extends Auditable<String> {
 
 	public void setLikeCoinId(String likeCoinId) {
 		this.likeCoinId = likeCoinId;
+	}
+
+	public String getFbId() {
+		return fbId;
+	}
+
+	public void setFbId(String fbId) {
+		this.fbId = fbId;
 	}
 
 }

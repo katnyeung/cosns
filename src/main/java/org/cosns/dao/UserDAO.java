@@ -30,4 +30,7 @@ public interface UserDAO extends JpaRepository<User, Long> {
 	@Query("SELECT u FROM User u WHERE u.uniqueName = :uniqueName and u.status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
 	public Set<User> findAllUserByUniqueName(@Param("uniqueName") String uniqueName);
 
+	@Query("SELECT u FROM User u WHERE u.fbId = :fbId and u.status = '" + ConstantsUtil.USER_STATUS_ACTIVE + "'")
+	public User findActiveUserByFbId(String fbId);
+
 }

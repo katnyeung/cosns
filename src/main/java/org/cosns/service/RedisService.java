@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.cosns.repository.Event;
@@ -206,4 +207,12 @@ public class RedisService {
 		stringRedisTemplate.opsForSet().remove(key, value);
 	}
 
+	public String getAndRefreshUserIdCache(String redisKey) {
+		stringRedisTemplate.expire(redisKey, 24, TimeUnit.HOURS);
+		return stringRedisTemplate.opsForValue().get(ConstantsUtil.USER_REDIS_KEY + ":" + redisKey);
+	}
+
+	public void setUserIdCache(String redisKey, String value) {
+		stringRedisTemplate.opsForValue().set(ConstantsUtil.USER_REDIS_KEY + ":" + redisKey, value);
+	}
 }

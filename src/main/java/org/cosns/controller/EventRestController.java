@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import org.cosns.auth.Auth;
 import org.cosns.repository.Event;
 import org.cosns.repository.HashTag;
 import org.cosns.repository.Post;
@@ -132,43 +133,40 @@ public class EventRestController {
 		return keyList;
 	}
 
+	@Auth
 	@PostMapping(path = "/addEvent")
 	public DefaultResult addEvent(@RequestBody EventFormDTO eventDTO, HttpSession session) throws ParseException {
 		DefaultResult dr = new DefaultResult();
 
 		User user = (User) session.getAttribute("user");
 
-		if (user != null) {
-			Set<String> hashTagSet = mapToKeySet(eventDTO.getKeyHashTag());
+		Set<String> hashTagSet = mapToKeySet(eventDTO.getKeyHashTag());
 
-			String eventKey = eventService.genEventKey(eventDTO, hashTagSet);
+		String eventKey = eventService.genEventKey(eventDTO, hashTagSet);
 
-			Set<Event> eventSet = eventService.getEventByEventKey(eventKey);
+		Set<Event> eventSet = eventService.getEventByEventKey(eventKey);
 
-			if (eventSet.size() > 0) {
-				dr.setStatus(ConstantsUtil.RESULT_ERROR);
-				dr.setRemarks("Event already exist");
-			} else {
-
-				logger.info("writing hash : " + hashTagSet);
-				Event event = eventService.createEvent(eventKey, eventDTO, hashTagSet, user);
-
-				hashTagService.saveEventHash(event, hashTagSet);
-
-				hashTagService.saveEventHashToRedis(event, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_EVENT);
-
-				redisService.saveEventKeyToRedis(event);
-
-				dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
-			}
-		} else {
-			dr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+		if (eventSet.size() > 0) {
 			dr.setStatus(ConstantsUtil.RESULT_ERROR);
+			dr.setRemarks("Event already exist");
+		} else {
+
+			logger.info("writing hash : " + hashTagSet);
+			Event event = eventService.createEvent(eventKey, eventDTO, hashTagSet, user);
+
+			hashTagService.saveEventHash(event, hashTagSet);
+
+			hashTagService.saveEventHashToRedis(event, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_EVENT);
+
+			redisService.saveEventKeyToRedis(event);
+
+			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		}
 
 		return dr;
 	}
 
+	@Auth
 	@PostMapping(path = "/addMessage")
 	public DefaultResult addMessage(@RequestBody EventMessageDTO messageDTO, HttpSession session) throws ParseException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
@@ -179,7 +177,7 @@ public class EventRestController {
 
 		User user = (User) session.getAttribute("user");
 
-		if (eventSet.size() > 0 && user != null) {
+		if (eventSet.size() > 0) {
 
 			EventMessage em = new EventMessage();
 			em.setDate(Calendar.getInstance().getTime());
@@ -194,6 +192,7 @@ public class EventRestController {
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			dr.setStatus(ConstantsUtil.RESULT_ERROR);
+			dr.setStatus("no events");
 		}
 		return dr;
 	}

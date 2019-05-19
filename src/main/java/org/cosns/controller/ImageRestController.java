@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tomcat.util.http.fileupload.FileUploadBase.SizeLimitExceededException;
+import org.cosns.auth.Auth;
 import org.cosns.repository.User;
 import org.cosns.repository.extend.EventImage;
 import org.cosns.repository.extend.PostImage;
@@ -50,6 +51,15 @@ public class ImageRestController {
 
 	@Value("${cosns.image.uploadPattern}")
 	String uploadPattern;
+
+	@GetMapping(path = "image/{imageFile}", produces = MediaType.IMAGE_JPEG_VALUE)
+	public ResponseEntity<byte[]> getDirectImage(@PathVariable("imageFile") String imageFile, HttpSession session, Model model) throws IOException {
+
+		File img = new File(uploadFolder + imageFile);
+
+		return ResponseEntity.ok().contentType(MediaType.valueOf(FileTypeMap.getDefaultFileTypeMap().getContentType(img))).body(Files.readAllBytes(img.toPath()));
+
+	}
 
 	@GetMapping(path = "images/{imageFile}", produces = MediaType.IMAGE_JPEG_VALUE)
 	public ResponseEntity<byte[]> getPostImage(@PathVariable("imageFile") String imageFile, HttpSession session, Model model) throws IOException {
@@ -118,142 +128,127 @@ public class ImageRestController {
 		}
 	}
 
+	@Auth
 	@PostMapping(value = "post/uploadImage", consumes = { "multipart/form-data" })
 	public DefaultResult uploadImageContent(ImageUploadDTO imageInfo, HttpSession session) throws IOException, NullPointerException, SizeLimitExceededException {
 		UploadImageResult result = new UploadImageResult();
 		User user = (User) session.getAttribute("user");
 
-		if (user != null) {
-			try {
-				String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
+		try {
+			String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
 
-				logger.info("user : " + user.getUserId() + " upload image");
+			logger.info("user : " + user.getUserId() + " upload image");
 
-				MultipartFile fromFile = imageInfo.getFile();
+			MultipartFile fromFile = imageInfo.getFile();
 
-				String ext = FilenameUtils.getExtension(fromFile.getOriginalFilename());
+			String ext = FilenameUtils.getExtension(fromFile.getOriginalFilename());
 
-				String filename = uuidPrefix + "." + ext;
-				String thumbnailFilename = uuidPrefix + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "." + ext;
+			String filename = uuidPrefix + "." + ext;
+			String thumbnailFilename = uuidPrefix + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "." + ext;
 
-				String targetFullPath = uploadFolder + filename;
-				logger.info("targetFullPath : " + targetFullPath);
+			String targetFullPath = uploadFolder + filename;
+			logger.info("targetFullPath : " + targetFullPath);
 
-				File targetFile = imageService.uploadImage(fromFile, targetFullPath);
-				File thumbnailFile = new File(uploadFolder + thumbnailFilename);
+			File targetFile = imageService.uploadImage(fromFile, targetFullPath);
+			File thumbnailFile = new File(uploadFolder + thumbnailFilename);
 
-				imageService.resizeImage(targetFile, targetFile, ext, 2048);
-				imageService.resizeImage(targetFile, thumbnailFile, ext, 512);
+			imageService.resizeImage(targetFile, targetFile, ext, 2048);
+			imageService.resizeImage(targetFile, thumbnailFile, ext, 512);
 
-				imageService.savePostImage(uploadFolder, filename, thumbnailFilename, targetFile.getTotalSpace(), user);
+			imageService.savePostImage(uploadFolder, filename, thumbnailFilename, targetFile.getTotalSpace(), user);
 
-				result.setFilePath(filename);
-				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			result.setFilePath(filename);
+			result.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
-			} catch (Exception ex) {
-				ex.printStackTrace();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 
-				result.setStatus(ConstantsUtil.RESULT_ERROR);
-				result.setRemarks(ex.getLocalizedMessage());
-
-			}
-
-		} else {
 			result.setStatus(ConstantsUtil.RESULT_ERROR);
-			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+			result.setRemarks(ex.getLocalizedMessage());
+
 		}
 
 		return result;
 	}
 
+	@Auth
 	@PostMapping(value = "user/uploadProfileImage", consumes = { "multipart/form-data" })
 	public DefaultResult uploadProfileImage(ImageUploadDTO imageInfo, HttpSession session) throws IOException, NullPointerException {
 		UploadImageResult result = new UploadImageResult();
 		User user = (User) session.getAttribute("user");
 
-		if (user != null) {
-			try {
+		try {
 
-				String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
+			String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
 
-				logger.info("inside upload image");
+			logger.info("inside upload image");
 
-				MultipartFile fromFile = imageInfo.getFile();
+			MultipartFile fromFile = imageInfo.getFile();
 
-				String ext = FilenameUtils.getExtension(fromFile.getOriginalFilename());
+			String ext = FilenameUtils.getExtension(fromFile.getOriginalFilename());
 
-				String fileName = uuidPrefix + "." + ext;
+			String fileName = uuidPrefix + "." + ext;
 
-				String targetPath = uploadFolder + fileName;
+			String targetPath = uploadFolder + fileName;
 
-				File targetFile = imageService.uploadImage(fromFile, targetPath);
+			File targetFile = imageService.uploadImage(fromFile, targetPath);
 
-				imageService.resizeImage(targetFile, targetFile, ext, 200);
+			imageService.resizeImage(targetFile, targetFile, ext, 200);
 
-				imageService.saveProfileImage(uploadFolder, fileName, fromFile.getSize(), user);
+			imageService.saveProfileImage(uploadFolder, fileName, fromFile.getSize(), user);
 
-				result.setFilePath(fileName);
-				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			result.setFilePath(fileName);
+			result.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
-			} catch (Exception ex) {
-				ex.printStackTrace();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 
-				result.setStatus(ConstantsUtil.RESULT_ERROR);
-				result.setRemarks(ex.getLocalizedMessage());
-
-			}
-
-		} else {
 			result.setStatus(ConstantsUtil.RESULT_ERROR);
-			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+			result.setRemarks(ex.getLocalizedMessage());
+
 		}
 
 		return result;
 	}
 
+	@Auth
 	@PostMapping(value = "event/uploadImage", consumes = { "multipart/form-data" })
 	public DefaultResult uploadEventImageContent(ImageUploadDTO imageInfo, HttpSession session) throws IOException, NullPointerException, SizeLimitExceededException {
 		UploadImageResult result = new UploadImageResult();
 		User user = (User) session.getAttribute("user");
 
-		if (user != null) {
-			try {
-				String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
+		try {
+			String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
 
-				logger.info("user : " + user.getUserId() + " upload image");
+			logger.info("user : " + user.getUserId() + " upload image");
 
-				MultipartFile fromFile = imageInfo.getFile();
+			MultipartFile fromFile = imageInfo.getFile();
 
-				String ext = FilenameUtils.getExtension(fromFile.getOriginalFilename());
+			String ext = FilenameUtils.getExtension(fromFile.getOriginalFilename());
 
-				String filename = uuidPrefix + "." + ext;
-				String thumbnailFilename = uuidPrefix + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "." + ext;
+			String filename = uuidPrefix + "." + ext;
+			String thumbnailFilename = uuidPrefix + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "." + ext;
 
-				String targetFullPath = uploadFolder + filename;
-				logger.info("targetFullPath : " + targetFullPath);
+			String targetFullPath = uploadFolder + filename;
+			logger.info("targetFullPath : " + targetFullPath);
 
-				File targetFile = imageService.uploadImage(fromFile, targetFullPath);
-				File thumbnailFile = new File(uploadFolder + thumbnailFilename);
+			File targetFile = imageService.uploadImage(fromFile, targetFullPath);
+			File thumbnailFile = new File(uploadFolder + thumbnailFilename);
 
-				imageService.resizeImage(targetFile, targetFile, ext, 2048);
-				imageService.resizeImage(targetFile, thumbnailFile, ext, 512);
+			imageService.resizeImage(targetFile, targetFile, ext, 2048);
+			imageService.resizeImage(targetFile, thumbnailFile, ext, 512);
 
-				imageService.saveEventImage(uploadFolder, filename, thumbnailFilename, targetFile.getTotalSpace(), user);
+			imageService.saveEventImage(uploadFolder, filename, thumbnailFilename, targetFile.getTotalSpace(), user);
 
-				result.setFilePath(filename);
-				result.setStatus(ConstantsUtil.RESULT_SUCCESS);
+			result.setFilePath(filename);
+			result.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
-			} catch (Exception ex) {
-				ex.printStackTrace();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 
-				result.setStatus(ConstantsUtil.RESULT_ERROR);
-				result.setRemarks(ex.getLocalizedMessage());
-
-			}
-
-		} else {
 			result.setStatus(ConstantsUtil.RESULT_ERROR);
-			result.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+			result.setRemarks(ex.getLocalizedMessage());
+
 		}
 
 		return result;

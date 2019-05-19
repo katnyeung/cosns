@@ -44,7 +44,7 @@ public abstract class Post extends Auditable<String> {
 	private Long postId;
 
 	private String postKey;
-	
+
 	private Date releaseDate;
 
 	@Lob
@@ -78,6 +78,9 @@ public abstract class Post extends Auditable<String> {
 
 	@Transient
 	Long likeCount;
+
+	@Transient
+	Long likeCoinCount;
 
 	@Transient
 	Long retweetCount;
@@ -234,6 +237,14 @@ public abstract class Post extends Auditable<String> {
 
 	public void setPostKey(String postKey) {
 		this.postKey = postKey;
+	}
+
+	public Long getLikeCoinCount() {
+		return likeCoinCount;
+	}
+
+	public void setLikeCoinCount(Long likeCoinCount) {
+		this.likeCoinCount = likeCoinCount;
 	}
 
 	@Override

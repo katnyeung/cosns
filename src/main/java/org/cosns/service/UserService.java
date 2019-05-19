@@ -49,7 +49,7 @@ public class UserService {
 		User registeredUser = null;
 
 		Set<User> userSet = userDAO.findActiveUserByEmail(userDTO.getEmail());
-		if (userSet.size() == 0) {
+		if (!userSet.iterator().hasNext()) {
 			// create user
 
 			User user = new User();
@@ -62,6 +62,37 @@ public class UserService {
 		}
 
 		return registeredUser;
+	}
+
+	@Transactional
+	public User registerFBUser(UserFormDTO userDTO) {
+		User registeredUser = null;
+
+		Set<User> userSet = userDAO.findActiveUserByEmail(userDTO.getEmail());
+		if (!userSet.iterator().hasNext()) {
+			// create user
+
+			User user = new User();
+			user.setEmail(userDTO.getEmail());
+			user.setFbId(userDTO.getFbId());
+			user.setPassword(bCryptPasswordEncoder().encode(userDTO.getPassword()));
+			user.setStatus(ConstantsUtil.USER_STATUS_ACTIVE);
+			user.setUserRole(ConstantsUtil.USER_ROLE_NORMAL);
+
+			registeredUser = userDAO.save(user);
+		}
+
+		return registeredUser;
+	}
+
+	public User linkAccountWithFB(UserFormDTO userDTO, User user) {
+		user.setFbId(userDTO.getFbId());
+		userDAO.save(user);
+		return user;
+	}
+
+	public User getUserByFbId(String fbId) {
+		return userDAO.findActiveUserByFbId(fbId);
 	}
 
 	public User verifyUser(UserFormDTO userDTO) {
@@ -263,9 +294,9 @@ public class UserService {
 				imageService.saveProfileImage(image);
 			}
 		}
-		
+
 		user.setLikeCoinId(userSettingDTO.getLikeCoinId());
-		
+
 		// message
 		if (userSettingDTO.getMessage() != null) {
 			user.setMessage(userSettingDTO.getMessage());
@@ -273,6 +304,10 @@ public class UserService {
 
 		if (userSettingDTO.getDisplayName() != null) {
 			user.setDisplayName(userSettingDTO.getDisplayName());
+		}
+
+		if (userSettingDTO.getFbId() != null) {
+			user.setFbId(userSettingDTO.getFbId());
 		}
 
 		user = updateUser(user);
@@ -311,7 +346,6 @@ public class UserService {
 		} else {
 			return null;
 		}
-
 	}
 
 }

@@ -1,10 +1,19 @@
 package org.cosns.web.DTO;
 
 public class UserFormDTO {
+	String fbId;
 	String email;
 	String password;
 	String passwordAgain;
-	
+
+	public String getFbId() {
+		return fbId;
+	}
+
+	public void setFbId(String fbId) {
+		this.fbId = fbId;
+	}
+
 	public String getEmail() {
 		return email;
 	}

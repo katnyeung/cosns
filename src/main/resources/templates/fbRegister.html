@@ -1,0 +1,131 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+
+
+<script th:include="components/header :: headerLibrary" th:remove="tag"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ng-tags-input/3.2.0/ng-tags-input.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ng-tags-input/3.2.0/ng-tags-input.min.css"></link>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ng-tags-input/3.2.0/ng-tags-input.bootstrap.min.css"></link>
+
+<script src="/js/ng-flow-standalone.min.js"></script>
+<script src="/js/angular-sortable-view.min.js"></script>
+</head>
+<body ng-app="application">
+	<script>
+		var main = angular.module('application', [ 'flow', 'angular-sortable-view', 'ngTagsInput' ]);
+
+		main.controller('fbRegisterController', function($scope, $http, $window, messageService) {
+
+			$scope.fbId = '[[${fbId}]]'
+
+			$scope.login = function() {
+				if ($scope.email && $scope.password) {
+
+					$http({
+						url : "/user/linkAccountWithFB",
+						method : "POST",
+						headers : {
+							'Content-Type' : 'application/json'
+						},
+						data : {
+							'fbId' : $scope.fbId,
+							'email' : $scope.email,
+							'password' : $scope.password
+						}
+					}).then(function(response) {
+						if (response.data.status === 'success') {
+							$window.location.href = '/loginWithFB';
+						} else {
+							$scope.message(response.data.remarks);
+						}
+
+					});
+				}
+			}
+
+			$scope.register = function() {
+				if ($scope.register.email && $scope.register.password) {
+
+					return $http({
+						url : "/user/registerWithFB",
+						method : "POST",
+						headers : {
+							'Content-Type' : 'application/json'
+						},
+						data : {
+							'fbId' : $scope.fbId,
+							'email' : $scope.register.email,
+							'password' : $scope.register.password,
+							'passwordAgain' : $scope.register.passwordAgain
+						}
+					}).then(function(response) {
+						if (response.data.status === 'success') {
+							$window.location.href = '/loginWithFB';
+						} else {
+							$scope.message(response.data.remarks);
+						}
+
+					});
+				}
+			}
+			$scope.message = function(message) {
+				messageService.setMessage(message);
+			}
+		})
+	</script>
+	<div th:include="components/post :: viewPostScript" th:remove="tag"></div>
+
+	<div th:include="components/header :: headerScript" th:remove="tag"></div>
+	<div th:include="components/header :: headerBody" th:remove="tag"></div>
+
+	<div class="container" ng-controller="fbRegisterController">
+
+		<div class="form-inline row m-1"></div>
+		<h3>please login to link up the account</h3>
+		<div class="card m-3">
+			<form method="post" ng-submit="login()">
+				<div class="card-body">
+					<div class="form-group">
+						<label for="email">email</label> <input type="text" id="email" class="form-control" ng-model="email"  placeholder="email"/>
+					</div>
+					<div class="form-group">
+						<label for="password">password</label> <input type="password" id="password" class="form-control" ng-model="password"  placeholder="password"/>
+					</div>
+					<div class="form-group">
+						<input type="submit" value="login" class="btn btn-primary" />
+					</div>
+				</div>
+			</form>
+		</div>
+		<h3>or register here</h3>
+		<div class="card m-3">
+			<form ng-submit="register()" name="registerForm">
+				<div class="card-body">
+					<div class="form-group">
+						<label for="email1">Email address</label> <input ng-model="register.email" type="email" class="form-control" id="email1" aria-describedby="emailHelp" placeholder="Enter email">
+					</div>
+					<div class="form-group">
+						<label for="pwd1">Password</label> <input ng-model="register.password" type="password" class="form-control" id="pwd1" placeholder="Password">
+					</div>
+					<div class="form-group">
+						<label for="exampleInputPassword1">Password Again</label> <input ng-model="register.passwordAgain" type="password" class="form-control" id="pwd2" placeholder="Password Again">
+					</div>
+					<input type="submit" id="register" value="register" class="btn btn-primary" />
+				</div>
+
+			</form>
+		</div>
+	</div>
+
+
+	<hr>
+
+	<footer>
+		<p>&copy; Company 2013</p>
+	</footer>
+
+</body>
+</html>

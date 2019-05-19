@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import org.cosns.auth.Auth;
 import org.cosns.repository.Event;
 import org.cosns.repository.Post;
 import org.cosns.repository.PostReaction;
@@ -101,7 +102,12 @@ public class PostRestController {
 		} else {
 			postList = postService.getPost(postId);
 		}
-
+		/*
+		 * try {// JSON example String json = Jsoup.connect(
+		 * "https://like.co/api/like/likebutton/chungyeung/total?referrer=http%3A%2F%2Flocalhost%3A8080%2F%40chungyeung%2Fhkbu-2019"
+		 * ).ignoreContentType(true).execute().body(); logger.info(json); } catch
+		 * (IOException e) { // TODO Auto-generated catch block e.printStackTrace(); }
+		 */
 		plr.setPostList(postList);
 		plr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		return plr;
@@ -218,109 +224,90 @@ public class PostRestController {
 		return plr;
 	}
 
+	@Auth
 	@PostMapping(path = "/writePost")
 	@Transactional
 	public DefaultResult writePost(@RequestBody PostFormDTO postDTO, HttpSession session) {
 		DefaultResult dr = new DefaultResult();
 		User user = (User) session.getAttribute("user");
 
-		if (user != null) {
-			Set<String> hashTagSet = hashTagService.parseHashByMessage(postDTO.getPostMessage());
+		Set<String> hashTagSet = hashTagService.parseHashByMessage(postDTO.getPostMessage());
 
-			Post post = postService.writePhotoPost(postDTO, user, hashTagSet);
+		Post post = postService.writePhotoPost(postDTO, user, hashTagSet);
 
-			logger.info("writing hash : " + hashTagSet);
+		logger.info("writing hash : " + hashTagSet);
 
-			hashTagService.savePostHash(post, hashTagSet);
+		hashTagService.savePostHash(post, hashTagSet);
 
-			hashTagService.savePostHashToRedis(post, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_PHOTO);
+		hashTagService.savePostHashToRedis(post, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_PHOTO);
 
-			redisService.savePostKeyToRedis(post);
+		redisService.savePostKeyToRedis(post);
 
-			redisService.addPostRecord(post.getPostId());
+		redisService.addPostRecord(post.getPostId());
 
-			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
-		} else {
-			dr.setStatus(ConstantsUtil.RESULT_ERROR);
-			dr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
-		}
+		dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
 		return dr;
 	}
 
+	@Auth
 	@PostMapping(path = "/likePost")
 	public DefaultResult likePost(@RequestBody PostReactionDTO postReactionDTO, HttpSession session) {
 		PostReactionResult prr = new PostReactionResult();
 		User user = (User) session.getAttribute("user");
 
-		if (user != null) {
-			PostReaction postReaction = postService.likePost(postReactionDTO.getPostId(), user);
+		PostReaction postReaction = postService.likePost(postReactionDTO.getPostId(), user);
 
-			if (postReaction.getStatus().equals(ConstantsUtil.POST_REACTION_ACTIVE)) {
-				prr.setType(ConstantsUtil.POST_REACTION_TYPE_INCREASE);
-			} else {
-				prr.setType(ConstantsUtil.POST_REACTION_TYPE_DECREASE);
-			}
-
-			prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		if (postReaction.getStatus().equals(ConstantsUtil.POST_REACTION_ACTIVE)) {
+			prr.setType(ConstantsUtil.POST_REACTION_TYPE_INCREASE);
 		} else {
-			prr.setStatus(ConstantsUtil.RESULT_ERROR);
-			prr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+			prr.setType(ConstantsUtil.POST_REACTION_TYPE_DECREASE);
 		}
+
+		prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
 		return prr;
 	}
 
+	@Auth
 	@PostMapping(path = "/retweetPost")
 	public DefaultResult retweet(@RequestBody PostReactionDTO postReactionDTO, HttpSession session) {
 		PostReactionResult prr = new PostReactionResult();
 		User user = (User) session.getAttribute("user");
 
-		if (user != null) {
-			Post post = postService.retweetPost(postReactionDTO.getPostId(), user);
-			if (post != null) {
-				prr.setType(ConstantsUtil.POST_REACTION_TYPE_INCREASE);
-				prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
-			} else {
-				prr.setStatus(ConstantsUtil.RESULT_ERROR);
-				prr.setRemarks("Retweet Failed");
-			}
-
+		Post post = postService.retweetPost(postReactionDTO.getPostId(), user);
+		if (post != null) {
+			prr.setType(ConstantsUtil.POST_REACTION_TYPE_INCREASE);
+			prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			prr.setStatus(ConstantsUtil.RESULT_ERROR);
-			prr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+			prr.setRemarks("Retweet Failed");
 		}
 
 		return prr;
 	}
 
+	@Auth
 	@PostMapping(path = "/removePost")
 	public DefaultResult removePost(@RequestBody PostReactionDTO postReactionDTO, HttpSession session) {
 
 		PostReactionResult prr = new PostReactionResult();
 		User user = (User) session.getAttribute("user");
 
-		if (user != null) {
+		Post post = postService.removePost(postReactionDTO.getPostId(), user);
 
-			Post post = postService.removePost(postReactionDTO.getPostId(), user);
+		if (post != null) {
+			logger.info("removing post : " + post.getPostId());
 
-			if (post != null) {
-				logger.info("removing post : " + post.getPostId());
+			redisService.removePostRecord(post);
 
-				redisService.removePostRecord(post);
+			prr.setType(ConstantsUtil.POST_REACTION_CANCEL);
+			prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
-				prr.setType(ConstantsUtil.POST_REACTION_CANCEL);
-				prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
-
-				prr.setRemarks("Remove OK");
-			} else {
-				prr.setStatus(ConstantsUtil.RESULT_ERROR);
-				prr.setRemarks("Remove Failed");
-			}
-
+			prr.setRemarks("Remove OK");
 		} else {
 			prr.setStatus(ConstantsUtil.RESULT_ERROR);
-			prr.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED);
+			prr.setRemarks("Remove Failed");
 		}
 
 		return prr;

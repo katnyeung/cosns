@@ -40,6 +40,7 @@
 						$scope.keyHashTag = response.data.user.hashtags.map(function(hashTag){return {text:hashTag.hashTag}});
 					}
 					$scope.likeCoinId = response.data.user.likeCoinId;
+					$scope.fbId = response.data.user.fbId;
 					
 				} else {
 					$scope.message("Load User Failed");
@@ -111,6 +112,7 @@
 							message : $scope.profileMessage,
 							keyHashTag : $scope.keyHashTag,
 							likeCoinId : $scope.likeCoinId,
+							fbId : $scope.fbId,
 							image : image
 						}
 					}).then(function(response) {
@@ -208,11 +210,19 @@
 							<div class="form-inline">
 								<tags-input ng-model="keyHashTag" add-on-paste="true" track-by-expr="$index" style="width:500px"> <auto-complete source="loadTags($query)"></auto-complete> </tags-input>
 							</div></td>
-					</tr>					<tr>
+					</tr>					
+					<tr>
 						<td>Like Coin Id</td>
 						<td>
 							<div class="form-inline">
 								<input type="text" ng-model="likeCoinId" name="likeCoinId" placeholder="(Optional)" class="form-control" />
+							</div></td>
+					</tr>
+					<tr>
+						<td>Facebook Id</td>
+						<td>
+							<div class="form-inline">
+								<input type="text" ng-model="fbId" name="fbId" placeholder="(Optional)" class="form-control" />
 							</div></td>
 					</tr>
 					<tr>
