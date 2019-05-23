@@ -348,4 +348,9 @@ public class UserService {
 		}
 	}
 
+	public void resetUserKeyToRedis() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

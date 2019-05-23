@@ -266,4 +266,9 @@ public class HashTagService {
 			redisService.removeSetItem(ConstantsUtil.REDIS_TAG_GROUP + ":" + hashTag.getHashTag(), ConstantsUtil.REDIS_USER_GROUP + ":" + user.getUserId());
 		}
 	}
+
+	public void resetHashTagKeyToRedis() {
+		// TODO Auto-generated method stub
+		
+	}
 }

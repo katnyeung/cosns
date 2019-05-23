@@ -47,7 +47,7 @@ public interface PostDAO extends PagingAndSortingRepository<Post, Long> {
 
 	@Query("SELECT p FROM Post p WHERE TYPE(p) <> RetweetPost AND p.status = '" + ConstantsUtil.POST_ACTIVE + "' AND p.createdate >= :start AND p.createdate <= :end")
 	public List<Post> findPostByDateRange(@Param("start") Date start, @Param("end") Date end);
-
+	
 	@Query("SELECT p FROM Post p INNER JOIN p.user u WHERE TYPE(p) = RetweetPost AND (p.post.postId = :postId AND p.user.userId = :userId)")
 	public List<Post> findRetweetedPost(@Param("postId") Long postId, @Param("userId") Long userId);
 

@@ -44,7 +44,6 @@ public class RedisService {
 	}
 
 	public boolean hasKey(String query) {
-		logger.info("redis : checking : " + query + ", exist ? " + stringRedisTemplate.hasKey(query));
 		return stringRedisTemplate.hasKey(query);
 	}
 
@@ -73,6 +72,7 @@ public class RedisService {
 
 	public void savePostKeyToRedis(Post post) {
 		setHashValue(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + post.getPostKey(), ConstantsUtil.REDIS_POST_ID, "" + post.getPostId());
+		setHashValue(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + post.getPostKey(), ConstantsUtil.REDIS_POST_VIEW_TYPE_TOTAL, "" + post.getTotalViewCount());
 	}
 
 	public void incrLike(Long postId, Long userId) {
@@ -121,7 +121,6 @@ public class RedisService {
 	}
 
 	public void incrTodayPostView(Long postId) {
-		logger.info("increasing viewcount : " + postId);
 		stringRedisTemplate.opsForHash().increment(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY, (long) 1);
 	}
 
@@ -176,7 +175,6 @@ public class RedisService {
 		});
 
 		for (byte[] byteArr : byters) {
-			logger.info(new String(byteArr));
 			keySet.add(new String(byteArr));
 		}
 		return keySet;

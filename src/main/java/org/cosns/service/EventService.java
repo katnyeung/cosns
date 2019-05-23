@@ -200,4 +200,9 @@ public class EventService {
 	public void incrViewCount(Long eventId) {
 		eventDAO.incrEventViewCount(eventId);
 	}
+
+	public void resetEventKeyToRedis() {
+		// TODO Auto-generated method stub
+		
+	}
 }

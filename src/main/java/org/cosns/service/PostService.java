@@ -555,4 +555,33 @@ public class PostService {
 		Set<Long> idList = keys.stream().limit(10).mapToLong(Long::parseLong).boxed().collect(Collectors.toSet());
 		return postDAO.findPostByPostIdSet(idList);
 	}
+
+	public void resetPostKeyToRedis() {
+
+		Iterable<Post> postIter = postDAO.findAll();
+
+		while (postIter.iterator().hasNext()) {
+			Post post = postIter.iterator().next();
+
+			if (post instanceof PhotoPost) {
+				if (post.getPostKey() != null) {
+					redisService.removePostRecord(post);
+
+					redisService.savePostKeyToRedis(post);
+
+					List<PostReaction> postReactionList = postReactionDAO.findByPostId(post.getPostId());
+					for (PostReaction pr : postReactionList) {
+						if (pr instanceof LikeReaction) {
+							redisService.incrLike(pr.getPost().getPostId(), pr.getUser().getUserId());
+						}
+
+					}
+
+				}
+			} else if (post instanceof RetweetPost) {
+				redisService.incrRetweet(post.getPostId(), post.getUser().getUserId());
+			}
+
+		}
+	}
 }
