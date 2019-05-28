@@ -17,8 +17,8 @@ import org.apache.tomcat.util.http.fileupload.FileUploadBase.SizeLimitExceededEx
 import org.cosns.auth.Auth;
 import org.cosns.repository.User;
 import org.cosns.repository.extend.EventImage;
-import org.cosns.repository.extend.PostImage;
 import org.cosns.repository.extend.ProfileImage;
+import org.cosns.repository.extend.post.PostImage;
 import org.cosns.service.ImageService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.ImageUploadDTO;

@@ -5,28 +5,28 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.cosns.repository.Post;
+import org.cosns.repository.Event;
 import org.cosns.repository.PostReaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@DiscriminatorValue(value = "like")
+@DiscriminatorValue(value = "event_comment")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class LikeReaction extends PostReaction {
+public class EventCommentReaction extends PostReaction {
 
 	@JsonIgnore
 	@ManyToOne
-	@JoinColumn(name = "post_id", referencedColumnName = "postId")
-	private Post post;
+	@JoinColumn(name = "event_id", referencedColumnName = "eventId")
+	private Event event;
 
-	public Post getPost() {
-		return post;
+	public Event getEvent() {
+		return event;
 	}
 
-	public void setPost(Post post) {
-		this.post = post;
+	public void setEvent(Event event) {
+		this.event = event;
 	}
 
 }

@@ -2,6 +2,7 @@ package org.cosns.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -24,6 +25,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.cosns.repository.extend.EventCommentReaction;
 import org.cosns.repository.extend.EventHashTag;
 import org.cosns.repository.extend.EventImage;
 import org.cosns.util.Auditable;
@@ -105,6 +107,10 @@ public abstract class Event extends Auditable<String> {
 
 	@Transient
 	private List<EventMessage> messageList;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+	private Set<EventCommentReaction> commentReaction;
 
 	public Long getEventId() {
 		return eventId;

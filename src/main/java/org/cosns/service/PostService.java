@@ -23,9 +23,9 @@ import org.cosns.repository.PostReaction;
 import org.cosns.repository.User;
 import org.cosns.repository.extend.DateCountReaction;
 import org.cosns.repository.extend.LikeReaction;
-import org.cosns.repository.extend.PhotoPost;
-import org.cosns.repository.extend.PostImage;
-import org.cosns.repository.extend.RetweetPost;
+import org.cosns.repository.extend.post.PhotoPost;
+import org.cosns.repository.extend.post.PostImage;
+import org.cosns.repository.extend.post.RetweetPost;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.PostFormDTO;
 import org.slf4j.Logger;
@@ -368,11 +368,11 @@ public class PostService {
 
 			Post post = postOptional.get();
 
-			Optional<PostReaction> optPR = postReactionDAO.findByPostIdUserId(post.getPostId(), user.getUserId());
+			Optional<LikeReaction> optPR = postReactionDAO.findLikeReactionByPostIdUserId(post.getPostId(), user.getUserId());
 
 			if (optPR.isPresent()) {
 
-				PostReaction reaction = optPR.get();
+				LikeReaction reaction = optPR.get();
 				if (reaction.getStatus().equals(ConstantsUtil.POST_REACTION_ACTIVE)) {
 					redisService.decrLike(post.getPostId(), user.getUserId());
 					reaction.setStatus(ConstantsUtil.POST_REACTION_CANCEL);
@@ -569,11 +569,9 @@ public class PostService {
 
 					redisService.savePostKeyToRedis(post);
 
-					List<PostReaction> postReactionList = postReactionDAO.findByPostId(post.getPostId());
-					for (PostReaction pr : postReactionList) {
-						if (pr instanceof LikeReaction) {
-							redisService.incrLike(pr.getPost().getPostId(), pr.getUser().getUserId());
-						}
+					List<LikeReaction> likeReactionList = postReactionDAO.findLikeReactionByPostId(post.getPostId());
+					for (LikeReaction pr : likeReactionList) {
+						redisService.incrLike(pr.getPost().getPostId(), pr.getUser().getUserId());
 
 					}
 

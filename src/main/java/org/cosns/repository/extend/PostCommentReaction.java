@@ -3,23 +3,23 @@ package org.cosns.repository.extend;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 
 import org.cosns.repository.Post;
+import org.cosns.repository.PostReaction;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
-@DiscriminatorValue(value = "retweet")
+@DiscriminatorValue(value = "post_comment")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class RetweetPost extends Post {
+public class PostCommentReaction extends PostReaction {
 
-	@OneToOne
-	@JoinColumn(name = "retweet_post_id", referencedColumnName = "postId")
-	@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "postId")
-	Post post;
+	@JsonIgnore
+	@ManyToOne
+	@JoinColumn(name = "post_id", referencedColumnName = "postId")
+	private Post post;
 
 	public Post getPost() {
 		return post;
@@ -28,4 +28,5 @@ public class RetweetPost extends Post {
 	public void setPost(Post post) {
 		this.post = post;
 	}
+
 }

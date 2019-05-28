@@ -25,8 +25,10 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.cosns.repository.extend.PostHashTag;
-import org.cosns.repository.extend.PostImage;
+import org.cosns.repository.extend.LikeReaction;
+import org.cosns.repository.extend.PostCommentReaction;
+import org.cosns.repository.extend.post.PostHashTag;
+import org.cosns.repository.extend.post.PostImage;
 import org.cosns.util.Auditable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -69,7 +71,11 @@ public abstract class Post extends Auditable<String> {
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-	private Set<PostReaction> postReaction;
+	private Set<LikeReaction> likeReaction;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+	private Set<PostCommentReaction> commentReaction;
 
 	Long totalViewCount;
 
@@ -151,12 +157,13 @@ public abstract class Post extends Auditable<String> {
 		this.hashtags = hashtags;
 	}
 
-	public Set<PostReaction> getPostReaction() {
-		return postReaction;
+
+	public Set<LikeReaction> getLikeReaction() {
+		return likeReaction;
 	}
 
-	public void setPostReaction(Set<PostReaction> postReaction) {
-		this.postReaction = postReaction;
+	public void setLikeReaction(Set<LikeReaction> likeReaction) {
+		this.likeReaction = likeReaction;
 	}
 
 	public Date getReleaseDate() {

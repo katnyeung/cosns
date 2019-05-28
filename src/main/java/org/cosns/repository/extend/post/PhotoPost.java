@@ -1,4 +1,4 @@
-package org.cosns.repository.extend;
+package org.cosns.repository.extend.post;
 
 import java.util.Date;
 

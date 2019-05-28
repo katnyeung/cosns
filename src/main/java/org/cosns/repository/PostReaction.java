@@ -32,11 +32,6 @@ public class PostReaction extends Auditable<String> {
 
 	@JsonIgnore
 	@ManyToOne
-	@JoinColumn(name = "post_id", referencedColumnName = "postId")
-	private Post post;
-
-	@JsonIgnore
-	@ManyToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "userId")
 	private User user;
 
@@ -44,14 +39,6 @@ public class PostReaction extends Auditable<String> {
 	@NotNull
 	@Size(max = 1)
 	private String status;
-
-	public Post getPost() {
-		return post;
-	}
-
-	public void setPost(Post post) {
-		this.post = post;
-	}
 
 	public Long getReactionId() {
 		return reactionId;

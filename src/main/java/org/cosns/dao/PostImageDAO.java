@@ -2,7 +2,7 @@ package org.cosns.dao;
 
 import java.util.List;
 
-import org.cosns.repository.extend.PostImage;
+import org.cosns.repository.extend.post.PostImage;
 import org.cosns.util.ConstantsUtil;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

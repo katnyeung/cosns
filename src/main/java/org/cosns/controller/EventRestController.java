@@ -197,6 +197,27 @@ public class EventRestController {
 		return dr;
 	}
 
+	@Auth
+	@PostMapping(path = "/addComment")
+	public DefaultResult addComment(@RequestBody EventMessageDTO messageDTO, HttpSession session) throws ParseException, JsonProcessingException {
+
+		DefaultResult dr = new DefaultResult();
+
+		Set<Event> eventSet = eventService.getEventByEventKey(messageDTO.getEventKey());
+
+		User user = (User) session.getAttribute("user");
+
+		if (eventSet.size() > 0) {
+
+			
+			
+			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		} else {
+			dr.setStatus(ConstantsUtil.RESULT_ERROR);
+			dr.setStatus("no events");
+		}
+		return dr;
+	}
 	private Set<String> mapToKeySet(List<Map<String, String>> keyHashTag) {
 		return keyHashTag.stream().map(Map::values).flatMap(Collection::stream).collect(Collectors.toSet());
 	}
