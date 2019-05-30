@@ -296,7 +296,12 @@ public class RouteController {
 	@GetMapping(path = "loginWithFB")
 	public String loginWithFB(HttpServletRequest request, HttpServletResponse response) {
 
-		StringBuilder sb = new StringBuilder("redirect:").append("https://www.facebook.com/v3.3/dialog/oauth").append("?client_id=").append(ConstantsUtil.FB_CLIENT_ID).append("&redirect_uri=").append("http://localhost:8080/validateLogin").append("&scope=").append("email").append("&state=").append("test");
+		StringBuilder sb = new StringBuilder("redirect:")
+				.append("https://www.facebook.com/v3.3/dialog/oauth")
+				.append("?client_id=").append(ConstantsUtil.FB_CLIENT_ID)
+				.append("&redirect_uri=").append("http://www.cosns.net/validateLogin")
+				.append("&scope=").append("email")
+				.append("&state=").append("test");
 
 		return sb.toString();
 
@@ -309,7 +314,10 @@ public class RouteController {
 
 		String fbResponse = "";
 		try {
-			StringBuilder sb = new StringBuilder("").append("https://graph.facebook.com/v3.3/oauth/access_token").append("?client_id=").append(ConstantsUtil.FB_CLIENT_ID).append("&redirect_uri=").append("http://localhost:8080/validateLogin").append("&client_secret=").append(ConstantsUtil.FB_SECRET).append("&code=").append(code);
+			StringBuilder sb = new StringBuilder("https://graph.facebook.com/v3.3/oauth/access_token")
+					.append("?client_id=").append(ConstantsUtil.FB_CLIENT_ID)
+					.append("&redirect_uri=").append("http://www.cosns.net/validateLogin")
+					.append("&client_secret=").append(ConstantsUtil.FB_SECRET).append("&code=").append(code);
 
 			fbResponse = Jsoup.connect(sb.toString()).timeout(60000).ignoreContentType(true).method(Connection.Method.GET).execute().body();
 
@@ -320,7 +328,9 @@ public class RouteController {
 
 			fbInfoMap.putAll(responseMap);
 
-			sb = new StringBuilder("").append("https://graph.facebook.com/v3.3/me").append("?fields=").append("id%2Cname%2Cemail").append("&access_token=").append(responseMap.get("access_token"));
+			sb = new StringBuilder("").append("https://graph.facebook.com/v3.3/me")
+					.append("?fields=").append("id%2Cname%2Cemail")
+					.append("&access_token=").append(responseMap.get("access_token"));
 
 			fbResponse = Jsoup.connect(sb.toString()).timeout(60000).ignoreContentType(true).method(Connection.Method.GET).execute().body();
 
