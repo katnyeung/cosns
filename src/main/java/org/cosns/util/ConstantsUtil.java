@@ -1,7 +1,8 @@
 package org.cosns.util;
 
 public class ConstantsUtil {
-
+	public static final String DOMAIN = "https://www.cosns.net";
+	
 	public static final String HASHTAG_PATTERN = "#([^\\s][^#^\\n]*)";
 
 	public final static String USER_STATUS_ACTIVE = "A";

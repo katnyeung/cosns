@@ -130,7 +130,7 @@
 <body th:fragment="LikeAndRetweetWithLikeCoin()">
 	<div ng-if="sharedUser.user" class='mr-auto d-inline-flex'>
 		<div ng-if="post.user.likeCoinId">
-			<iframe scrolling="no" frameborder="0" id="player" ng-init="getLikeCoinURL(post.user.likeCoinId)" ng-src="{{likeCoinURL}}" allowfullscreen="true"></iframe>
+			<iframe scrolling="no" frameborder="0" id="player" ng-init="getLikeCoinURL(post)" ng-src="{{likeCoinURL}}" allowfullscreen="true"></iframe>
 		</div>
 		<div>
 			<span> <a href="#" class="btn" ng-click="likePost(post); $event.preventDefault();"> <span ng-if="post.liked"><i class="fas fa-arrow-up fa-1x" style="color: red"></i></span> <span ng-if="!post.liked"><i class="fas fa-arrow-up fa-1x"></i> </span> <span ng-if="post.likeCount > 0">{{post.likeCount}}</span>

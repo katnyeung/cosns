@@ -64,8 +64,8 @@
 		
 		$scope.likeCoinURL = "";
 
-		$scope.getLikeCoinURL = function(likeCoinId) {
-			$scope.likeCoinURL = $sce.trustAsResourceUrl("https://button.like.co/in/embed/" + likeCoinId + "/button/?referrer=[[${referrer}]]");
+		$scope.getLikeCoinURL = function(post) {
+			$scope.likeCoinURL = $sce.trustAsResourceUrl("https://button.like.co/in/embed/" + post.user.likeCoinId + "/button/?referrer=[[${DOMAIN}]]/@" + post.postKey);
 		}
 	});
 </script>

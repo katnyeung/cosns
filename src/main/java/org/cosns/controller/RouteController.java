@@ -102,46 +102,6 @@ public class RouteController {
 		return "viewTimeline";
 	}
 
-	@GetMapping(path = "@{userName}/{postKey}")
-	public String viewPost(@PathVariable("userName") String userName, @PathVariable("postKey") String postKey, HttpSession session, HttpServletRequest request, Model model) throws DefaultException {
-		User loggedUser = (User) session.getAttribute("user");
-
-		try {
-			model.addAttribute("referrer", URLEncoder.encode(request.getRequestURL().toString(), "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if (loggedUser != null) {
-			model.addAttribute("user", loggedUser);
-		}
-
-		logger.info("searching from redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " ->" + ConstantsUtil.REDIS_POST_ID);
-		logger.info("hasKey : " + redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey));
-
-		if (!redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey)) {
-			logger.info("redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " -> " + ConstantsUtil.REDIS_POST_ID + ", redis not found");
-
-			try {
-				logger.info("postId string : " + postKey);
-				Long postId = Long.parseLong(postKey);
-				logger.info("try to parse ID : " + postId);
-				model.addAttribute("postId", postId);
-			} catch (NumberFormatException nfe) {
-				logger.info("post not found");
-				throw new DefaultException("post not found");
-			}
-		} else {
-
-			String postIdString = (String) redisService.getHashValue(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey, ConstantsUtil.REDIS_POST_ID);
-
-			model.addAttribute("postId", postIdString);
-		}
-
-		return "viewPost";
-	}
-
 	@GetMapping(path = "h/{hashTag}/{orderByType}")
 	public String viewHashTag(@PathVariable("hashTag") String hashTag, @PathVariable("orderByType") String orderByType, HttpSession session, Model model) {
 		User loggedUser = (User) session.getAttribute("user");
@@ -171,12 +131,8 @@ public class RouteController {
 
 	@GetMapping(path = "@")
 	public String viewProfile(HttpSession session, HttpServletRequest request, Model model) {
-		try {
-			model.addAttribute("referrer", URLEncoder.encode(request.getRequestURL().toString(), "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		model.addAttribute("DOMAIN", ConstantsUtil.DOMAIN);
 
 		User loggedUser = (User) session.getAttribute("user");
 		if (loggedUser != null) {
@@ -191,12 +147,8 @@ public class RouteController {
 
 	@GetMapping(path = "@{userName}")
 	public String viewProfile(@PathVariable("userName") String userName, HttpSession session, HttpServletRequest request, Model model) {
-		try {
-			model.addAttribute("referrer", URLEncoder.encode(request.getRequestURL().toString(), "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		model.addAttribute("DOMAIN", ConstantsUtil.DOMAIN);
 
 		try {
 			User loggedUser = (User) session.getAttribute("user");
@@ -240,6 +192,41 @@ public class RouteController {
 		return "viewProfile";
 	}
 
+	@GetMapping(path = "@{userName}/{postKey}")
+	public String viewPost(@PathVariable("userName") String userName, @PathVariable("postKey") String postKey, HttpSession session, HttpServletRequest request, Model model) throws DefaultException {
+		User loggedUser = (User) session.getAttribute("user");
+
+		model.addAttribute("DOMAIN", ConstantsUtil.DOMAIN);
+		
+		if (loggedUser != null) {
+			model.addAttribute("user", loggedUser);
+		}
+
+		logger.info("searching from redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " ->" + ConstantsUtil.REDIS_POST_ID);
+		logger.info("hasKey : " + redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey));
+
+		if (!redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey)) {
+			logger.info("redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " -> " + ConstantsUtil.REDIS_POST_ID + ", redis not found");
+
+			try {
+				logger.info("postId string : " + postKey);
+				Long postId = Long.parseLong(postKey);
+				logger.info("try to parse ID : " + postId);
+				model.addAttribute("postId", postId);
+			} catch (NumberFormatException nfe) {
+				logger.info("post not found");
+				throw new DefaultException("post not found");
+			}
+		} else {
+
+			String postIdString = (String) redisService.getHashValue(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey, ConstantsUtil.REDIS_POST_ID);
+
+			model.addAttribute("postId", postIdString);
+		}
+
+		return "viewPost";
+	}
+	
 	@GetMapping(path = "setting")
 	public String viewSetting(HttpSession session, Model model) {
 		User loggedUser = (User) session.getAttribute("user");
@@ -299,7 +286,7 @@ public class RouteController {
 		StringBuilder sb = new StringBuilder("redirect:")
 				.append("https://www.facebook.com/v3.3/dialog/oauth")
 				.append("?client_id=").append(ConstantsUtil.FB_CLIENT_ID)
-				.append("&redirect_uri=").append("http://www.cosns.net/validateLogin")
+				.append("&redirect_uri=").append(ConstantsUtil.DOMAIN + "/validateLogin")
 				.append("&scope=").append("email")
 				.append("&state=").append("test");
 
@@ -316,7 +303,7 @@ public class RouteController {
 		try {
 			StringBuilder sb = new StringBuilder("https://graph.facebook.com/v3.3/oauth/access_token")
 					.append("?client_id=").append(ConstantsUtil.FB_CLIENT_ID)
-					.append("&redirect_uri=").append("http://www.cosns.net/validateLogin")
+					.append("&redirect_uri=").append(ConstantsUtil.DOMAIN + "/validateLogin")
 					.append("&client_secret=").append(ConstantsUtil.FB_SECRET).append("&code=").append(code);
 
 			fbResponse = Jsoup.connect(sb.toString()).timeout(60000).ignoreContentType(true).method(Connection.Method.GET).execute().body();

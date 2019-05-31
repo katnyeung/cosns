@@ -110,8 +110,8 @@
 			}
 			$scope.likeCoinURL = "";
 
-			$scope.getLikeCoinURL = function(likeCoinId) {
-				$scope.likeCoinURL = $sce.trustAsResourceUrl("https://button.like.co/in/embed/" + likeCoinId + "/button/?referrer=[[${referrer}]]");
+			$scope.getUserLikeCoinURL = function(user) {
+				$scope.likeCoinURL = $sce.trustAsResourceUrl("https://button.like.co/in/embed/" + user.likeCoinId + "/button/?referrer=[[${DOMAIN}]]/" + user.email);
 			}
 		});
 	</script>
@@ -125,7 +125,7 @@
 
 			<div th:include="components/user :: user" th:remove="tag"></div>
 			<div class="col-12 mt-2" ng-if="user.likeCoinId">
-				<iframe scrolling="no" frameborder="0" id="player" ng-init="getLikeCoinURL(user.likeCoinId)" ng-src="{{likeCoinURL}}" allowfullscreen="true"></iframe>
+				<iframe scrolling="no" frameborder="0" id="player" ng-init="getUserLikeCoinURL(user)" ng-src="{{likeCoinURL}}" allowfullscreen="true"></iframe>
 			</div>
 			<div class="col-12" ng-show="user.followers > 0">
 				<br /> Following
