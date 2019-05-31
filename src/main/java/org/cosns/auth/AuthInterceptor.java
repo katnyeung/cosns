@@ -34,7 +34,8 @@ public class AuthInterceptor implements HandlerInterceptor {
 	UserService userSerivce;
 
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
 
 		HttpSession session = request.getSession();
 		User user = (User) session.getAttribute("user");
@@ -45,13 +46,18 @@ public class AuthInterceptor implements HandlerInterceptor {
 			if (user == null) {
 				if (cookieMap.get("userKey") != null) {
 					String userIdString = redisService.getAndRefreshUserIdCache(cookieMap.get("userKey"));
-					Long userId = Long.parseLong(userIdString);
-					user = userSerivce.getUserById(userId);
+					if (userIdString != null) {
+						Long userId = Long.parseLong(userIdString);
+						user = userSerivce.getUserById(userId);
+						session.setAttribute("user", user);
+					} else {
+						// remove the cooke if no redis key found
+						CookieUtil.addCookie(response, "userKey", cookieMap.get("userKey"), 0);
+					}
 
-					session.setAttribute("user", user);
 				}
 			}
-	
+
 			HandlerMethod hm = (HandlerMethod) handler;
 			Method method = hm.getMethod();
 
@@ -67,7 +73,8 @@ public class AuthInterceptor implements HandlerInterceptor {
 
 						response.setContentType("application/json; charset=utf-8");
 						ServletOutputStream sos = response.getOutputStream();
-						sos.print(om.writeValueAsString(ResultFactory.getErrorResult(ConstantsUtil.RESULT_ERROR, ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED)));
+						sos.print(om.writeValueAsString(ResultFactory.getErrorResult(ConstantsUtil.RESULT_ERROR,
+								ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED)));
 
 						sos.close();
 
@@ -79,6 +86,5 @@ public class AuthInterceptor implements HandlerInterceptor {
 
 		return true;
 	}
-
 
 }

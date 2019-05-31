@@ -29,7 +29,7 @@ public class CookieUtil {
 		return cookieMap;
 	}
 
-	public static void handleCookie(HttpServletRequest request, HttpServletResponse response, User user) {
+	public static String handleCookie(HttpServletRequest request, HttpServletResponse response, User user) {
 		Map<String, String> cookieMap = CookieUtil.readCookieMap(request);
 		String userKey = cookieMap.get("userKey");
 
@@ -38,6 +38,7 @@ public class CookieUtil {
 			// set cookie
 			CookieUtil.addCookie(response, "userKey", uuid, 7 * 24 * 60 * 60);
 		}
+		return userKey;
 	}
 
 }

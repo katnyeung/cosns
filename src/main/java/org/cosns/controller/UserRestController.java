@@ -75,8 +75,9 @@ public class UserRestController {
 				ur.setUser(user);
 				ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 				ur.setRemarks("Good day, " + user.getEmail());
+				String userKey = CookieUtil.handleCookie(request, response, user);
 
-				CookieUtil.handleCookie(request, response, user);
+				redisService.setUserIdCache(userKey, "" + user.getUserId());
 			} else {
 				ur.setStatus(ConstantsUtil.RESULT_ERROR);
 				ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_FAIL);
