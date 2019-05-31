@@ -4,6 +4,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.cosns.util.Auditable;
@@ -12,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
+@Table(name = "hash_tag", indexes = { @Index(name = "INDEX_HASHTAG", columnList = "hashTag") })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public abstract class HashTag extends Auditable<String> {
 	@JsonIgnore

@@ -208,7 +208,6 @@ public class EventRestController {
 		User user = (User) session.getAttribute("user");
 
 		if (eventSet.size() > 0) {
-
 			
 			
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);

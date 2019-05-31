@@ -34,8 +34,16 @@ public class AuthInterceptor implements HandlerInterceptor {
 	UserService userSerivce;
 
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-			throws Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+
+		String ipAddress = request.getHeader("X-FORWARDED-FOR");
+		if (ipAddress == null) {
+			ipAddress = request.getRemoteAddr();
+		}
+
+		if (!request.getRequestURI().contains("/js/") && !request.getRequestURI().contains("/css/")) {
+			logger.info("IP [" + ipAddress + "] : " + request.getRequestURI());
+		}
 
 		HttpSession session = request.getSession();
 		User user = (User) session.getAttribute("user");
@@ -73,8 +81,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
 						response.setContentType("application/json; charset=utf-8");
 						ServletOutputStream sos = response.getOutputStream();
-						sos.print(om.writeValueAsString(ResultFactory.getErrorResult(ConstantsUtil.RESULT_ERROR,
-								ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED)));
+						sos.print(om.writeValueAsString(ResultFactory.getErrorResult(ConstantsUtil.RESULT_ERROR, ConstantsUtil.ERROR_MESSAGE_LOGIN_REQUIRED)));
 
 						sos.close();
 

@@ -208,7 +208,7 @@ public class HashTagService {
 	public Set<String> getRelatedTag(String query, List<String> eventTypeList) {
 		Set<String> keyList = queryKeySet(ConstantsUtil.REDIS_TAG_GROUP, query);
 		Set<String> eventKeyList = new HashSet<>();
-
+		Set<String> idList = new HashSet<>();
 		for (String key : keyList) {
 			Set<String> itemSet = getMembers(key);
 			for (String itemString : itemSet) {
@@ -217,11 +217,23 @@ public class HashTagService {
 
 				if (idArr.length > 1) {
 					String typeItem = idArr[0];
+					String idString = idArr[1];
 
 					if (eventTypeList.contains(typeItem)) {
 						eventKeyList.add(key.replaceAll(ConstantsUtil.REDIS_TAG_GROUP + ":", ""));
+						// store the Id
+						idList.add(idString);
 					}
 				}
+			}
+		}
+		logger.info("stored idList : " + idList);
+		
+		if(!idList.isEmpty()) {
+			List<Map<String, String>> listResult = hashTagDAO.getTopRelatedHashTag(idList);
+
+			for (Map<String, String> result : listResult) {
+				eventKeyList.add(result.get("hash_tag"));
 			}
 		}
 
@@ -269,6 +281,6 @@ public class HashTagService {
 
 	public void resetHashTagKeyToRedis() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
