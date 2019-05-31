@@ -304,7 +304,10 @@ public class RouteController {
 			StringBuilder sb = new StringBuilder("https://graph.facebook.com/v3.3/oauth/access_token")
 					.append("?client_id=").append(ConstantsUtil.FB_CLIENT_ID)
 					.append("&redirect_uri=").append(ConstantsUtil.DOMAIN + "/validateLogin")
-					.append("&client_secret=").append(ConstantsUtil.FB_SECRET).append("&code=").append(code);
+					.append("&client_secret=").append(ConstantsUtil.FB_SECRET)
+					.append("&code=").append(code);
+
+
 
 			fbResponse = Jsoup.connect(sb.toString()).timeout(60000).ignoreContentType(true).method(Connection.Method.GET).execute().body();
 
