@@ -15,7 +15,7 @@ public class CookieUtil {
 		Cookie cookie = new Cookie(name, value);
 		cookie.setPath("/");
 		cookie.setMaxAge(maxAge);
-		cookie.setDomain("www.cosns.com");
+		cookie.setDomain(ConstantsUtil.DOMAIN);
 		response.addCookie(cookie);
 	}
 
