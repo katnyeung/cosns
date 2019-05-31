@@ -1,8 +1,6 @@
 package org.cosns.controller;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,6 +89,9 @@ public class RouteController {
 
 	@GetMapping(path = "t")
 	public String viewTimeline(HttpSession session, Model model) {
+		
+		model.addAttribute("DOMAIN", ConstantsUtil.DOMAIN);
+		
 		User loggedUser = (User) session.getAttribute("user");
 
 		if (loggedUser != null) {
