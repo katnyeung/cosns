@@ -46,7 +46,7 @@ public class EventService {
 			u.setDescription(u.getDescription() + "<br/>" + u.getUrl());
 			u.setUrl("/e/" + u.getEventKey());
 			if (u.getEventImages().iterator().hasNext()) {
-				u.setImage("/eimages/" + u.getEventImages().iterator().next().getThumbnailFilename());
+				u.setImage("/image/" + u.getEventImages().iterator().next().getThumbnailFilename());
 			}
 
 		});
@@ -103,7 +103,7 @@ public class EventService {
 			event.setTitle(sb.toString());
 
 			for (Image image : post.getPostImages()) {
-				event.setImage("/images/" + image.getThumbnailFilename());
+				event.setImage("/image/" + image.getThumbnailFilename());
 				break;
 			}
 
