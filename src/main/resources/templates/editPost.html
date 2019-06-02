@@ -19,19 +19,36 @@
 </head>
 <body ng-app="application">
 
-	<script>
+	<script th:inline="javascript">
 		var main = angular.module('application', [ 'mentio', 'flow', 'angular-sortable-view' ])
 
-		main.controller('writePostController', function($scope, $http, $timeout, $window, messageService) {
+		main.controller('editPostController', function($scope, $http, $timeout, $window, messageService) {
 			$scope.obj = {};
 			$scope.uploading = false;
 
-			var releaseDateString = '[[${releaseDate}]]';
-
-			if (releaseDateString === '') {
-				$scope.releaseDate = new Date();
-			} else {
-				$scope.releaseDate = new Date(releaseDateString);
+			$scope.post = [[${post}]];
+			
+			$scope.initPost = function(flow){
+				$scope.postMessage = $scope.post.message;
+				$scope.releaseDate = new Date($scope.post.releaseDate);
+				angular.forEach($scope.post.postImages,function(value,key){ 					
+					$scope.addFile(flow, '/image/' + value.filename, value.filename);
+				});
+			}
+			
+			$scope.addFile = function(flow, filePath , fileName){ 
+				$http.get(filePath,{responseType: "blob"}).then((data) => {
+				  	var file = new File([data.data], fileName, {
+				  	  type: data.data.type,
+				  	});
+				  	var flowFile = new Flow.FlowFile(flow, file);
+				  	flowFile.msg = '{"status":"success","filePath":"' + fileName + '"}';
+				  	flowFile._prevProgress = 1;
+				  	flowFile._prevUploadedSize = flowFile.size;
+				  	flowFile.isComplete = function(){return true};
+				  	flowFile.paused = true;
+			        flow.files.push(flowFile);
+				});
 			}
 
 			$scope.validate = function(file) {
@@ -52,7 +69,7 @@
 			}
 			
 			$scope.uploaded = function() {
-				console.log($scope.obj);
+				console.log($scope.obj.flow.files);
 				$scope.uploading = false;
 				$scope.message("");
 				return true;
@@ -63,19 +80,22 @@
 					var fileList = [];
 
 					angular.forEach($scope.obj.flow.files, function(value, key) {
+						console.log(value);
 						var msg = JSON.parse(value.msg);
 						if (msg.status === 'success') {
+							console.log("filePath : " + msg.filePath);
 							fileList.push(msg.filePath);
 						}
 					});
 
 					$http({
-						url : "/post/writePost",
+						url : "/post/updatePost",
 						method : "POST",
 						headers : {
 							'Content-Type' : 'application/json'
 						},
 						data : {
+							'postId' : $scope.post.postId,
 							'postMessage' : $scope.postMessage,
 							'releaseDate' : $scope.releaseDate,
 							'fileList' : fileList
@@ -83,7 +103,7 @@
 					}).then(function(response) {
 
 						if (response.data.status == 'success') {
-							$scope.message("Post Success");
+							$scope.message("Update Success");
 
 							$timeout(function() {
 								$window.location.href = '/@';
@@ -117,12 +137,12 @@
 	<div th:include="components/header :: headerScript" th:remove="tag"></div>
 	<div th:include="components/header :: headerBody" th:remove="tag"></div>
 
-	<div ng-controller="writePostController" class="container">
+	<div ng-controller="editPostController" class="container">
 
-		<h3 class="row m-1">write</h3>
+		<h3 class="row m-1">edit post {{post.postKey}}</h3>
 		<form ng-submit="submit()">
 			<div class="m-1 pb-3 pt-2">
-				<button type="submit" class="btn btn-primary" ng-disabled="uploading">Post</button>
+				<button type="submit" class="btn btn-primary">Update</button>
 			</div>
 
 			<div class="form-group">
@@ -136,7 +156,7 @@
 
 			<div class="form-group">
 				<h4>Images</h4>
-				<div flow-init="{target: '/post/uploadImage', testChunks:false,  chunkSize:10000000}" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file);" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message;uploaded();" flow-name="obj.flow">
+				<div flow-init="{target: '/post/uploadImage', testChunks:false,  chunkSize:10000000}" ng-init="initPost($flow)" flow-file-added="!!{png:1,jpg:1,jpeg:1}[$file.getExtension()];validate($file);" flow-files-submitted="$flow.upload()" flow-file-success="$file.msg = $message;uploaded();" flow-name="obj.flow">
 					<div flow-drop flow-btn flow-drag-enter="style={border:'4px solid green'}" flow-drag-leave="style={}" ng-style="style" class="btn btn-danger">Click or Drop image here</div>
 					<div class="mt-2"></div>
 					<div sv-root sv-part="$flow.files" class="row">

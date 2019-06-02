@@ -15,10 +15,10 @@ import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import org.cosns.auth.Auth;
-import org.cosns.repository.Event;
-import org.cosns.repository.HashTag;
-import org.cosns.repository.Post;
 import org.cosns.repository.User;
+import org.cosns.repository.event.Event;
+import org.cosns.repository.hashtag.HashTag;
+import org.cosns.repository.post.Post;
 import org.cosns.service.EventService;
 import org.cosns.service.HashTagService;
 import org.cosns.service.PostService;
@@ -154,9 +154,9 @@ public class EventRestController {
 			logger.info("writing hash : " + hashTagSet);
 			Event event = eventService.createEvent(eventKey, eventDTO, hashTagSet, user);
 
-			hashTagService.saveEventHash(event, hashTagSet);
+			hashTagService.saveEventHashTag(event, hashTagSet);
 
-			hashTagService.saveEventHashToRedis(event, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_EVENT);
+			hashTagService.saveEventHashTagToRedis(event, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_EVENT);
 
 			redisService.saveEventKeyToRedis(event);
 

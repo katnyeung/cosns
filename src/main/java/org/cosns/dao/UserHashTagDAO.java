@@ -1,6 +1,6 @@
 package org.cosns.dao;
 
-import org.cosns.repository.extend.UserHashTag;
+import org.cosns.repository.hashtag.UserHashTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

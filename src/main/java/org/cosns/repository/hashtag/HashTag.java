@@ -1,4 +1,4 @@
-package org.cosns.repository;
+package org.cosns.repository.hashtag;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.cosns.util.Auditable;
+import org.cosns.util.ConstantsUtil;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -52,4 +53,9 @@ public abstract class HashTag extends Auditable<String> {
 		this.totalCount = totalCount;
 	}
 
+	public String getRedisKey() {
+		return ConstantsUtil.REDIS_TAG_GROUP + ":" + this.getHashTag();
+	}
+	
+	public abstract String getRedisValue();
 }

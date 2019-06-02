@@ -1,12 +1,10 @@
-package org.cosns.repository.extend.post;
+package org.cosns.repository.post;
 
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-
-import org.cosns.repository.Post;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

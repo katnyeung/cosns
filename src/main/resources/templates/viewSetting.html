@@ -172,7 +172,7 @@
 
 								<div class="span2">
 									<div class="thumbnail" ng-show="!$flow.files.length">
-										<img ng-src="{{profileImage ? '/pimages/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" style="height: 150px" flow-btn /> <span style="color: #CFCFCF">(Optional)</span>
+										<img ng-src="{{profileImage ? '/image/' + profileImage : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" style="height: 150px" flow-btn /> <span style="color: #CFCFCF">(Optional)</span>
 									</div>
 									<div class="thumbnail" ng-show="$flow.files.length">
 										<img flow-img="$flow.files[0]" style="height: 150px" flow-btn />
@@ -235,10 +235,8 @@
 			</div>
 		</form>
 	</div>
-	<hr>
 
-	<footer>
-		<p>&copy; Company 2013</p>
-	</footer>
+	<div th:include="components/footer :: footerBody" th:remove="tag"></div>
+	
 </body>
 </html>

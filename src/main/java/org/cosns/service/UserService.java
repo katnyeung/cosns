@@ -9,9 +9,9 @@ import java.util.Set;
 import org.cosns.dao.FriendRequestDAO;
 import org.cosns.dao.UserDAO;
 import org.cosns.repository.FriendRequest;
-import org.cosns.repository.Post;
 import org.cosns.repository.User;
-import org.cosns.repository.extend.ProfileImage;
+import org.cosns.repository.image.ProfileImage;
+import org.cosns.repository.post.Post;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.UserFormDTO;
 import org.cosns.web.DTO.UserSettingDTO;
@@ -227,11 +227,11 @@ public class UserService {
 		}
 	}
 
-	public void setKeysInRedis(String prefix, String uniqueName, String type, Long id) {
+	public void setUserKeysInRedis(String prefix, String uniqueName, String type, Long id) {
 		redisService.setHashValue(prefix + ":" + uniqueName, type, "" + id);
 	}
 
-	public void deleteKeysInRedis(String uniqueName, String prefix) {
+	public void deleteUserKeysInRedis(String uniqueName, String prefix) {
 		redisService.deleteKey(prefix + ":" + uniqueName);
 	}
 
@@ -258,7 +258,7 @@ public class UserService {
 
 						if (oldUniqueName != null) {
 							logger.info("update setting : delete old uniqueName : " + oldUniqueName);
-							deleteKeysInRedis(oldUniqueName, ConstantsUtil.REDIS_USER_GROUP);
+							deleteUserKeysInRedis(oldUniqueName, ConstantsUtil.REDIS_USER_GROUP);
 						}
 						logger.info("update setting : setting new uniqueName : " + oldUniqueName);
 
@@ -269,7 +269,7 @@ public class UserService {
 						user.setMessage(userSettingDTO.getMessage());
 					}
 
-					setKeysInRedis(ConstantsUtil.REDIS_USER_GROUP, userSettingDTO.getUniqueName(), ConstantsUtil.REDIS_USER_TYPE_ID, user.getUserId());
+					setUserKeysInRedis(ConstantsUtil.REDIS_USER_GROUP, userSettingDTO.getUniqueName(), ConstantsUtil.REDIS_USER_TYPE_ID, user.getUserId());
 
 					user.setLastUpdateUniqueNameDate(Calendar.getInstance().getTime());
 
@@ -349,8 +349,19 @@ public class UserService {
 	}
 
 	public void resetUserKeyToRedis() {
-		// TODO Auto-generated method stub
+		Set<User> userSet = userDAO.findActiveUsers();
 		
+		if(userSet.iterator().hasNext()) {
+			User user = userSet.iterator().next();
+
+			if(user.getUniqueName() != null) {
+
+				deleteUserKeysInRedis(user.getUniqueName(), ConstantsUtil.REDIS_USER_GROUP);
+				
+				setUserKeysInRedis(ConstantsUtil.REDIS_USER_GROUP, user.getUniqueName(), ConstantsUtil.REDIS_USER_TYPE_ID, user.getUserId());
+			}
+		}
 	}
 
 }
+

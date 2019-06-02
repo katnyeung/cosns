@@ -2,7 +2,7 @@ package org.cosns.web.result;
 
 import java.util.List;
 
-import org.cosns.repository.Post;
+import org.cosns.repository.post.Post;
 
 public class PostListResult extends DefaultResult {
 	List<Post> postList;

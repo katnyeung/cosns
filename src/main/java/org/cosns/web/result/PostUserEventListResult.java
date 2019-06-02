@@ -2,9 +2,9 @@ package org.cosns.web.result;
 
 import java.util.List;
 
-import org.cosns.repository.Event;
-import org.cosns.repository.Post;
 import org.cosns.repository.User;
+import org.cosns.repository.event.Event;
+import org.cosns.repository.post.Post;
 
 public class PostUserEventListResult extends DefaultResult {
 	List<Post> postList;

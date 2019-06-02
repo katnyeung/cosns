@@ -12,9 +12,9 @@ import org.cosns.dao.EventImageDAO;
 import org.cosns.dao.PostImageDAO;
 import org.cosns.dao.ProfileImageDAO;
 import org.cosns.repository.User;
-import org.cosns.repository.extend.EventImage;
-import org.cosns.repository.extend.ProfileImage;
-import org.cosns.repository.extend.post.PostImage;
+import org.cosns.repository.image.EventImage;
+import org.cosns.repository.image.PostImage;
+import org.cosns.repository.image.ProfileImage;
 import org.cosns.util.ConstantsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,6 +131,10 @@ public class ImageService {
 
 	public List<PostImage> findActivePostImageByFilename(String file) {
 		return postImageDAO.findActivePostImageByFilename(file);
+	}
+
+	public List<PostImage> findPostImageByFilename(String file) {
+		return postImageDAO.findPostImageByFilename(file);
 	}
 
 	public void saveProfileImage(ProfileImage image) {

@@ -1,4 +1,4 @@
-package org.cosns.repository;
+package org.cosns.repository.post;
 
 import java.util.Date;
 import java.util.List;
@@ -25,11 +25,14 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.cosns.repository.extend.LikeReaction;
-import org.cosns.repository.extend.PostCommentReaction;
-import org.cosns.repository.extend.post.PostHashTag;
-import org.cosns.repository.extend.post.PostImage;
+import org.cosns.repository.User;
+import org.cosns.repository.hashtag.PostHashTag;
+import org.cosns.repository.image.PostImage;
+import org.cosns.repository.postreaction.LikeReaction;
+import org.cosns.repository.postreaction.PostCommentReaction;
 import org.cosns.util.Auditable;
+import org.cosns.util.ConstantsUtil;
+import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -64,6 +67,7 @@ public abstract class Post extends Auditable<String> {
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	@OrderBy("seq ASC")
+	@Where(clause = "status = '" + ConstantsUtil.IMAGE_ACTIVE + "'")
 	private List<PostImage> postImages;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)

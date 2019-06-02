@@ -1,23 +1,23 @@
-package org.cosns.repository.extend;
+package org.cosns.repository.image;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.cosns.repository.Post;
-import org.cosns.repository.PostReaction;
+import org.cosns.repository.post.Post;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@DiscriminatorValue(value = "like")
+@DiscriminatorValue(value = "post")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class LikeReaction extends PostReaction {
+public class PostImage extends Image {
 
 	@JsonIgnore
-	@ManyToOne
+	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	@JoinColumn(name = "post_id", referencedColumnName = "postId")
 	private Post post;
 

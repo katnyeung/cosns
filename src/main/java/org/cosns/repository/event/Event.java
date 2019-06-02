@@ -1,4 +1,4 @@
-package org.cosns.repository;
+package org.cosns.repository.event;
 
 import java.util.Date;
 import java.util.List;
@@ -25,9 +25,11 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.cosns.repository.extend.EventCommentReaction;
-import org.cosns.repository.extend.EventHashTag;
-import org.cosns.repository.extend.EventImage;
+import org.cosns.repository.User;
+import org.cosns.repository.hashtag.EventHashTag;
+import org.cosns.repository.image.EventImage;
+import org.cosns.repository.post.Post;
+import org.cosns.repository.postreaction.EventCommentReaction;
 import org.cosns.util.Auditable;
 import org.cosns.util.EventMessage;
 

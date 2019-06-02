@@ -12,10 +12,10 @@ import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import org.cosns.auth.Auth;
-import org.cosns.repository.Event;
-import org.cosns.repository.Post;
-import org.cosns.repository.PostReaction;
 import org.cosns.repository.User;
+import org.cosns.repository.event.Event;
+import org.cosns.repository.post.Post;
+import org.cosns.repository.postreaction.PostReaction;
 import org.cosns.service.EventService;
 import org.cosns.service.HashTagService;
 import org.cosns.service.ImageService;
@@ -62,16 +62,6 @@ public class PostRestController {
 
 	@Autowired
 	RedisService redisService;
-
-	@GetMapping(path = "/sync")
-	public DefaultResult sync(HttpSession session) {
-		DefaultResult dr = new DefaultResult();
-		dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
-
-		postService.syncPostCountToDB();
-
-		return dr;
-	}
 
 	@GetMapping(path = "/getPosts")
 	public DefaultResult getPosts(HttpSession session) {
@@ -224,22 +214,49 @@ public class PostRestController {
 		return plr;
 	}
 
-	@Auth
+	@Auth	
 	@PostMapping(path = "/writePost")
 	@Transactional
 	public DefaultResult writePost(@RequestBody PostFormDTO postDTO, HttpSession session) {
 		DefaultResult dr = new DefaultResult();
 		User user = (User) session.getAttribute("user");
 
-		Set<String> hashTagSet = hashTagService.parseHashByMessage(postDTO.getPostMessage());
+		Set<String> hashTagSet = hashTagService.parseHashTagByMessage(postDTO.getPostMessage());
 
 		Post post = postService.writePhotoPost(postDTO, user, hashTagSet);
 
 		logger.info("writing hash : " + hashTagSet);
 
-		hashTagService.savePostHash(post, hashTagSet);
+		hashTagService.savePostHashTag(post, hashTagSet);
 
-		hashTagService.savePostHashToRedis(post, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_PHOTO);
+		hashTagService.savePostHashTagToRedis(post, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_PHOTO);
+
+		redisService.savePostKeyToRedis(post);	
+
+		redisService.addPostRecord(post.getPostId());
+
+		dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+
+		return dr;
+	}
+
+	@Auth
+	@PostMapping(path = "/updatePost")
+	@Transactional
+	public DefaultResult updatePost(@RequestBody PostFormDTO postDTO, HttpSession session) {
+		logger.info("postFormDTO : " + postDTO);
+		DefaultResult dr = new DefaultResult();
+		User user = (User) session.getAttribute("user");
+
+		Set<String> hashTagSet = hashTagService.parseHashTagByMessage(postDTO.getPostMessage());
+		
+		Post post = postService.updatePhotoPost(postDTO, user, hashTagSet);
+
+		logger.info("writing hash : " + hashTagSet);
+
+		hashTagService.savePostHashTag(post, hashTagSet);
+
+		hashTagService.savePostHashTagToRedis(post, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_PHOTO);
 
 		redisService.savePostKeyToRedis(post);
 
@@ -299,8 +316,11 @@ public class PostRestController {
 		if (post != null) {
 			logger.info("removing post : " + post.getPostId());
 
-			redisService.removePostRecord(post);
-
+			//remove hashtag linkage
+			hashTagService.deletePostHashTagInRedis(post);
+			
+			redisService.deletePostRecordInRedis(post);
+			
 			prr.setType(ConstantsUtil.POST_REACTION_CANCEL);
 			prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
@@ -316,7 +336,7 @@ public class PostRestController {
 	@GetMapping(path = "/getRelatedTag/{query}")
 	public List<Map<String, String>> getRelatedTag(@PathVariable("query") String query, HttpSession session) throws ParseException {
 
-		List<String> eventTypeList = Arrays.asList(ConstantsUtil.REDIS_TAG_TYPE_EVENT.split(","));
+		List<String> eventTypeList = Arrays.asList(ConstantsUtil.REDIS_TAG_TYPE_EVENT_PHOTO.split(","));
 
 		Set<String> resultSet = hashTagService.getRelatedTag(query, eventTypeList);
 

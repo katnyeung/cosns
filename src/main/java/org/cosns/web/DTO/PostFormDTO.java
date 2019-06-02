@@ -4,10 +4,19 @@ import java.util.Date;
 import java.util.List;
 
 public class PostFormDTO {
+	Long postId;
 	String postMessage;
 	Date releaseDate;
-	
+
 	List<String> fileList;
+
+	public Long getPostId() {
+		return postId;
+	}
+
+	public void setPostId(Long postId) {
+		this.postId = postId;
+	}
 
 	public String getPostMessage() {
 		return postMessage;
@@ -35,7 +44,7 @@ public class PostFormDTO {
 
 	@Override
 	public String toString() {
-		return "PostFormDTO [postMessage=" + postMessage + ", fileList=" + fileList + "]";
+		return "PostFormDTO [postId=" + postId + ", postMessage=" + postMessage + ", releaseDate=" + releaseDate + ", fileList=" + fileList + "]";
 	}
 
 }

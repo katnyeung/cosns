@@ -3,11 +3,11 @@ package org.cosns.dao;
 import java.util.List;
 import java.util.Optional;
 
-import org.cosns.repository.PostReaction;
-import org.cosns.repository.extend.DateCountReaction;
-import org.cosns.repository.extend.EventCommentReaction;
-import org.cosns.repository.extend.LikeReaction;
-import org.cosns.repository.extend.PostCommentReaction;
+import org.cosns.repository.postreaction.DateCountReaction;
+import org.cosns.repository.postreaction.EventCommentReaction;
+import org.cosns.repository.postreaction.LikeReaction;
+import org.cosns.repository.postreaction.PostCommentReaction;
+import org.cosns.repository.postreaction.PostReaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

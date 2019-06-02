@@ -40,7 +40,8 @@ public class ConstantsUtil {
 	public static final String REDIS_TAG_GROUP = "tag";
 	public static final String REDIS_TAG_TYPE_PHOTO = "photo";
 	public static final String REDIS_TAG_TYPE_USER = "user";
-	public static final String REDIS_TAG_TYPE_EVENT = "event,photo";
+	public static final String REDIS_TAG_TYPE_EVENT = "event";
+	public static final String REDIS_TAG_TYPE_EVENT_PHOTO = "event,photo";
 	public static final String REDIS_TAG_TYPE_SELLING = "sell";
 	public static final String REDIS_TAG_TYPE_ALL_POST = "photo,sell";
 	public static final String REDIS_TAG_TYPE_ALL = "all";

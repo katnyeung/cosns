@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.cosns.repository.Event;
+import org.cosns.repository.event.Event;
 import org.cosns.util.ConstantsUtil;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.cosns.repository.Event;
-import org.cosns.repository.Post;
+import org.cosns.repository.event.Event;
+import org.cosns.repository.post.Post;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.util.EventMessage;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class RedisService {
 
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
-
+	
 	public void addSetItem(String key, String value) {
 		stringRedisTemplate.opsForSet().add(key, value);
 	}
@@ -63,16 +63,8 @@ public class RedisService {
 		stringRedisTemplate.opsForSet().add(ConstantsUtil.REDIS_POST_GROUP, "" + postId);
 	}
 
-	public void removePostRecord(Post post) {
-		stringRedisTemplate.opsForSet().remove(ConstantsUtil.REDIS_POST_GROUP, "" + post.getPostId());
-		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + post.getPostKey());
-		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + post.getPostKey());
-		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_LIKE_GROUP + ":" + post.getPostKey());
-	}
-
 	public void savePostKeyToRedis(Post post) {
 		setHashValue(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + post.getPostKey(), ConstantsUtil.REDIS_POST_ID, "" + post.getPostId());
-		setHashValue(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + post.getPostKey(), ConstantsUtil.REDIS_POST_VIEW_TYPE_TOTAL, "" + post.getTotalViewCount());
 	}
 
 	public void incrLike(Long postId, Long userId) {
@@ -133,12 +125,12 @@ public class RedisService {
 		}
 	}
 
+	public void resetTotalPostView(Long postId) {
+		stringRedisTemplate.opsForHash().put(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TOTAL, "0");
+	}
+	
 	public void resetTodayPostView(Long postId) {
 		stringRedisTemplate.opsForHash().put(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY, "0");
-	}
-
-	public void deleteKey(String key) {
-		stringRedisTemplate.delete(key);
 	}
 
 	public List<String> getSortedKeysByToday() {
@@ -201,10 +193,6 @@ public class RedisService {
 		}).collect(Collectors.toList());
 	}
 
-	public void removeSetItem(String key, String value) {
-		stringRedisTemplate.opsForSet().remove(key, value);
-	}
-
 	public String getAndRefreshUserIdCache(String redisKey) {
 		stringRedisTemplate.expire(redisKey, 24, TimeUnit.HOURS);
 		return stringRedisTemplate.opsForValue().get(ConstantsUtil.USER_REDIS_KEY + ":" + redisKey);
@@ -212,5 +200,20 @@ public class RedisService {
 
 	public void setUserIdCache(String redisKey, String value) {
 		stringRedisTemplate.opsForValue().set(ConstantsUtil.USER_REDIS_KEY + ":" + redisKey, value);
+	}
+	
+	public void deletePostRecordInRedis(Post post) {
+		stringRedisTemplate.opsForSet().remove(ConstantsUtil.REDIS_POST_GROUP, "" + post.getPostId());
+		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + post.getPostKey());
+		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + post.getPostId());
+		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_LIKE_GROUP + ":" + post.getPostId());
+	}
+	
+	public void deleteKey(String key) {
+		stringRedisTemplate.delete(key);
+	}
+
+	public void deleteSetItem(String key, String value) {
+		stringRedisTemplate.opsForSet().remove(key, value);
 	}
 }

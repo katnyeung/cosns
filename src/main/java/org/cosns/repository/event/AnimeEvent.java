@@ -1,9 +1,7 @@
-package org.cosns.repository.extend;
+package org.cosns.repository.event;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-
-import org.cosns.repository.Event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

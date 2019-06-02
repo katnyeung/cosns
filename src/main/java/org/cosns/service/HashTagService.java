@@ -8,15 +8,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.cosns.dao.HashTagDAO;
 import org.cosns.dao.UserHashTagDAO;
-import org.cosns.repository.Event;
-import org.cosns.repository.Post;
 import org.cosns.repository.User;
-import org.cosns.repository.extend.EventHashTag;
-import org.cosns.repository.extend.UserHashTag;
-import org.cosns.repository.extend.post.PostHashTag;
+import org.cosns.repository.event.Event;
+import org.cosns.repository.hashtag.EventHashTag;
+import org.cosns.repository.hashtag.HashTag;
+import org.cosns.repository.hashtag.PostHashTag;
+import org.cosns.repository.hashtag.UserHashTag;
+import org.cosns.repository.post.Post;
 import org.cosns.util.ConstantsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,21 @@ public class HashTagService {
 	@Autowired
 	private RedisService redisService;
 
-	public Set<String> parseHashByMessage(String postMessage) {
+	public Set<String> parseHashTagByMessage(String postMessage) {
+		Pattern pattern = Pattern.compile(ConstantsUtil.HASHTAG_PATTERN);
+		Matcher matcher = pattern.matcher(postMessage);
+
+		Set<String> hashTagSet = new HashSet<>();
+
+		while (matcher.find()) {
+			String key = matcher.group(1);
+			hashTagSet.add(key.toLowerCase());
+		}
+
+		return hashTagSet;
+	}
+
+	public Set<String> parseHashTagByComma(String postMessage) {
 		Pattern pattern = Pattern.compile(ConstantsUtil.HASHTAG_PATTERN);
 		Matcher matcher = pattern.matcher(postMessage);
 
@@ -51,21 +67,7 @@ public class HashTagService {
 		return hashTagSet;
 	}
 
-	public Set<String> parseHashByComma(String postMessage) {
-		Pattern pattern = Pattern.compile(ConstantsUtil.HASHTAG_PATTERN);
-		Matcher matcher = pattern.matcher(postMessage);
-
-		Set<String> hashTagSet = new HashSet<>();
-
-		while (matcher.find()) {
-			String key = matcher.group(1);
-			hashTagSet.add(key);
-		}
-
-		return hashTagSet;
-	}
-
-	public void savePostHash(Post post, Set<String> hashTagSet) {
+	public void savePostHashTag(Post post, Set<String> hashTagSet) {
 		for (String hashTag : hashTagSet) {
 			PostHashTag hashObject = new PostHashTag();
 
@@ -76,7 +78,7 @@ public class HashTagService {
 		}
 	}
 
-	public void saveEventHash(Event event, Set<String> hashTagSet) {
+	public void saveEventHashTag(Event event, Set<String> hashTagSet) {
 		for (String hashTag : hashTagSet) {
 			EventHashTag hashObject = new EventHashTag();
 
@@ -87,7 +89,7 @@ public class HashTagService {
 		}
 	}
 
-	public void saveUserHash(User user, Set<String> hashTagSet) {
+	public void saveUserHashTag(User user, Set<String> hashTagSet) {
 		for (String hashTag : hashTagSet) {
 			UserHashTag hashObject = new UserHashTag();
 
@@ -99,19 +101,19 @@ public class HashTagService {
 		}
 	}
 
-	public void savePostHashToRedis(Post post, Set<String> hashTagSet, String tagPrefix, String typePrefix) {
+	public void savePostHashTagToRedis(Post post, Set<String> hashTagSet, String tagPrefix, String typePrefix) {
 		for (String hashTag : hashTagSet) {
 			redisService.addSetItem(tagPrefix + ":" + hashTag.toLowerCase().trim(), typePrefix + ":" + post.getPostId());
 		}
 	}
 
-	public void saveEventHashToRedis(Event event, Set<String> hashTagSet, String tagPrefix, String typePrefix) {
+	public void saveEventHashTagToRedis(Event event, Set<String> hashTagSet, String tagPrefix, String typePrefix) {
 		for (String hashTag : hashTagSet) {
 			redisService.addSetItem(tagPrefix + ":" + hashTag.toLowerCase().trim(), typePrefix + ":" + event.getEventId());
 		}
 	}
 
-	public void saveUserHashToRedis(User user, Set<String> hashTagSet, String tagPrefix, String typePrefix) {
+	public void saveUserHashTagToRedis(User user, Set<String> hashTagSet, String tagPrefix, String typePrefix) {
 		for (String hashTag : hashTagSet) {
 			redisService.addSetItem(tagPrefix + ":" + hashTag.toLowerCase().trim(), typePrefix + ":" + user.getUserId());
 		}
@@ -220,7 +222,7 @@ public class HashTagService {
 					String idString = idArr[1];
 
 					if (eventTypeList.contains(typeItem)) {
-						eventKeyList.add(key.replaceAll(ConstantsUtil.REDIS_TAG_GROUP + ":", ""));
+						eventKeyList.add(key.replaceAll(ConstantsUtil.REDIS_TAG_GROUP + ":", "").trim());
 						// store the Id
 						idList.add(idString);
 					}
@@ -228,12 +230,12 @@ public class HashTagService {
 			}
 		}
 		logger.info("stored idList : " + idList);
-		
-		if(!idList.isEmpty()) {
+
+		if (!idList.isEmpty()) {
 			List<Map<String, String>> listResult = hashTagDAO.getTopRelatedHashTag(idList);
 
 			for (Map<String, String> result : listResult) {
-				eventKeyList.add(result.get("hash_tag"));
+				eventKeyList.add(result.get("hash_tag").trim());
 			}
 		}
 
@@ -275,12 +277,33 @@ public class HashTagService {
 		List<UserHashTag> hashTagList = user.getHashtags();
 		for (UserHashTag hashTag : hashTagList) {
 			logger.info("removing hash : " + hashTag.getHashTag() + " from user : " + user.getUserId());
-			redisService.removeSetItem(ConstantsUtil.REDIS_TAG_GROUP + ":" + hashTag.getHashTag(), ConstantsUtil.REDIS_USER_GROUP + ":" + user.getUserId());
+			redisService.deleteSetItem(ConstantsUtil.REDIS_TAG_GROUP + ":" + hashTag.getHashTag(), ConstantsUtil.REDIS_USER_GROUP + ":" + user.getUserId());
+		}
+	}
+
+	public void deletePostHashTagInRedis(Post post) {
+		logger.info("post hashTag : " + post);
+		for (PostHashTag hashTag : post.getHashtags()) {
+			logger.info("removing hash : " + hashTag.getHashTag() + " id  : " + hashTag.getHashId());
+			redisService.deleteSetItem(ConstantsUtil.REDIS_TAG_GROUP + ":" + hashTag.getHashTag(), ConstantsUtil.REDIS_TAG_TYPE_PHOTO + ":" + post.getPostId());
 		}
 	}
 
 	public void resetHashTagKeyToRedis() {
-		// TODO Auto-generated method stub
+		redisService.deleteKey("tag:*");
 
+		List<HashTag> hashTagList = hashTagDAO.findAll();
+		
+		for (HashTag hashTag : hashTagList) {
+			redisService.addSetItem(hashTag.getRedisKey(), hashTag.getRedisValue());
+		}
+
+	}
+
+	public void deletePostHashTag(Post post) {
+		List<PostHashTag> phtList = post.getHashtags();
+		List<Long> hashTagIdList = phtList.stream().map(hashTag -> hashTag.getHashId()).collect(Collectors.toList());
+		logger.info("delete hashIdList : " + hashTagIdList);
+		hashTagDAO.deleteByIdList(hashTagIdList);
 	}
 }

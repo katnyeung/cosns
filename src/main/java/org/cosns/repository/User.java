@@ -21,8 +21,12 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.cosns.repository.extend.ProfileImage;
-import org.cosns.repository.extend.UserHashTag;
+import org.cosns.repository.event.Event;
+import org.cosns.repository.hashtag.UserHashTag;
+import org.cosns.repository.image.Image;
+import org.cosns.repository.image.ProfileImage;
+import org.cosns.repository.post.Post;
+import org.cosns.repository.postreaction.PostReaction;
 import org.cosns.util.Auditable;
 import org.cosns.util.ConstantsUtil;
 import org.hibernate.annotations.Where;

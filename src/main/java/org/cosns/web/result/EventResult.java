@@ -3,8 +3,8 @@ package org.cosns.web.result;
 import java.util.List;
 import java.util.Set;
 
-import org.cosns.repository.Event;
 import org.cosns.repository.User;
+import org.cosns.repository.event.Event;
 
 public class EventResult extends DefaultResult {
 

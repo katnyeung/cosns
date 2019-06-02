@@ -76,8 +76,10 @@ public class UserRestController {
 				ur.setStatus(ConstantsUtil.RESULT_SUCCESS);
 				ur.setRemarks("Good day, " + user.getEmail());
 				String userKey = CookieUtil.handleCookie(request, response, user);
-
-				redisService.setUserIdCache(userKey, "" + user.getUserId());
+				
+				if(userKey != null) {
+					redisService.setUserIdCache(userKey, "" + user.getUserId());
+				}
 			} else {
 				ur.setStatus(ConstantsUtil.RESULT_ERROR);
 				ur.setRemarks(ConstantsUtil.ERROR_MESSAGE_LOGIN_FAIL);
@@ -130,9 +132,9 @@ public class UserRestController {
 
 			hashTagService.deleteUserHashTagByUserId(user.getUserId());
 
-			hashTagService.saveUserHash(user, hashTagSet);
+			hashTagService.saveUserHashTag(user, hashTagSet);
 
-			hashTagService.saveUserHashToRedis(user, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_USER);
+			hashTagService.saveUserHashTagToRedis(user, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_USER);
 
 			if (returnValue instanceof User) {
 
@@ -375,4 +377,5 @@ public class UserRestController {
 	private Set<String> mapToKeySet(List<Map<String, String>> keyHashTag) {
 		return keyHashTag.stream().map(Map::values).flatMap(Collection::stream).collect(Collectors.toSet());
 	}
+	
 }

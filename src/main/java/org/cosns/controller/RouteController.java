@@ -2,6 +2,7 @@ package org.cosns.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +11,9 @@ import javax.servlet.http.HttpSession;
 
 import org.cosns.auth.Auth;
 import org.cosns.repository.User;
+import org.cosns.repository.post.Post;
 import org.cosns.service.ImageService;
+import org.cosns.service.PostService;
 import org.cosns.service.RedisService;
 import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
@@ -40,6 +43,9 @@ public class RouteController {
 
 	@Autowired
 	UserService userService;
+
+	@Autowired
+	PostService postService;
 
 	@Autowired
 	ImageService imageService;
@@ -73,7 +79,26 @@ public class RouteController {
 		model.addAttribute("releaseDate", dateStart);
 
 		return "writePost";
+	}
 
+	@Auth
+	@GetMapping(path = "post/edit/{postId}")
+	public String writePostWithDate(@PathVariable("postId") Long postId, HttpSession session, Model model) {
+		User loggedUser = (User) session.getAttribute("user");
+
+		model.addAttribute("user", loggedUser);
+		model.addAttribute("postId", postId);
+
+		List<Post> postList = postService.getPost(postId);
+		if (postList.iterator().hasNext()) {
+			Post post = postList.iterator().next();
+			if (!post.getUser().getUserId().equals(loggedUser.getUserId())) {
+				return "redirect:/";
+			}
+			model.addAttribute("post", post);
+		}
+
+		return "editPost";
 	}
 
 	@GetMapping(path = "c")

@@ -3,11 +3,7 @@ package org.cosns.controller;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.activation.FileTypeMap;
 import javax.servlet.http.HttpSession;
@@ -16,9 +12,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.tomcat.util.http.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.cosns.auth.Auth;
 import org.cosns.repository.User;
-import org.cosns.repository.extend.EventImage;
-import org.cosns.repository.extend.ProfileImage;
-import org.cosns.repository.extend.post.PostImage;
 import org.cosns.service.ImageService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.ImageUploadDTO;
@@ -59,73 +52,6 @@ public class ImageRestController {
 
 		return ResponseEntity.ok().contentType(MediaType.valueOf(FileTypeMap.getDefaultFileTypeMap().getContentType(img))).body(Files.readAllBytes(img.toPath()));
 
-	}
-
-	@GetMapping(path = "images/{imageFile}", produces = MediaType.IMAGE_JPEG_VALUE)
-	public ResponseEntity<byte[]> getPostImage(@PathVariable("imageFile") String imageFile, HttpSession session, Model model) throws IOException {
-		boolean isThumbnail = false;
-
-		Pattern pattern = Pattern.compile("([a-zA-Z0-9]*)" + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "\\.([a-zA-Z0-9]*)");
-		Matcher matcher = pattern.matcher(imageFile);
-
-		if (matcher.matches()) {
-			isThumbnail = true;
-			imageFile = matcher.group(1) + "." + matcher.group(2);
-		}
-
-		List<PostImage> postImageSet = imageService.findActivePostImageByFilename(imageFile);
-		logger.info("postMessageSet : " + postImageSet);
-		if (postImageSet.iterator().hasNext()) {
-			PostImage postImage = postImageSet.iterator().next();
-
-			File img = new File(postImage.getStoredPath() + (isThumbnail ? postImage.getThumbnailFilename() : postImage.getFilename()));
-
-			return ResponseEntity.ok().contentType(MediaType.valueOf(FileTypeMap.getDefaultFileTypeMap().getContentType(img))).body(Files.readAllBytes(img.toPath()));
-
-		} else {
-			return null;
-		}
-	}
-
-	@GetMapping(path = "eimages/{imageFile}", produces = MediaType.IMAGE_JPEG_VALUE)
-	public ResponseEntity<byte[]> getEventImage(@PathVariable("imageFile") String imageFile, HttpSession session, Model model) throws IOException {
-		boolean isThumbnail = false;
-
-		Pattern pattern = Pattern.compile("([a-zA-Z0-9]*)" + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "\\.([a-zA-Z0-9]*)");
-		Matcher matcher = pattern.matcher(imageFile);
-
-		if (matcher.matches()) {
-			isThumbnail = true;
-			imageFile = matcher.group(1) + "." + matcher.group(2);
-		}
-
-		List<EventImage> eventImageSet = imageService.findActiveEventImageByFilename(imageFile);
-		logger.info("eventImageSet : " + eventImageSet);
-		if (eventImageSet.iterator().hasNext()) {
-			EventImage postImage = eventImageSet.iterator().next();
-
-			File img = new File(postImage.getStoredPath() + (isThumbnail ? postImage.getThumbnailFilename() : postImage.getFilename()));
-
-			return ResponseEntity.ok().contentType(MediaType.valueOf(FileTypeMap.getDefaultFileTypeMap().getContentType(img))).body(Files.readAllBytes(img.toPath()));
-
-		} else {
-			return null;
-		}
-	}
-
-	@GetMapping(path = "pimages/{imageFile}", produces = MediaType.IMAGE_JPEG_VALUE)
-	public ResponseEntity<byte[]> getProfileImage(@PathVariable("imageFile") String imageFile, HttpSession session, Model model) throws IOException {
-
-		Set<ProfileImage> postImageSet = imageService.findActiveProfileImageByFilename(imageFile);
-		if (postImageSet.iterator().hasNext()) {
-			ProfileImage postImage = postImageSet.iterator().next();
-
-			File img = new File(postImage.getStoredPath() + postImage.getFilename());
-			return ResponseEntity.ok().contentType(MediaType.valueOf(FileTypeMap.getDefaultFileTypeMap().getContentType(img))).body(Files.readAllBytes(img.toPath()));
-
-		} else {
-			return null;
-		}
 	}
 
 	@Auth

@@ -9,13 +9,13 @@ import java.util.Set;
 
 import org.cosns.dao.EventDAO;
 import org.cosns.dao.PostDAO;
-import org.cosns.repository.Event;
-import org.cosns.repository.HashTag;
-import org.cosns.repository.Image;
-import org.cosns.repository.Post;
 import org.cosns.repository.User;
-import org.cosns.repository.extend.EventImage;
-import org.cosns.repository.extend.PhotoEvent;
+import org.cosns.repository.event.Event;
+import org.cosns.repository.event.PhotoEvent;
+import org.cosns.repository.hashtag.HashTag;
+import org.cosns.repository.image.EventImage;
+import org.cosns.repository.image.Image;
+import org.cosns.repository.post.Post;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.EventFormDTO;
 import org.slf4j.Logger;
@@ -202,7 +202,6 @@ public class EventService {
 	}
 
 	public void resetEventKeyToRedis() {
-		// TODO Auto-generated method stub
-		
+		// nothing yet
 	}
 }

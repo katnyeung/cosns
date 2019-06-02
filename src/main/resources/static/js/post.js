@@ -1,6 +1,8 @@
 main.filter('hashTag', function() {
 	return function(val) {
-		return val.replace(/#(\S[^#^\n]*)/g, '<a href="/h/$1" class="badge badge-info">#$1</a> &nbsp;')
+		return val.replace(/#(\S[^#^\n]*)/g, function($0,$1) {
+			return '<a href="/h/' + $1.toLowerCase() + '" class="badge badge-info">#' + $1.toLowerCase() + '</a> &nbsp;'
+		});
 	};
 });
 

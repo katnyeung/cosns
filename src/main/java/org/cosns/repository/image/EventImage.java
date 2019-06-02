@@ -1,13 +1,11 @@
-package org.cosns.repository.extend;
+package org.cosns.repository.image;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.cosns.repository.Event;
-import org.cosns.repository.HashTag;
+import org.cosns.repository.event.Event;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,10 +13,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @DiscriminatorValue(value = "event")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class EventHashTag extends HashTag {
+public class EventImage extends Image {
 
 	@JsonIgnore
-	@ManyToOne(optional = true, fetch = FetchType.LAZY)
+	@ManyToOne(optional = true)
 	@JoinColumn(name = "event_id", referencedColumnName = "eventId")
 	private Event event;
 

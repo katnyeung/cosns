@@ -1,4 +1,4 @@
-package org.cosns.repository;
+package org.cosns.repository.image;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -16,6 +16,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.cosns.repository.User;
 import org.cosns.util.Auditable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

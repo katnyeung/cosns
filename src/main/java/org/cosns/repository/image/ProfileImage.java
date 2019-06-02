@@ -1,32 +1,31 @@
-package org.cosns.repository.extend;
+package org.cosns.repository.image;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.cosns.repository.Event;
-import org.cosns.repository.Image;
+import org.cosns.repository.User;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@DiscriminatorValue(value = "event")
+@DiscriminatorValue(value = "profile")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class EventImage extends Image {
+public class ProfileImage extends Image {
 
 	@JsonIgnore
 	@ManyToOne(optional = true)
-	@JoinColumn(name = "event_id", referencedColumnName = "eventId")
-	private Event event;
+	@JoinColumn(name = "profile_user_id", referencedColumnName = "userId")
+	private User profileUser;
 
-	public Event getEvent() {
-		return event;
+	public User getProfileUser() {
+		return profileUser;
 	}
 
-	public void setEvent(Event event) {
-		this.event = event;
+	public void setProfileUser(User profileUser) {
+		this.profileUser = profileUser;
 	}
 
 }

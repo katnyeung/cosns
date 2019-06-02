@@ -3,7 +3,7 @@ package org.cosns.dao;
 import java.util.List;
 import java.util.Set;
 
-import org.cosns.repository.extend.ProfileImage;
+import org.cosns.repository.image.ProfileImage;
 import org.cosns.util.ConstantsUtil;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

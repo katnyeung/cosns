@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.cosns.repository.Post;
+import org.cosns.repository.post.Post;
 import org.cosns.util.ConstantsUtil;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

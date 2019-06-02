@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,14 +19,14 @@ import java.util.stream.Collectors;
 
 import org.cosns.dao.PostDAO;
 import org.cosns.dao.PostReactionDAO;
-import org.cosns.repository.Post;
-import org.cosns.repository.PostReaction;
 import org.cosns.repository.User;
-import org.cosns.repository.extend.DateCountReaction;
-import org.cosns.repository.extend.LikeReaction;
-import org.cosns.repository.extend.post.PhotoPost;
-import org.cosns.repository.extend.post.PostImage;
-import org.cosns.repository.extend.post.RetweetPost;
+import org.cosns.repository.image.PostImage;
+import org.cosns.repository.post.PhotoPost;
+import org.cosns.repository.post.Post;
+import org.cosns.repository.post.RetweetPost;
+import org.cosns.repository.postreaction.DateCountReaction;
+import org.cosns.repository.postreaction.LikeReaction;
+import org.cosns.repository.postreaction.PostReaction;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.PostFormDTO;
 import org.slf4j.Logger;
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -54,9 +54,6 @@ public class PostService {
 
 	@Autowired
 	RedisService redisService;
-
-	@Autowired
-	StringRedisTemplate stringRedisTemplate;
 
 	public Post removePost(Long postId, User user) {
 		logger.info("Remove Post By User : " + user.getUserId());
@@ -99,14 +96,14 @@ public class PostService {
 		post.setUser(user);
 
 		// assign key to post
-		assignKey(post, hashTagSet);
+		post.setPostKey(getPostKey(post, hashTagSet));
 
 		post = (PhotoPost) postDAO.save(post);
 
 		int count = 1;
 		for (String file : postDTO.getFileList()) {
-			List<PostImage> imageSet = imageService.findPendPostImageByFilename(file);
-			for (PostImage image : imageSet) {
+			List<PostImage> imageList = imageService.findPendPostImageByFilename(file);
+			for (PostImage image : imageList) {
 				image.setStatus(ConstantsUtil.IMAGE_ACTIVE);
 				image.setPost(post);
 				image.setSeq(count++);
@@ -117,7 +114,59 @@ public class PostService {
 		return post;
 	}
 
-	public Post assignKey(Post post, Set<String> hashTagSet) {
+	public Post updatePhotoPost(PostFormDTO postDTO, User user, Set<String> hashTagSet) {
+		logger.info("Updating Post #" +postDTO.getPostId() + " By User : " + user.getUserId());
+		Post post = null;
+
+		List<Post> postList = postDAO.findPostByPostId(postDTO.getPostId());
+		if (postList.iterator().hasNext()) {
+			post = postList.iterator().next();
+			
+			//remove hashtag linkage
+			hashTagService.deletePostHashTagInRedis(post);
+			
+			hashTagService.deletePostHashTag(post);
+
+			redisService.deletePostRecordInRedis(post);
+			
+			post.setMessage(postDTO.getPostMessage());
+			post.setReleaseDate(removeTime(postDTO.getReleaseDate()));
+			post.setStatus(ConstantsUtil.POST_ACTIVE);
+			post.setUser(user);
+
+			// assign key to post
+			post.setPostKey(getPostKey(post, hashTagSet));
+
+			post = (PhotoPost) postDAO.save(post);
+
+			//deactive all photo
+			List<PostImage> postImageList = post.getPostImages();
+			for (PostImage postImage : postImageList) {
+				if (!postDTO.getFileList().contains(postImage.getFilename())) {
+					postImage.setStatus(ConstantsUtil.IMAGE_PEND);
+					imageService.savePostImage(postImage);
+				}
+			}
+			
+			logger.info("fileList : " +  postDTO.getFileList());
+			int count = 1;
+			for (String file : postDTO.getFileList()) {
+				logger.info("processing file : " + file + ", seq : " + count);
+				List<PostImage> imageList = imageService.findPostImageByFilename(file);
+				for (PostImage image : imageList) {
+					image.setStatus(ConstantsUtil.IMAGE_ACTIVE);
+					image.setPost(post);
+					image.setSeq(count++);
+					imageService.savePostImage(image);
+				}
+			}
+			
+		}
+
+		return post;
+	}
+
+	public String getPostKey(Post post, Set<String> hashTagSet) {
 
 		String userName = post.getUser().getUniqueName() != null ? post.getUser().getUniqueName() : "" + post.getUser().getUserId();
 
@@ -134,7 +183,7 @@ public class PostService {
 					String hashTagFirstTenChar = hashTag.substring(0, Math.min(hashTag.length(), ConstantsUtil.POST_KEY_HASHTAG_LENGTH));
 
 					sb.append(prepend);
-					sb.append(hashTagFirstTenChar.replaceAll(" ", "-"));
+					sb.append(hashTagFirstTenChar.trim().replaceAll(" ", "-"));
 					prepend = "-";
 				}
 			}
@@ -159,12 +208,10 @@ public class PostService {
 		} else {
 			sb.append(post.getPostId() + "" + uniqueCurrentTimeMS());
 		}
-
-		post.setPostKey(userName + "/" + sb.toString());
-
-		logger.info("saved postId : " + post.getPostId() + " to : " + post.getPostKey());
-
-		return post;
+		
+		String postKey = userName + "/" + sb.toString();
+		
+		return postKey;
 	}
 
 	private static final AtomicLong LAST_TIME_MS = new AtomicLong();
@@ -227,9 +274,7 @@ public class PostService {
 		Map<Long, List<Post>> processedMap = new LinkedHashMap<>();
 
 		for (Post post : postList) {
-			logger.info("grouping : " + post.getPostId());
 			if (post instanceof RetweetPost) {
-				logger.info("is retweetPost");
 				RetweetPost retweetedPost = ((RetweetPost) post);
 
 				List<Post> savedList = processedMap.get(retweetedPost.getPost().getPostId());
@@ -559,20 +604,26 @@ public class PostService {
 	public void resetPostKeyToRedis() {
 
 		Iterable<Post> postIter = postDAO.findAll();
-
-		while (postIter.iterator().hasNext()) {
-			Post post = postIter.iterator().next();
-
+		Iterator<Post> iter = postIter.iterator();
+		
+		while (iter.hasNext()) {
+			Post post = iter.next();
+			logger.info("Processing reset post : " + post.getPostId());
 			if (post instanceof PhotoPost) {
 				if (post.getPostKey() != null) {
-					redisService.removePostRecord(post);
+					//remove hashtag linkage
+					hashTagService.deletePostHashTagInRedis(post);
+					
+					redisService.deletePostRecordInRedis(post);
 
 					redisService.savePostKeyToRedis(post);
 
+					redisService.resetTotalPostView(post.getPostId());
+					redisService.resetTodayPostView(post.getPostId());
+					
 					List<LikeReaction> likeReactionList = postReactionDAO.findLikeReactionByPostId(post.getPostId());
 					for (LikeReaction pr : likeReactionList) {
 						redisService.incrLike(pr.getPost().getPostId(), pr.getUser().getUserId());
-
 					}
 
 				}
@@ -582,4 +633,5 @@ public class PostService {
 
 		}
 	}
+
 }

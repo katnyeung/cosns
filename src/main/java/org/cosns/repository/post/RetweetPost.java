@@ -1,11 +1,9 @@
-package org.cosns.repository.extend.post;
+package org.cosns.repository.post;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-
-import org.cosns.repository.Post;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
