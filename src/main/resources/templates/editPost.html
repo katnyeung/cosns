@@ -22,7 +22,7 @@
 	<script th:inline="javascript">
 		var main = angular.module('application', [ 'mentio', 'flow', 'angular-sortable-view' ])
 
-		main.controller('editPostController', function($scope, $http, $timeout, $window, messageService) {
+		main.controller('editPostController', function($scope, $http, $timeout, $window,$q, messageService) {
 			$scope.obj = {};
 			$scope.uploading = false;
 
@@ -31,9 +31,15 @@
 			$scope.initPost = function(flow){
 				$scope.postMessage = $scope.post.message;
 				$scope.releaseDate = new Date($scope.post.releaseDate);
-				angular.forEach($scope.post.postImages,function(value,key){ 					
-					$scope.addFile(flow, '/image/' + value.filename, value.filename);
+				
+				var promises = [];
+				
+				angular.forEach($scope.post.postImages,function(value,key){ 
+					console.log(value.filename  +  " order " + value.seq);
+					promises.push($scope.addFile(flow, '/image/' + value.filename, value.filename));
 				});
+				
+				$q.all(promises);
 			}
 			
 			$scope.addFile = function(flow, filePath , fileName){ 
