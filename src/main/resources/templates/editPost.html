@@ -35,26 +35,30 @@
 				var promises = [];
 				
 				angular.forEach($scope.post.postImages,function(value,key){ 
-					console.log(value.filename  +  " order " + value.seq);
-					promises.push($scope.addFile(flow, '/image/' + value.filename, value.filename));
+					promises.push(addFile(flow, value.filename));
 				});
 				
-				$q.all(promises);
+				$q.all(promises).then((data) => {
+				      angular.forEach(data, function(partData) {
+							var fileName = partData.config.url.replace(/\/image\//g,'');
+							
+						  	var file = new File([partData.data], fileName, {
+							  	  type: partData.data.type,
+							  	});
+							  	var flowFile = new Flow.FlowFile(flow, file);
+							  	flowFile.msg = '{"status":"success","filePath":"' + fileName + '"}';
+							  	flowFile._prevProgress = 1;
+							  	flowFile._prevUploadedSize = flowFile.size;
+							  	flowFile.isComplete = function(){return true};
+							  	flowFile.paused = true;
+						        flow.files.push(flowFile);
+							});
+				        })
+
 			}
 			
-			$scope.addFile = function(flow, filePath , fileName){ 
-				$http.get(filePath,{responseType: "blob"}).then((data) => {
-				  	var file = new File([data.data], fileName, {
-				  	  type: data.data.type,
-				  	});
-				  	var flowFile = new Flow.FlowFile(flow, file);
-				  	flowFile.msg = '{"status":"success","filePath":"' + fileName + '"}';
-				  	flowFile._prevProgress = 1;
-				  	flowFile._prevUploadedSize = flowFile.size;
-				  	flowFile.isComplete = function(){return true};
-				  	flowFile.paused = true;
-			        flow.files.push(flowFile);
-				});
+			addFile = function(flow, fileName){  
+				return $http.get('/image/' + fileName,{responseType: "blob"});
 			}
 
 			$scope.validate = function(file) {
@@ -188,6 +192,6 @@
 	</div>
 
 	<div th:include="components/footer :: footerBody" th:remove="tag"></div>
-	
+
 </body>
 </html>
