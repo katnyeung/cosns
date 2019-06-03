@@ -623,11 +623,12 @@ public class PostService {
 					redisService.resetTotalPostView(post.getPostId());
 					redisService.resetTodayPostView(post.getPostId());
 					
+					redisService.addPostRecord(post.getPostId());
+					
 					List<LikeReaction> likeReactionList = postReactionDAO.findLikeReactionByPostId(post.getPostId());
 					for (LikeReaction pr : likeReactionList) {
 						redisService.incrLike(pr.getPost().getPostId(), pr.getUser().getUserId());
 					}
-
 				}
 			} else if (post instanceof RetweetPost) {
 				redisService.incrRetweet(post.getPostId(), post.getUser().getUserId());
