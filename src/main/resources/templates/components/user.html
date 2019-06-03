@@ -1,7 +1,7 @@
 
 <body th:fragment="user">
 	<div class="col-12">
-		<img ng-src="{{user.profileImages[0].filename ? '/image/' + user.profileImages[0].filename : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" class="rounded img-fluid" />
+		<img ng-src="{{user.profileImages[0].filename ? '/image/' + user.profileImages[0].filename : 'https://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image'}}" class="rounded img-fluid" />
 	</div>
 	<div class="col-12">{{user.uniqueName}} ( {{user.email}} )</div>
 	<div class="col-12">
