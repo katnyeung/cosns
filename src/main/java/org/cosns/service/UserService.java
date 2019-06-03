@@ -110,7 +110,11 @@ public class UserService {
 	}
 
 	public boolean passwordCheck(String inputPassword, String databasePassword) {
-		return bCryptPasswordEncoder().matches(inputPassword, databasePassword);
+		if(inputPassword != null && databasePassword != null) {
+			return bCryptPasswordEncoder().matches(inputPassword, databasePassword);
+		}else {
+			return false;
+		}
 	}
 
 	public List<Post> getPosts(User user) {

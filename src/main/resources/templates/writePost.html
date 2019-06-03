@@ -52,7 +52,6 @@
 			}
 			
 			$scope.uploaded = function() {
-				console.log($scope.obj);
 				$scope.uploading = false;
 				$scope.message("");
 				return true;
@@ -104,9 +103,8 @@
 			$scope.hashTags = [];
 
 			$scope.searchHashTag = function(term) {
-				if (term.length > 0) {
+				if (term.length > 2) {
 					$http.get('/post/getRelatedTag/' + term).then(function(response) {
-						console.log(response.data);
 						$scope.hashTags = response.data;
 					});
 				}

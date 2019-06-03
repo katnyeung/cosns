@@ -14,7 +14,7 @@
 	<script>
 		var main = angular.module('application', [ 'flow', 'ngTagsInput' ]);
 
-		main.controller('settingController', function($scope, $http, messageService) {
+		main.controller('settingController', function($scope, $http, $window, messageService) {
 			$scope.shared = messageService.getShared();
 			$scope.obj = {};
 			$scope.checkedUniqueName = false;
@@ -119,6 +119,11 @@
 						if (response.data.status == 'success') {
 							$scope.password = null;
 							$scope.message(response.data.remarks);
+							
+							$timeout(function() {
+								$window.location.href = '/setting';
+							}, 1000);
+
 						} else {
 							$scope.message(response.data.remarks);
 						}
@@ -139,12 +144,10 @@
 				var newTitle = {
 					'text' : title
 				};
-				console.log($scope.keyHashTag);
 				const found = $scope.keyHashTag.some(el => el.text === title);
 				if(!found){
 					$scope.keyHashTag.push(newTitle);	
 				}
-				console.log($scope.keyHashTag);
 			};
 			
 

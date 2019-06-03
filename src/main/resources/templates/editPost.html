@@ -79,7 +79,6 @@
 			}
 			
 			$scope.uploaded = function() {
-				console.log($scope.obj.flow.files);
 				$scope.uploading = false;
 				$scope.message("");
 				return true;
@@ -90,10 +89,8 @@
 					var fileList = [];
 
 					angular.forEach($scope.obj.flow.files, function(value, key) {
-						console.log(value);
 						var msg = JSON.parse(value.msg);
 						if (msg.status === 'success') {
-							console.log("filePath : " + msg.filePath);
 							fileList.push(msg.filePath);
 						}
 					});
@@ -136,7 +133,6 @@
 			$scope.searchHashTag = function(term) {
 				if (term.length > 0) {
 					$http.get('/post/getRelatedTag/' + term).then(function(response) {
-						console.log(response.data);
 						$scope.hashTags = response.data;
 					});
 				}

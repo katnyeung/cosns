@@ -17,7 +17,7 @@
 	<script>
 		var main = angular.module('application', [ 'flow', 'angular-sortable-view', 'ngTagsInput' ]);
 
-		main.controller('addEventController', function($scope, $http, messageService) {
+		main.controller('addEventController', function($scope, $http, $window, messageService) {
 
 			$scope.obj = {};
 			$scope.uploading = false;
@@ -58,10 +58,13 @@
 			$scope.loadTags = function(query) {
 				return $http.get('/event/getRelatedTag/' + query);
 			};
-
+			$scope.formSubmitted = false;
+			
 			$scope.submit = function() {
-				if ($scope.eventName) {
+				if ($scope.eventName && $scope.message) {
 
+					$scope.formSubmitted = true;
+					
 					var fileList = [];
 
 					angular.forEach($scope.obj.flow.files, function(value, key) {
@@ -88,11 +91,18 @@
 						}
 					}).then(function(response) {
 						if (response.data.status === 'success') {
-							$scope.message("Success added Event");
+							$scope.message("successful added the event, may take some time for approval");
+							
+							$timeout(function() {
+								$window.location.href = '/c/';
+							}, 1000);
 						} else {
 							$scope.message(response.data.remarks);
+							$scope.formSubmitted  = false;
 						}
 
+					},function(response){
+						$scope.message("ERROR : " + response.data.error);
 					});
 				}
 			}
@@ -175,7 +185,7 @@
 
 
 				<div class="row m-2">
-					<input type="submit" value="Add" class="form-control btn btn-info" />
+					<input type="submit" value="Add" ng-disabled="form-submitted" class="form-control btn btn-info" />
 				</div>
 
 			</form>

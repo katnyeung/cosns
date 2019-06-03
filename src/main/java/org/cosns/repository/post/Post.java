@@ -52,6 +52,8 @@ public abstract class Post extends Auditable<String> {
 
 	private Date releaseDate;
 
+	private int weight = 100;
+	
 	@Lob
 	@Column(nullable = true)
 	private String message;
@@ -256,6 +258,22 @@ public abstract class Post extends Auditable<String> {
 
 	public void setLikeCoinCount(Long likeCoinCount) {
 		this.likeCoinCount = likeCoinCount;
+	}
+
+	public int getWeight() {
+		return weight;
+	}
+
+	public void setWeight(int weight) {
+		this.weight = weight;
+	}
+
+	public Set<PostCommentReaction> getCommentReaction() {
+		return commentReaction;
+	}
+
+	public void setCommentReaction(Set<PostCommentReaction> commentReaction) {
+		this.commentReaction = commentReaction;
 	}
 
 	@Override

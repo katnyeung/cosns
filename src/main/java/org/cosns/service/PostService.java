@@ -94,7 +94,17 @@ public class PostService {
 		post.setReleaseDate(removeTime(postDTO.getReleaseDate()));
 		post.setStatus(ConstantsUtil.POST_ACTIVE);
 		post.setUser(user);
-
+		
+		int weight = 100;
+		if(hashTagSet.size() > 5) {
+			weight = weight - ((hashTagSet.size() - 5) * 3);
+			if(weight < 0) {
+				weight = 0;
+			}
+		}
+		
+		post.setWeight(weight);
+		
 		// assign key to post
 		post.setPostKey(getPostKey(post, hashTagSet));
 
@@ -262,8 +272,8 @@ public class PostService {
 	private Post setAndIncreaseCount(Post post) {
 		Long postId = post.getPostId();
 
-		redisService.incrTotalPostView(postId);
-		redisService.incrTodayPostView(postId);
+		redisService.incrTotalPostView(postId, post.getWeight());
+		redisService.incrTodayPostView(postId, post.getWeight());
 
 		return post;
 	}
@@ -483,15 +493,7 @@ public class PostService {
 			}
 		}
 	}
-
-	public void incrTotalPostView(Long postId) {
-		redisService.incrTotalPostView(postId);
-	}
-
-	public Long getTotalPostView(Long postId) {
-		return redisService.getTotalPostView(postId);
-	}
-
+	
 	public void syncPostCountToDB() {
 		Set<String> keySet = redisService.findKeys(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":*");
 

@@ -40,7 +40,6 @@
 			eventClick : function(info) {
 				info.jsEvent.preventDefault();
 
-				console.log(info.event);
 				var content = "<br/><span class='badge'>" + info.event.title + "</span>";
 				content += "<br/> <a href ='" + info.event.url + "' classs='btn btn-info'>" + info.event.url + "</a>";
 				if (info.event.extendedProps.description) {
@@ -97,7 +96,7 @@
 		<div class="row">
 			<div id='calendar' class="col-md-10"></div>
 			<div id='detail' class="col-md-2">
-				<p class="message"></p>
+				<p class="message" style="white-space: pre;" ></p>
 			</div>
 		</div>
 	</div>

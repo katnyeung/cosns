@@ -67,7 +67,7 @@ public class EventService {
 
 	public Set<Event> getPostSchedule(Date start, Date end) {
 		Set<Event> eventSet = new HashSet<>();
-
+		logger.info("searching event within : " + start + " , " + end);
 		List<Post> postSet = postDAO.findPostByDateRange(start, end);
 
 		for (Post post : postSet) {

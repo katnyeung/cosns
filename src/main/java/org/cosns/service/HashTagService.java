@@ -229,7 +229,6 @@ public class HashTagService {
 				}
 			}
 		}
-		logger.info("stored idList : " + idList);
 
 		if (!idList.isEmpty()) {
 			List<Map<String, String>> listResult = hashTagDAO.getTopRelatedHashTag(idList);

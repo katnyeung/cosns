@@ -80,4 +80,6 @@ public class ConstantsUtil {
 
 	public static final String USER_REDIS_KEY = "userkey";
 
+	public static final int POST_VIEW_RATE = 10;
+
 }

@@ -99,8 +99,9 @@ public class RedisService {
 		return stringRedisTemplate.opsForSet().isMember(ConstantsUtil.REDIS_POST_RETWEET_GROUP + ":" + postId, "" + userId);
 	}
 
-	public void incrTotalPostView(Long postId) {
-		stringRedisTemplate.opsForHash().increment(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TOTAL, (long) 1);
+	public void incrTotalPostView(Long postId , int weight) {
+		long rate = (long)((weight / 100.0) * ConstantsUtil.POST_VIEW_RATE);
+		stringRedisTemplate.opsForHash().increment(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TOTAL, rate);
 	}
 
 	public Long getTotalPostView(Long postId) {
@@ -112,8 +113,9 @@ public class RedisService {
 		}
 	}
 
-	public void incrTodayPostView(Long postId) {
-		stringRedisTemplate.opsForHash().increment(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY, (long) 1);
+	public void incrTodayPostView(Long postId , int weight) {
+		long rate = (long)((weight / 100.0) * ConstantsUtil.POST_VIEW_RATE);
+		stringRedisTemplate.opsForHash().increment(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + postId, ConstantsUtil.REDIS_POST_VIEW_TYPE_TODAY, rate);
 	}
 
 	public Long getTodayPostView(Long postId) {
