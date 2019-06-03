@@ -73,6 +73,13 @@ public class EventRestController {
 
 		Set<Event> eventSet = eventService.getAllEvents(dateStart, dateEnd);
 
+		eventSet.stream().forEach(event -> {
+			Calendar endDateCalendar = Calendar.getInstance();
+			endDateCalendar.setTime(event.getEnd());
+			endDateCalendar.add(Calendar.DAY_OF_MONTH, 1);
+			event.setEnd(endDateCalendar.getTime());
+		});
+
 		Set<Event> postSet = eventService.getPostSchedule(dateStart, dateEnd);
 
 		eventSet.addAll(postSet);
