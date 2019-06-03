@@ -125,12 +125,16 @@ public class EventService {
 	}
 
 	public Event createEvent(String eventKey, EventFormDTO eventDTO, Set<String> hashTagSet, User user) {
+		Calendar endDateCalendar = Calendar.getInstance();
+		endDateCalendar.setTime(eventDTO.getEndDate());
+		endDateCalendar.add(Calendar.DAY_OF_MONTH, 1);
+		
 		Event event = new PhotoEvent();
 		event.setEventName(eventDTO.getEventName());
 		event.setDescription(eventDTO.getDescription());
 		event.setUrl(eventDTO.getUrl());
 		event.setStart(eventDTO.getStartDate());
-		event.setEnd(eventDTO.getEndDate());
+		event.setEnd(endDateCalendar.getTime());
 		event.setLocation(eventDTO.getLocation());
 
 		if (user.getUserRole().equalsIgnoreCase(ConstantsUtil.USER_ROLE_ADMIN)) {
