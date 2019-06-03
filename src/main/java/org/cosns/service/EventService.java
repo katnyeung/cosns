@@ -37,6 +37,9 @@ public class EventService {
 	@Autowired
 	ImageService imageService;
 
+	@Autowired
+	RedisService redisService;
+	
 	public Set<Event> getAllEvents(Date start, Date end) {
 		Set<Event> eventSet = eventDAO.findActiveEvent(start, end);
 
@@ -55,7 +58,15 @@ public class EventService {
 	}
 
 	public Set<Event> getEventByEventKey(String eventKey) {
-		Set<Event> eventSet = eventDAO.getEventByEventKey(eventKey);
+		Set<Event> eventSet = null;
+
+		Long eventId = (Long) redisService.getHashValue(ConstantsUtil.REDIS_EVENT_NAME_GROUP, ConstantsUtil.REDIS_EVENT_ID);
+
+		if (eventId != null) {
+			eventSet = eventDAO.getEventById(eventId);
+		} else {
+			eventSet = eventDAO.getEventByEventKey(eventKey);
+		}
 
 		eventSet.stream().forEach(u -> {
 			u.setColor("red");
@@ -202,6 +213,12 @@ public class EventService {
 	}
 
 	public void resetEventKeyToRedis() {
-		// nothing yet
+		
+		List<Event> eventList = eventDAO.findAllActiveEvent();
+		
+		for(Event event:eventList) {
+			redisService.saveEventKeyToRedis(event);
+		}
+		
 	}
 }

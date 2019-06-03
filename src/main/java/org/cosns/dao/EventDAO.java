@@ -29,4 +29,7 @@ public interface EventDAO extends JpaRepository<Event, Long> {
 	@Modifying
 	@Query("UPDATE Event e SET e.totalViewCount = e.totalViewCount + 1 WHERE e.eventId = :eventId")
 	public void incrEventViewCount(Long eventId);
+
+	@Query("FROM Event e WHERE e.status = '" + ConstantsUtil.EVENT_ACTIVE + "'")
+	public List<Event> findAllActiveEvent();
 }
