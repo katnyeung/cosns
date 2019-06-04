@@ -228,19 +228,19 @@ public class RouteController {
 			model.addAttribute("user", loggedUser);
 		}
 
-		logger.info("searching from redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " ->" + ConstantsUtil.REDIS_POST_ID);
-		logger.info("hasKey : " + redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey));
+		logger.debug("searching from redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " ->" + ConstantsUtil.REDIS_POST_ID);
+		logger.debug("hasKey : " + redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey));
 
 		if (!redisService.hasKey(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey)) {
-			logger.info("redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " -> " + ConstantsUtil.REDIS_POST_ID + ", redis not found");
+			logger.debug("redis : " + ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + userName + "/" + postKey + " -> " + ConstantsUtil.REDIS_POST_ID + ", redis not found");
 
 			try {
-				logger.info("postId string : " + postKey);
+				logger.debug("postId string : " + postKey);
 				Long postId = Long.parseLong(postKey);
-				logger.info("try to parse ID : " + postId);
+				logger.debug("try to parse ID : " + postId);
 				model.addAttribute("postId", postId);
 			} catch (NumberFormatException nfe) {
-				logger.info("post not found");
+				logger.debug("post not found");
 				throw new DefaultException("post not found");
 			}
 		} else {
@@ -337,7 +337,7 @@ public class RouteController {
 
 			fbResponse = Jsoup.connect(sb.toString()).timeout(60000).ignoreContentType(true).method(Connection.Method.GET).execute().body();
 
-			logger.info(fbResponse);
+			logger.debug(fbResponse);
 
 			Map<String, Object> responseMap = om.readValue(fbResponse, new TypeReference<Map<String, Object>>() {
 			});

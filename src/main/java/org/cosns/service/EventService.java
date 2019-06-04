@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.cosns.dao.EventDAO;
 import org.cosns.dao.PostDAO;
 import org.cosns.repository.User;
@@ -39,6 +41,9 @@ public class EventService {
 
 	@Autowired
 	RedisService redisService;
+
+	@Autowired
+	HashTagService hashTagService;
 	
 	public Set<Event> getAllEvents(Date start, Date end) {
 		Set<Event> eventSet = eventDAO.findActiveEvent(start, end);
@@ -125,16 +130,13 @@ public class EventService {
 	}
 
 	public Event createEvent(String eventKey, EventFormDTO eventDTO, Set<String> hashTagSet, User user) {
-		Calendar endDateCalendar = Calendar.getInstance();
-		endDateCalendar.setTime(eventDTO.getEndDate());
-		endDateCalendar.add(Calendar.DAY_OF_MONTH, 1);
-		
+
 		Event event = new PhotoEvent();
 		event.setEventName(eventDTO.getEventName());
 		event.setDescription(eventDTO.getDescription());
 		event.setUrl(eventDTO.getUrl());
 		event.setStart(eventDTO.getStartDate());
-		event.setEnd(endDateCalendar.getTime());
+		event.setEnd(eventDTO.getEndDate());
 		event.setLocation(eventDTO.getLocation());
 
 		if (user.getUserRole().equalsIgnoreCase(ConstantsUtil.USER_ROLE_ADMIN)) {
@@ -217,12 +219,38 @@ public class EventService {
 	}
 
 	public void resetEventKeyToRedis() {
-		
+
 		List<Event> eventList = eventDAO.findAllActiveEvent();
-		
-		for(Event event:eventList) {
+
+		for (Event event : eventList) {
 			redisService.saveEventKeyToRedis(event);
 		}
+
+	}
+
+	@Transactional
+	public void removeEvent(Long eventId) {
+
+		Set<Event> eventList = eventDAO.getEventById(eventId);
 		
+		for (Event event : eventList) {
+			// remove event from tag in redis
+			hashTagService.deleteEventHashTagInRedis(event);
+
+			// remove event from tag
+			hashTagService.deleteEventHashTag(event);
+
+			// remove event from redis
+			hashTagService.deleteEventInRedis(event);
+
+			// delete event images
+			imageService.deleteImageByEvent(event);
+			
+			// remove event from event
+			event.setStatus(ConstantsUtil.EVENT_DELETED);
+			
+			eventDAO.save(event);
+		}
+
 	}
 }

@@ -87,6 +87,22 @@ public class AuthInterceptor implements HandlerInterceptor {
 
 						return true;
 					}
+				} else {
+					Auth auth = method.getAnnotation(Auth.class);
+					if (auth.type().equals("ADMIN")) {
+						logger.info("User : " + user.getEmail() + ":" + user.getUserRole() + " access admin service ");
+						if (user.getUserRole().equals("ADMIN")) {
+							return true;
+						} else {
+							response.setContentType("application/json; charset=utf-8");
+							ServletOutputStream sos = response.getOutputStream();
+							sos.print(om.writeValueAsString(ResultFactory.getErrorResult(ConstantsUtil.RESULT_ERROR, ConstantsUtil.ERROR_MESSAGE_USER_NOT_FOUND)));
+
+							sos.close();
+							return false;
+						}
+					}
+
 				}
 			}
 		}

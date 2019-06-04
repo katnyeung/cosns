@@ -55,36 +55,6 @@ public class PostService {
 	@Autowired
 	RedisService redisService;
 
-	public Post removePost(Long postId, User user) {
-		logger.info("Remove Post By User : " + user.getUserId());
-
-		List<Post> postList = this.getPost(postId);
-
-		if (postList.iterator().hasNext()) {
-
-			Post post = postList.iterator().next();
-
-			logger.info("removing post : " + post.getPostId());
-			if (post.getUser().getUserId() != user.getUserId()) {
-				// final check
-				return null;
-			}
-
-			List<PostImage> imageList = post.getPostImages();
-			for (PostImage pi : imageList) {
-				pi.setStatus(ConstantsUtil.IMAGE_DELETED);
-			}
-
-			post.setStatus(ConstantsUtil.POST_DELETED);
-			post = postDAO.save(post);
-
-			return post;
-		} else {
-			return null;
-		}
-
-	}
-
 	public Post writePhotoPost(PostFormDTO postDTO, User user, Set<String> hashTagSet) {
 		logger.info("Writing Post By User : " + user.getUserId());
 
@@ -94,17 +64,17 @@ public class PostService {
 		post.setReleaseDate(removeTime(postDTO.getReleaseDate()));
 		post.setStatus(ConstantsUtil.POST_ACTIVE);
 		post.setUser(user);
-		
+
 		int weight = 100;
-		if(hashTagSet.size() > 5) {
+		if (hashTagSet.size() > 5) {
 			weight = weight - ((hashTagSet.size() - 5) * 3);
-			if(weight < 0) {
+			if (weight < 0) {
 				weight = 0;
 			}
 		}
-		
+
 		post.setWeight(weight);
-		
+
 		// assign key to post
 		post.setPostKey(getPostKey(post, hashTagSet));
 
@@ -125,20 +95,20 @@ public class PostService {
 	}
 
 	public Post updatePhotoPost(PostFormDTO postDTO, User user, Set<String> hashTagSet) {
-		logger.info("Updating Post #" +postDTO.getPostId() + " By User : " + user.getUserId());
+		logger.info("Updating Post #" + postDTO.getPostId() + " By User : " + user.getUserId());
 		Post post = null;
 
 		List<Post> postList = postDAO.findPostByPostId(postDTO.getPostId());
 		if (postList.iterator().hasNext()) {
 			post = postList.iterator().next();
-			
-			//remove hashtag linkage
+
+			// remove hashtag linkage
 			hashTagService.deletePostHashTagInRedis(post);
-			
+
 			hashTagService.deletePostHashTag(post);
 
-			redisService.deletePostRecordInRedis(post);
-			
+			redisService.deletePostInRedis(post);
+
 			post.setMessage(postDTO.getPostMessage());
 			post.setReleaseDate(removeTime(postDTO.getReleaseDate()));
 			post.setStatus(ConstantsUtil.POST_ACTIVE);
@@ -149,7 +119,7 @@ public class PostService {
 
 			post = (PhotoPost) postDAO.save(post);
 
-			//deactive all photo
+			// deactive all photo
 			List<PostImage> postImageList = post.getPostImages();
 			for (PostImage postImage : postImageList) {
 				if (!postDTO.getFileList().contains(postImage.getFilename())) {
@@ -157,8 +127,7 @@ public class PostService {
 					imageService.savePostImage(postImage);
 				}
 			}
-			
-			logger.info("fileList : " +  postDTO.getFileList());
+
 			int count = 1;
 			for (String file : postDTO.getFileList()) {
 				logger.info("processing file : " + file + ", seq : " + count);
@@ -170,7 +139,7 @@ public class PostService {
 					imageService.savePostImage(image);
 				}
 			}
-			
+
 		}
 
 		return post;
@@ -218,9 +187,9 @@ public class PostService {
 		} else {
 			sb.append(post.getPostId() + "" + uniqueCurrentTimeMS());
 		}
-		
+
 		String postKey = userName + "/" + sb.toString();
-		
+
 		return postKey;
 	}
 
@@ -493,7 +462,7 @@ public class PostService {
 			}
 		}
 	}
-	
+
 	public void syncPostCountToDB() {
 		Set<String> keySet = redisService.findKeys(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":*");
 
@@ -607,24 +576,24 @@ public class PostService {
 
 		Iterable<Post> postIter = postDAO.findAll();
 		Iterator<Post> iter = postIter.iterator();
-		
+
 		while (iter.hasNext()) {
 			Post post = iter.next();
 			logger.info("Processing reset post : " + post.getPostId());
 			if (post instanceof PhotoPost) {
 				if (post.getPostKey() != null) {
-					//remove hashtag linkage
+					// remove hashtag linkage
 					hashTagService.deletePostHashTagInRedis(post);
-					
-					redisService.deletePostRecordInRedis(post);
+
+					redisService.deletePostInRedis(post);
 
 					redisService.savePostKeyToRedis(post);
 
 					redisService.resetTotalPostView(post.getPostId());
 					redisService.resetTodayPostView(post.getPostId());
-					
+
 					redisService.addPostRecord(post.getPostId());
-					
+
 					List<LikeReaction> likeReactionList = postReactionDAO.findLikeReactionByPostId(post.getPostId());
 					for (LikeReaction pr : likeReactionList) {
 						redisService.incrLike(pr.getPost().getPostId(), pr.getUser().getUserId());
@@ -637,4 +606,33 @@ public class PostService {
 		}
 	}
 
+	public Post deletePost(Long postId, User user) {
+		logger.info("Remove Post By User : " + user.getUserId());
+
+		List<Post> postList = this.getPost(postId);
+
+		if (postList.iterator().hasNext()) {
+
+			Post post = postList.iterator().next();
+
+			logger.info("removing post : " + post.getPostId());
+			if (post.getUser().getUserId() != user.getUserId()) {
+				// final check
+				return null;
+			}
+
+			List<PostImage> imageList = post.getPostImages();
+			for (PostImage pi : imageList) {
+				pi.setStatus(ConstantsUtil.IMAGE_DELETED);
+			}
+
+			post.setStatus(ConstantsUtil.POST_DELETED);
+			post = postDAO.save(post);
+
+			return post;
+		} else {
+			return null;
+		}
+
+	}
 }

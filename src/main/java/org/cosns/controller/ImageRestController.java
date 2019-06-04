@@ -73,7 +73,6 @@ public class ImageRestController {
 			String thumbnailFilename = uuidPrefix + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "." + ext;
 
 			String targetFullPath = uploadFolder + filename;
-			logger.info("targetFullPath : " + targetFullPath);
 
 			File targetFile = imageService.uploadImage(fromFile, targetFullPath);
 			File thumbnailFile = new File(uploadFolder + thumbnailFilename);
@@ -107,7 +106,8 @@ public class ImageRestController {
 
 			String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
 
-			logger.info("inside upload image");
+			logger.info("user : " + user.getUserId() + " upload profile image");
+
 
 			MultipartFile fromFile = imageInfo.getFile();
 
@@ -146,7 +146,7 @@ public class ImageRestController {
 		try {
 			String uuidPrefix = UUID.randomUUID().toString().replaceAll("-", "");
 
-			logger.info("user : " + user.getUserId() + " upload image");
+			logger.info("user : " + user.getUserId() + " upload event image");
 
 			MultipartFile fromFile = imageInfo.getFile();
 
@@ -156,7 +156,6 @@ public class ImageRestController {
 			String thumbnailFilename = uuidPrefix + ConstantsUtil.IMAGE_THUMBNAIL_POSTFIX + "." + ext;
 
 			String targetFullPath = uploadFolder + filename;
-			logger.info("targetFullPath : " + targetFullPath);
 
 			File targetFile = imageService.uploadImage(fromFile, targetFullPath);
 			File thumbnailFile = new File(uploadFolder + thumbnailFilename);

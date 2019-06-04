@@ -130,7 +130,7 @@ public class UserRestController {
 
 			hashTagService.deleteUserHashTagInRedis(user);
 
-			hashTagService.deleteUserHashTagByUserId(user.getUserId());
+			hashTagService.deleteUserHashTag(user);
 
 			hashTagService.saveUserHashTag(user, hashTagSet);
 

@@ -29,7 +29,6 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler({ SizeLimitExceededException.class })
 	@ResponseBody
 	public ErrorResult sizeLimitExceededException(HttpServletRequest req, SizeLimitExceededException e) throws Exception {
-		logger.info("here");
 		ErrorResult r = new ErrorResult();
 		r.setRemarks(e.getLocalizedMessage());
 		r.setErrorURL(req.getRequestURL().toString());

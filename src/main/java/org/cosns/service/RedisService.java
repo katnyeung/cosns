@@ -161,7 +161,7 @@ public class RedisService {
 				try {
 					cursor.close();
 				} catch (IOException e) {
-					logger.info("Had a problem", e);
+					logger.error("Had a problem", e);
 				}
 
 				return binaryKeys;
@@ -204,7 +204,7 @@ public class RedisService {
 		stringRedisTemplate.opsForValue().set(ConstantsUtil.USER_REDIS_KEY + ":" + redisKey, value);
 	}
 	
-	public void deletePostRecordInRedis(Post post) {
+	public void deletePostInRedis(Post post) {
 		stringRedisTemplate.opsForSet().remove(ConstantsUtil.REDIS_POST_GROUP, "" + post.getPostId());
 		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_NAME_GROUP + ":" + post.getPostKey());
 		stringRedisTemplate.delete(ConstantsUtil.REDIS_POST_VIEW_GROUP + ":" + post.getPostId());

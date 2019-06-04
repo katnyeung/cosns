@@ -225,8 +225,6 @@ public class PostRestController {
 
 		Post post = postService.writePhotoPost(postDTO, user, hashTagSet);
 
-		logger.info("writing hash : " + hashTagSet);
-
 		hashTagService.savePostHashTag(post, hashTagSet);
 
 		hashTagService.savePostHashTagToRedis(post, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_PHOTO);
@@ -244,15 +242,12 @@ public class PostRestController {
 	@PostMapping(path = "/updatePost")
 	@Transactional
 	public DefaultResult updatePost(@RequestBody PostFormDTO postDTO, HttpSession session) {
-		logger.info("postFormDTO : " + postDTO);
 		DefaultResult dr = new DefaultResult();
 		User user = (User) session.getAttribute("user");
 
 		Set<String> hashTagSet = hashTagService.parseHashTagByMessage(postDTO.getPostMessage());
 		
 		Post post = postService.updatePhotoPost(postDTO, user, hashTagSet);
-
-		logger.info("writing hash : " + hashTagSet);
 
 		hashTagService.savePostHashTag(post, hashTagSet);
 
@@ -311,7 +306,7 @@ public class PostRestController {
 		PostReactionResult prr = new PostReactionResult();
 		User user = (User) session.getAttribute("user");
 
-		Post post = postService.removePost(postReactionDTO.getPostId(), user);
+		Post post = postService.deletePost(postReactionDTO.getPostId(), user);
 
 		if (post != null) {
 			logger.info("removing post : " + post.getPostId());
@@ -319,7 +314,7 @@ public class PostRestController {
 			//remove hashtag linkage
 			hashTagService.deletePostHashTagInRedis(post);
 			
-			redisService.deletePostRecordInRedis(post);
+			redisService.deletePostInRedis(post);
 			
 			prr.setType(ConstantsUtil.POST_REACTION_CANCEL);
 			prr.setStatus(ConstantsUtil.RESULT_SUCCESS);

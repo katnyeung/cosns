@@ -123,7 +123,6 @@ public class EventRestController {
 			eventService.incrViewCount(event.getEventId());
 		}
 
-		logger.info("getting event : " + eventSet.size());
 		er.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		er.setEvents(eventSet);
 
@@ -158,7 +157,6 @@ public class EventRestController {
 			dr.setRemarks("Event already exist");
 		} else {
 
-			logger.info("writing hash : " + hashTagSet);
 			Event event = eventService.createEvent(eventKey, eventDTO, hashTagSet, user);
 
 			hashTagService.saveEventHashTag(event, hashTagSet);
@@ -191,8 +189,6 @@ public class EventRestController {
 			em.setMessage(messageDTO.getMessage());
 			em.setUserId(user.getUserId());
 
-			logger.info("writing message : " + mapper.writeValueAsString(em));
-
 			redisService.addEventMessage(ConstantsUtil.REDIS_EVENT_NAME_GROUP + ":" + messageDTO.getEventKey() + ":message", mapper.writeValueAsString(em));
 
 			dr.setRemarks(mapper.writeValueAsString(em));
@@ -224,6 +220,7 @@ public class EventRestController {
 		}
 		return dr;
 	}
+	
 	private Set<String> mapToKeySet(List<Map<String, String>> keyHashTag) {
 		return keyHashTag.stream().map(Map::values).flatMap(Collection::stream).collect(Collectors.toSet());
 	}

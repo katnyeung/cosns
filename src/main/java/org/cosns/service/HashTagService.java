@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.cosns.dao.HashTagDAO;
-import org.cosns.dao.UserHashTagDAO;
 import org.cosns.repository.User;
 import org.cosns.repository.event.Event;
 import org.cosns.repository.hashtag.EventHashTag;
@@ -32,9 +31,6 @@ public class HashTagService {
 
 	@Autowired
 	HashTagDAO hashTagDAO;
-
-	@Autowired
-	UserHashTagDAO userHashTagDAO;
 
 	@Autowired
 	private RedisService redisService;
@@ -268,41 +264,62 @@ public class HashTagService {
 		return eventKeyList;
 	}
 
-	public void deleteUserHashTagByUserId(Long userId) {
-		userHashTagDAO.deleteHashTagByUserId(userId);
+	public void deleteUserHashTag(User user) {
+		List<UserHashTag> uhtList = user.getHashtags();
+		List<Long> hashTagIdList = uhtList.stream().map(hashTag -> hashTag.getHashId()).collect(Collectors.toList());
+		logger.debug("delete user hashIdList : " + hashTagIdList);
+		hashTagDAO.deleteByIdList(hashTagIdList);
 	}
 
 	public void deleteUserHashTagInRedis(User user) {
 		List<UserHashTag> hashTagList = user.getHashtags();
 		for (UserHashTag hashTag : hashTagList) {
-			logger.info("removing hash : " + hashTag.getHashTag() + " from user : " + user.getUserId());
-			redisService.deleteSetItem(ConstantsUtil.REDIS_TAG_GROUP + ":" + hashTag.getHashTag(), ConstantsUtil.REDIS_USER_GROUP + ":" + user.getUserId());
+			logger.info("removing hash : {} FROM {} ", ConstantsUtil.REDIS_TAG_GROUP + ":" + hashTag.getHashTag(), ConstantsUtil.REDIS_TAG_TYPE_USER + ":" + user.getUserId());
+			redisService.deleteSetItem(ConstantsUtil.REDIS_TAG_GROUP + ":" + hashTag.getHashTag(), ConstantsUtil.REDIS_TAG_TYPE_USER + ":" + user.getUserId());
+		}
+	}
+
+	public void deleteEventHashTagInRedis(Event event) {
+		List<EventHashTag> eventHashTagList = event.getHashtags();
+		for (EventHashTag eventHashTag : eventHashTagList) {
+			logger.info("removing hash : {} FROM {} ", ConstantsUtil.REDIS_TAG_GROUP + ":" + eventHashTag.getHashTag(), ConstantsUtil.REDIS_TAG_TYPE_EVENT + ":" + event.getEventId());
+			redisService.deleteSetItem(ConstantsUtil.REDIS_TAG_GROUP + ":" + eventHashTag.getHashTag(), ConstantsUtil.REDIS_TAG_TYPE_EVENT + ":" + event.getEventId());
 		}
 	}
 
 	public void deletePostHashTagInRedis(Post post) {
-		logger.info("post hashTag : " + post);
 		for (PostHashTag hashTag : post.getHashtags()) {
-			logger.info("removing hash : " + hashTag.getHashTag() + " id  : " + hashTag.getHashId());
+			logger.info("removing hash : {} FROM {} ", ConstantsUtil.REDIS_TAG_GROUP + ":" + hashTag.getHashTag(), ConstantsUtil.REDIS_TAG_TYPE_PHOTO + ":" + post.getPostId());
 			redisService.deleteSetItem(ConstantsUtil.REDIS_TAG_GROUP + ":" + hashTag.getHashTag(), ConstantsUtil.REDIS_TAG_TYPE_PHOTO + ":" + post.getPostId());
 		}
+	}
+
+	public void deletePostHashTag(Post post) {
+		List<PostHashTag> phtList = post.getHashtags();
+		List<Long> hashTagIdList = phtList.stream().map(hashTag -> hashTag.getHashId()).collect(Collectors.toList());
+		logger.info("delete post hashIdList : " + hashTagIdList);
+		hashTagDAO.deleteByIdList(hashTagIdList);
+	}
+
+	public void deleteEventHashTag(Event event) {
+		List<EventHashTag> ehtList = event.getHashtags();
+		List<Long> hashTagIdList = ehtList.stream().map(hashTag -> hashTag.getHashId()).collect(Collectors.toList());
+		logger.info("delete event hashIdList : " + hashTagIdList);
+		hashTagDAO.deleteByIdList(hashTagIdList);
+	}
+
+	public void deleteEventInRedis(Event event) {
+		redisService.deleteKey(ConstantsUtil.REDIS_EVENT_NAME_GROUP + ":" + event.getEventKey());
 	}
 
 	public void resetHashTagKeyToRedis() {
 		redisService.deleteKey("tag:*");
 
 		List<HashTag> hashTagList = hashTagDAO.findAll();
-		
 		for (HashTag hashTag : hashTagList) {
 			redisService.addSetItem(hashTag.getRedisKey(), hashTag.getRedisValue());
 		}
 
 	}
 
-	public void deletePostHashTag(Post post) {
-		List<PostHashTag> phtList = post.getHashtags();
-		List<Long> hashTagIdList = phtList.stream().map(hashTag -> hashTag.getHashId()).collect(Collectors.toList());
-		logger.info("delete hashIdList : " + hashTagIdList);
-		hashTagDAO.deleteByIdList(hashTagIdList);
-	}
 }

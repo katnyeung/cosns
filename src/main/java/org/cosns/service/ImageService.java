@@ -12,6 +12,7 @@ import org.cosns.dao.EventImageDAO;
 import org.cosns.dao.PostImageDAO;
 import org.cosns.dao.ProfileImageDAO;
 import org.cosns.repository.User;
+import org.cosns.repository.event.Event;
 import org.cosns.repository.image.EventImage;
 import org.cosns.repository.image.PostImage;
 import org.cosns.repository.image.ProfileImage;
@@ -82,15 +83,15 @@ public class ImageService {
 
 		file.transferTo(targetFile);
 
-		logger.info("file : " + targetFile);
+		logger.debug("file : " + targetFile);
 
 		return targetFile;
 	}
 
 	public void resizeImage(File fromFile, File outputFile, String ext, int size) throws IOException {
-		logger.info("target file : " + fromFile);
-		logger.info("Content Type : " + ext);
-		logger.info("Size : " + size);
+		logger.debug("target file : " + fromFile);
+		logger.debug("Content Type : " + ext);
+		logger.debug("Size : " + size);
 
 		// resize image
 		BufferedImage in = ImageIO.read(fromFile);
@@ -104,7 +105,7 @@ public class ImageService {
 			BufferedImage scaledImage = resizeOp.filter(in, null);
 
 			ImageIO.write(scaledImage, ext, outputFile);
-			logger.info("Write file complete");
+			logger.debug("Write file complete");
 		}
 
 	}
@@ -155,6 +156,14 @@ public class ImageService {
 
 	public Set<ProfileImage> findActiveProfileImageByFilename(String file) {
 		return profileImageDAO.findActiveImageByFilename(file);
+	}
+
+	public void deleteImageByEvent(Event event) {
+		List<EventImage> eventImageList = event.getEventImages();
+		for(EventImage ei : eventImageList) {
+			ei.setStatus(ConstantsUtil.IMAGE_DELETED);
+			eventImageDAO.save(ei);
+		}
 	}
 
 }
