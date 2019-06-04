@@ -21,7 +21,7 @@ public class DateCountReaction extends PostReaction {
 	Long viewCount;
 
 	@JsonIgnore
-	@ManyToOne
+	@ManyToOne(targetEntity=Post.class)
 	@JoinColumn(name = "post_id", referencedColumnName = "postId")
 	private Post post;
 

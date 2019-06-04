@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class PostCommentReaction extends PostReaction {
 
 	@JsonIgnore
-	@ManyToOne
+	@ManyToOne(targetEntity=Post.class)
 	@JoinColumn(name = "post_id", referencedColumnName = "postId")
 	private Post post;
 
