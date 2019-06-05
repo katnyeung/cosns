@@ -20,19 +20,23 @@
 </body>
 
 <body th:fragment="viewPostDetail()">
+	<div class="row">
+		<div class="col-10">
+			<div th:include="components/post :: CreatorAndCreateDate()" th:remove="tag"></div>
+			
+			<h2>{{post.postKey}}</h2>
+			
+			<div th:include="components/post :: RetweetedBy()" th:remove="tag"></div>
+			<div th:attr="ng-repeat='image in post.postImages'">
+				<img ng-src="/image/{{::image.filename}}" class="img-fluid m-1 rounded" />
+			</div>
+		</div>
+		<div class="col-2">
 
-	<div th:include="components/post :: RetweetedBy()" th:remove="tag"></div>
-
-	<div th:include="components/post :: CreatorAndCreateDate()" th:remove="tag"></div>
-
-	<div th:include="components/post :: LikeAndRetweetWithLikeCoin()" th:remove="tag"></div>
-	
-	<div class="well" style="white-space: pre;" ng-bind-html="post.message | hashTag"></div>
-	
-	<div th:attr="ng-repeat='image in post.postImages'">
-		<img ng-src="/image/{{::image.filename}}" class="img-fluid m-1 rounded" />
+			<div th:include="components/post :: LikeAndRetweetWithLikeCoin()" th:remove="tag"></div>
+			<div class="well" style="white-space: pre;" ng-bind-html="post.message | hashTag"></div>
+		</div>
 	</div>
-
 </body>
 
 <body th:fragment="viewPostThumbnailMid()">
@@ -100,9 +104,7 @@
 			<i class="fas fa-id-card"></i> {{::post.postId}} &nbsp;<i class="fas fa-user"></i>&nbsp;<a href="/@{{post.user.uniqueName ? post.user.uniqueName : post.user.userId}}" style="font-size: 14px">{{post.user.displayName ? post.user.displayName : (post.user.uniqueName ? post.user.uniqueName : post.user.userId)}}</a>
 		</div>
 		<div class="col-ml-auto">
-			<a href="/@{{post.postKey ? post.postKey : post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'dd/MM/yyyy'}}</a> &nbsp; 
-			<a href="/post/edit/{{post.postId}}" ng-if="sharedUser.user.userId == post.user.userId"><i class="far fa-edit"></i></a>&nbsp;
-			<a href="#" ng-if="sharedUser.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()"><i class="far fa-trash-alt"></i></a>
+			<a href="/@{{post.postKey ? post.postKey : post.postId}}">{{post.releaseDate ? post.releaseDate : post.createdate | date:'dd/MM/yyyy'}}</a> &nbsp; <a href="/post/edit/{{post.postId}}" ng-if="sharedUser.user.userId == post.user.userId"><i class="far fa-edit"></i></a>&nbsp; <a href="#" ng-if="sharedUser.user.userId == post.user.userId" ng-click="removePost(post);$event.preventDefault()"><i class="far fa-trash-alt"></i></a>
 		</div>
 	</div>
 </body>

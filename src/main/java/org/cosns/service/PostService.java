@@ -185,7 +185,7 @@ public class PostService {
 				sb.append(checkCount);
 			}
 		} else {
-			sb.append(post.getPostId() + "" + uniqueCurrentTimeMS());
+			sb.append(uniqueCurrentTimeMS());
 		}
 
 		String postKey = userName + "/" + sb.toString();

@@ -234,7 +234,7 @@ public class PostRestController {
 		redisService.addPostRecord(post.getPostId());
 
 		dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
-
+		
 		return dr;
 	}
 
