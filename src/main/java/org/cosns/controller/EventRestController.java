@@ -178,7 +178,7 @@ public class EventRestController {
 
 		DefaultResult dr = new DefaultResult();
 
-		Set<Event> eventSet = eventService.getEventByEventKey(messageDTO.getEventKey());
+		Set<Event> eventSet = eventService.getEventByEventId(messageDTO.getEventId());
 
 		User user = (User) session.getAttribute("user");
 
@@ -189,7 +189,7 @@ public class EventRestController {
 			em.setMessage(messageDTO.getMessage());
 			em.setUserId(user.getUserId());
 
-			redisService.addEventMessage(ConstantsUtil.REDIS_EVENT_NAME_GROUP + ":" + messageDTO.getEventKey() + ":message", mapper.writeValueAsString(em));
+			redisService.addEventMessage(ConstantsUtil.REDIS_EVENT_NAME_GROUP + ":" + messageDTO.getEventId() + ":message", mapper.writeValueAsString(em));
 
 			dr.setRemarks(mapper.writeValueAsString(em));
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
@@ -206,13 +206,15 @@ public class EventRestController {
 
 		DefaultResult dr = new DefaultResult();
 
-		Set<Event> eventSet = eventService.getEventByEventKey(messageDTO.getEventKey());
+		Set<Event> eventSet = eventService.getEventByEventId(messageDTO.getEventId());
 
 		User user = (User) session.getAttribute("user");
 
 		if (eventSet.size() > 0) {
-			
-			
+			if (eventSet.iterator().hasNext()) {
+				Event event = eventSet.iterator().next();
+				eventService.addComment(messageDTO, event, user);
+			}
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {
 			dr.setStatus(ConstantsUtil.RESULT_ERROR);
@@ -220,7 +222,7 @@ public class EventRestController {
 		}
 		return dr;
 	}
-	
+
 	private Set<String> mapToKeySet(List<Map<String, String>> keyHashTag) {
 		return keyHashTag.stream().map(Map::values).flatMap(Collection::stream).collect(Collectors.toSet());
 	}

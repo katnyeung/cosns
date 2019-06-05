@@ -11,6 +11,7 @@ import javax.transaction.Transactional;
 
 import org.cosns.dao.EventDAO;
 import org.cosns.dao.PostDAO;
+import org.cosns.dao.PostReactionDAO;
 import org.cosns.repository.User;
 import org.cosns.repository.event.Event;
 import org.cosns.repository.event.PhotoEvent;
@@ -18,8 +19,10 @@ import org.cosns.repository.hashtag.HashTag;
 import org.cosns.repository.image.EventImage;
 import org.cosns.repository.image.Image;
 import org.cosns.repository.post.Post;
+import org.cosns.repository.postreaction.EventCommentReaction;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.EventFormDTO;
+import org.cosns.web.DTO.EventMessageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,9 @@ public class EventService {
 	PostDAO postDAO;
 
 	@Autowired
+	PostReactionDAO postReactionDAO;
+
+	@Autowired
 	EventDAO eventDAO;
 
 	@Autowired
@@ -44,7 +50,7 @@ public class EventService {
 
 	@Autowired
 	HashTagService hashTagService;
-	
+
 	public Set<Event> getAllEvents(Date start, Date end) {
 		Set<Event> eventSet = eventDAO.findActiveEvent(start, end);
 
@@ -232,7 +238,7 @@ public class EventService {
 	public void removeEvent(Long eventId) {
 
 		Set<Event> eventList = eventDAO.getEventById(eventId);
-		
+
 		for (Event event : eventList) {
 			// remove event from tag in redis
 			hashTagService.deleteEventHashTagInRedis(event);
@@ -245,12 +251,24 @@ public class EventService {
 
 			// delete event images
 			imageService.deleteImageByEvent(event);
-			
+
 			// remove event from event
 			event.setStatus(ConstantsUtil.EVENT_DELETED);
-			
+
 			eventDAO.save(event);
 		}
+	}
 
+	public EventCommentReaction addComment(EventMessageDTO messageDTO, Event event, User user) {
+		EventCommentReaction ecr = new EventCommentReaction();
+		ecr.setEvent(event);
+		ecr.setUser(user);
+		ecr.setMessage(messageDTO.getMessage());
+		ecr.setStatus(ConstantsUtil.EVENT_ACTIVE);
+		return postReactionDAO.save(ecr);
+	}
+
+	public Set<Event> getEventByEventId(Long eventId) {
+		return eventDAO.getEventById(eventId);
 	}
 }

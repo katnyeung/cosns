@@ -15,6 +15,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class EventCommentReaction extends PostReaction {
 
+	String message;
+
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "event_id", referencedColumnName = "eventId")
@@ -26,6 +28,14 @@ public class EventCommentReaction extends PostReaction {
 
 	public void setEvent(Event event) {
 		this.event = event;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 }

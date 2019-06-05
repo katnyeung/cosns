@@ -268,7 +268,9 @@ public class HashTagService {
 		List<UserHashTag> uhtList = user.getHashtags();
 		List<Long> hashTagIdList = uhtList.stream().map(hashTag -> hashTag.getHashId()).collect(Collectors.toList());
 		logger.debug("delete user hashIdList : " + hashTagIdList);
-		hashTagDAO.deleteByIdList(hashTagIdList);
+		if(hashTagIdList.size() > 0) {
+			hashTagDAO.deleteByIdList(hashTagIdList);
+		}
 	}
 
 	public void deleteUserHashTagInRedis(User user) {
@@ -298,14 +300,18 @@ public class HashTagService {
 		List<PostHashTag> phtList = post.getHashtags();
 		List<Long> hashTagIdList = phtList.stream().map(hashTag -> hashTag.getHashId()).collect(Collectors.toList());
 		logger.info("delete post hashIdList : " + hashTagIdList);
-		hashTagDAO.deleteByIdList(hashTagIdList);
+		if(hashTagIdList.size() > 0) {
+			hashTagDAO.deleteByIdList(hashTagIdList);
+		}
 	}
 
 	public void deleteEventHashTag(Event event) {
 		List<EventHashTag> ehtList = event.getHashtags();
 		List<Long> hashTagIdList = ehtList.stream().map(hashTag -> hashTag.getHashId()).collect(Collectors.toList());
 		logger.info("delete event hashIdList : " + hashTagIdList);
-		hashTagDAO.deleteByIdList(hashTagIdList);
+		if(hashTagIdList.size() > 0) {
+			hashTagDAO.deleteByIdList(hashTagIdList);
+		}
 	}
 
 	public void deleteEventInRedis(Event event) {

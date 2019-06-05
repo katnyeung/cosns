@@ -1,16 +1,16 @@
 package org.cosns.web.DTO;
 
-public class EventMessageDTO {
-	Long eventId;
+public class PostMessageDTO {
+	Long postId;
 
 	String message;
 
-	public Long getEventId() {
-		return eventId;
+	public Long getPostId() {
+		return postId;
 	}
 
-	public void setEventId(Long eventId) {
-		this.eventId = eventId;
+	public void setPostId(Long postId) {
+		this.postId = postId;
 	}
 
 	public String getMessage() {

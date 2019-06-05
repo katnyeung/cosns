@@ -26,6 +26,7 @@ import org.cosns.repository.post.Post;
 import org.cosns.repository.post.RetweetPost;
 import org.cosns.repository.postreaction.DateCountReaction;
 import org.cosns.repository.postreaction.LikeReaction;
+import org.cosns.repository.postreaction.PostCommentReaction;
 import org.cosns.repository.postreaction.PostReaction;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.PostFormDTO;
@@ -634,5 +635,13 @@ public class PostService {
 			return null;
 		}
 
+	}
+
+	public PostCommentReaction addComment(String message, Post post, User user) {
+		PostCommentReaction pcr = new PostCommentReaction();
+		pcr.setMessage(message);
+		pcr.setPost(post);
+		pcr.setUser(user);
+		return postReactionDAO.save(pcr);
 	}
 }

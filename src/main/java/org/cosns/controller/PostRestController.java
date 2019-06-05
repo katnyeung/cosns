@@ -24,6 +24,7 @@ import org.cosns.service.RedisService;
 import org.cosns.service.UserService;
 import org.cosns.util.ConstantsUtil;
 import org.cosns.web.DTO.PostFormDTO;
+import org.cosns.web.DTO.PostMessageDTO;
 import org.cosns.web.DTO.PostReactionDTO;
 import org.cosns.web.DTO.SearchPostDTO;
 import org.cosns.web.result.DefaultResult;
@@ -39,6 +40,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RestController
 @RequestMapping("/post")
@@ -214,7 +217,7 @@ public class PostRestController {
 		return plr;
 	}
 
-	@Auth	
+	@Auth
 	@PostMapping(path = "/writePost")
 	@Transactional
 	public DefaultResult writePost(@RequestBody PostFormDTO postDTO, HttpSession session) {
@@ -229,12 +232,12 @@ public class PostRestController {
 
 		hashTagService.savePostHashTagToRedis(post, hashTagSet, ConstantsUtil.REDIS_TAG_GROUP, ConstantsUtil.REDIS_TAG_TYPE_PHOTO);
 
-		redisService.savePostKeyToRedis(post);	
+		redisService.savePostKeyToRedis(post);
 
 		redisService.addPostRecord(post.getPostId());
 
 		dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
-		
+
 		return dr;
 	}
 
@@ -246,7 +249,7 @@ public class PostRestController {
 		User user = (User) session.getAttribute("user");
 
 		Set<String> hashTagSet = hashTagService.parseHashTagByMessage(postDTO.getPostMessage());
-		
+
 		Post post = postService.updatePhotoPost(postDTO, user, hashTagSet);
 
 		hashTagService.savePostHashTag(post, hashTagSet);
@@ -311,11 +314,11 @@ public class PostRestController {
 		if (post != null) {
 			logger.info("removing post : " + post.getPostId());
 
-			//remove hashtag linkage
+			// remove hashtag linkage
 			hashTagService.deletePostHashTagInRedis(post);
-			
+
 			redisService.deletePostInRedis(post);
-			
+
 			prr.setType(ConstantsUtil.POST_REACTION_CANCEL);
 			prr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 
@@ -344,4 +347,28 @@ public class PostRestController {
 
 		return returnMapList;
 	}
+
+	@Auth
+	@PostMapping(path = "/addComment")
+	public DefaultResult addComment(@RequestBody PostMessageDTO messageDTO, HttpSession session) throws ParseException, JsonProcessingException {
+
+		DefaultResult dr = new DefaultResult();
+
+		List<Post> postList = postService.getPost(messageDTO.getPostId());
+
+		User user = (User) session.getAttribute("user");
+
+		if (postList.size() > 0) {
+			while (postList.iterator().hasNext()) {
+				Post post = postList.iterator().next();
+				postService.addComment(messageDTO.getMessage(), post, user);
+			}
+			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
+		} else {
+			dr.setStatus(ConstantsUtil.RESULT_ERROR);
+			dr.setStatus("no events");
+		}
+		return dr;
+	}
+
 }
