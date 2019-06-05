@@ -16,6 +16,7 @@ import javax.validation.constraints.Size;
 
 import org.cosns.repository.User;
 import org.cosns.util.Auditable;
+import org.hibernate.annotations.DiscriminatorOptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(indexes = { @Index(name = "INDEX_DATE_COUNT_REACTION", columnList = "year,month,day") })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "reaction_type")
+@DiscriminatorOptions(force=true)	
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class PostReaction extends Auditable<String> {
 

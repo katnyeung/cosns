@@ -28,6 +28,7 @@ import javax.validation.constraints.Size;
 import org.cosns.repository.User;
 import org.cosns.repository.hashtag.PostHashTag;
 import org.cosns.repository.image.PostImage;
+import org.cosns.repository.postreaction.DateCountReaction;
 import org.cosns.repository.postreaction.LikeReaction;
 import org.cosns.repository.postreaction.PostCommentReaction;
 import org.cosns.util.Auditable;
@@ -74,7 +75,11 @@ public abstract class Post extends Auditable<String> {
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private List<PostHashTag> hashtags;
-
+	
+	@JsonIgnore
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+	private Set<DateCountReaction> dateCountReaction;
+	
 	@JsonIgnore
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private Set<LikeReaction> likeReaction;
@@ -274,6 +279,14 @@ public abstract class Post extends Auditable<String> {
 
 	public void setCommentReaction(Set<PostCommentReaction> commentReaction) {
 		this.commentReaction = commentReaction;
+	}
+
+	public Set<DateCountReaction> getDateCountReaction() {
+		return dateCountReaction;
+	}
+
+	public void setDateCountReaction(Set<DateCountReaction> dateCountReaction) {
+		this.dateCountReaction = dateCountReaction;
 	}
 
 	@Override
