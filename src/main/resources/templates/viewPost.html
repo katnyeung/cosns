@@ -7,7 +7,7 @@
 <script>
 	var main = angular.module('application', [ 'ngSanitize' ]);
 
-	main.controller('viewPostController', function($scope, $window, $sce, postService, messageService) {
+	main.controller('viewPostController', function($scope, $http, $window, $sce, postService, messageService) {
 		$scope.shared = messageService.getShared();
 		$scope.sharedUser = messageService.getSharedUser();
 
@@ -46,6 +46,24 @@
 			$scope.likeCoinURL = $sce.trustAsResourceUrl("https://button.like.co/in/embed/" + post.user.likeCoinId + "/button/?referrer=[[${DOMAIN}]]/@" + post.postKey);
 		}
 
+		$scope.addComment = function(post){
+			return $http({
+				url : "/post/addComment",
+				method : "POST",
+				headers : {
+					'Content-Type' : 'application/json'
+				},
+				data : {
+					message : $scope.comment,
+					postId : post.postId
+				}
+			}).then(function(response) {
+				if (response.data.status === 'success') {
+				}
+				return response;
+			});
+
+		}
 	});
 </script>
 </head>
