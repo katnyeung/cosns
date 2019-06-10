@@ -37,7 +37,7 @@
 			<div class="well" style="white-space: pre;" ng-bind-html="post.message | hashTag"></div>
 			<div class="well">
 				<form method="post" ng-submit="addComment(post)">
-					<textarea ng-model="comment" cols="10" rows="10"></textarea>
+					<textarea ng-model="postComment" cols="10" rows="10"></textarea>
 					<button type="submit">Add Comment</button>
 				</form>
 			</div>

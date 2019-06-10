@@ -351,7 +351,7 @@ public class PostRestController {
 	@Auth
 	@PostMapping(path = "/addComment")
 	public DefaultResult addComment(@RequestBody PostMessageDTO messageDTO, HttpSession session) throws ParseException, JsonProcessingException {
-
+		logger.info("adding comment " + messageDTO.getComment() + " to post : " + messageDTO.getPostId());
 		DefaultResult dr = new DefaultResult();
 
 		List<Post> postList = postService.getPost(messageDTO.getPostId());
@@ -361,7 +361,7 @@ public class PostRestController {
 		if (postList.size() > 0) {
 			while (postList.iterator().hasNext()) {
 				Post post = postList.iterator().next();
-				postService.addComment(messageDTO.getMessage(), post, user);
+				postService.addComment(messageDTO.getComment(), post, user);
 			}
 			dr.setStatus(ConstantsUtil.RESULT_SUCCESS);
 		} else {

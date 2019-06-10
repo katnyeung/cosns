@@ -3,7 +3,7 @@ package org.cosns.web.DTO;
 public class PostMessageDTO {
 	Long postId;
 
-	String message;
+	String comment;
 
 	public Long getPostId() {
 		return postId;
@@ -13,12 +13,12 @@ public class PostMessageDTO {
 		this.postId = postId;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getComment() {
+		return comment;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 }

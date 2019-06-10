@@ -4,6 +4,7 @@ public class EventMessageDTO {
 	Long eventId;
 
 	String message;
+	String comment;
 
 	public Long getEventId() {
 		return eventId;
@@ -19,6 +20,14 @@ public class EventMessageDTO {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 }

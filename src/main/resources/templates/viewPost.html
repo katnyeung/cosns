@@ -47,6 +47,7 @@
 		}
 
 		$scope.addComment = function(post){
+			alert($scope.postComment);
 			return $http({
 				url : "/post/addComment",
 				method : "POST",
@@ -54,7 +55,7 @@
 					'Content-Type' : 'application/json'
 				},
 				data : {
-					message : $scope.comment,
+					comment : $scope.postComment,
 					postId : post.postId
 				}
 			}).then(function(response) {
