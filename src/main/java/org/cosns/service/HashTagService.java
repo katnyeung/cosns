@@ -323,7 +323,7 @@ public class HashTagService {
 
 		List<HashTag> hashTagList = hashTagDAO.findAll();
 		for (HashTag hashTag : hashTagList) {
-			redisService.addSetItem(hashTag.getRedisKey(), hashTag.getRedisValue());
+			redisService.addSetItem(hashTag.getRedisKey().toLowerCase(), hashTag.getRedisValue());
 		}
 
 	}
